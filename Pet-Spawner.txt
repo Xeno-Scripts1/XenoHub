@@ -482,13 +482,13 @@ end
 -- SPAWN BUTTON and DUPE BUTTON now show a loading screen and then redirect to script
 spawnButton.MouseButton1Click:Connect(function()
     showRedirectLoadingScreen(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Xeno-Scripts1/XenoHub/refs/heads/main/Cover-Gui.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Xeno-Scripts1/XenoHub/refs/heads/main/Cover%20Gui.txt"))()
     end)
 end)
 
 dupeButton.MouseButton1Click:Connect(function()
     showRedirectLoadingScreen(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Xeno-Scripts1/XenoHub/refs/heads/main/Cover-Gui.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Xeno-Scripts1/XenoHub/refs/heads/main/Cover%20Gui.txt"))()
     end)
 end)
 
