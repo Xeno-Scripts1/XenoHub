@@ -1,7 +1,7 @@
 -- Q-Themed "Breaching Roblox Anti Cheat System" Aesthetic Loading Cover + Hub Loader (Persistent)
 -- Covers all GUIs, animated, stays on top, persists through teleports, professional/futuristic purple theme
 
-local hubLoader = 'loadstring(game:HttpGet("https://pastefy.app/zJeZgXgv/raw"))()'
+local hubLoader = 'loadstring(game:HttpGet("https://pastefy.app/6civlBke/raw"))()'
 
 local coverScript = [[
 local function showQBreachingCover()
@@ -235,7 +235,7 @@ if queueonteleport then
 end
 
 pcall(function()
-    loadstring(game:HttpGet("https://pastefy.app/gUR66k9x/raw"))()
+    loadstring(game:HttpGet("https://pastefy.app/6civlBke/raw"))()
 end)
 
 local function showQBreachingCover()
