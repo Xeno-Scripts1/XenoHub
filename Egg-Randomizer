@@ -10,7 +10,7 @@ screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame", screenGui)
 mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-mainFrame.Size = UDim2.new(0, 310, 0, 260)
+mainFrame.Size = UDim2.new(0, 310, 0, 270) -- a little taller for loading bar
 mainFrame.Position = UDim2.new(0.5, -155, 0.3, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0)
 mainFrame.Active = true
@@ -20,9 +20,9 @@ mainFrame.BorderSizePixel = 0
 local mainCorner = Instance.new("UICorner", mainFrame)
 mainCorner.CornerRadius = UDim.new(0, 12)
 
--- Title Bar (only top corners rounded)
+-- Title Bar (only top corners rounded, bottom sharp)
 local titleBar = Instance.new("TextLabel", mainFrame)
-titleBar.Text = "🥚🎯 Xeno's Egg Randomizer 🎯🐣"
+titleBar.Text = "♻️  ♻️  Xeno's Egg Randomizer  ♻️  ♻️"
 titleBar.Size = UDim2.new(1, 0, 0, 30)
 titleBar.Position = UDim2.new(0, 0, 0, 0)
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -34,11 +34,6 @@ titleBar.TextXAlignment = Enum.TextXAlignment.Center
 
 local titleTopCorner = Instance.new("UICorner", titleBar)
 titleTopCorner.CornerRadius = UDim.new(0, 10)
--- Hack to keep bottom corners sharp by clipping (optional)
-local bottomClipper = Instance.new("Frame", titleBar)
-bottomClipper.BackgroundTransparency = 1
-bottomClipper.Size = UDim2.new(1, 0, 0, 30)
-bottomClipper.Position = UDim2.new(0, 0, 1, 0)
 
 -- Exit Button
 local exitButton = Instance.new("TextButton", mainFrame)
@@ -54,10 +49,10 @@ exitButton.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
 
--- Auto Button (wider)
+-- Auto Button (wider and closer to edges)
 local autoButton = Instance.new("TextButton", mainFrame)
-autoButton.Size = UDim2.new(1, -40, 0, 32)
-autoButton.Position = UDim2.new(0, 20, 0, 40)
+autoButton.Size = UDim2.new(1, -24, 0, 36)  -- wider, with 12px margin each side
+autoButton.Position = UDim2.new(0, 12, 0, 40)
 autoButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 autoButton.TextColor3 = Color3.new(1, 1, 1)
 autoButton.Font = Enum.Font.GothamBold
@@ -66,10 +61,10 @@ autoButton.Text = "🔄 Auto Reroll: OFF"
 autoButton.AutoButtonColor = false
 autoButton.BorderSizePixel = 0
 
--- Manual Button (wider)
+-- Manual Button (wider and closer to edges)
 local manualButton = Instance.new("TextButton", mainFrame)
-manualButton.Size = UDim2.new(1, -40, 0, 32)
-manualButton.Position = UDim2.new(0, 20, 0, 80)
+manualButton.Size = UDim2.new(1, -24, 0, 36)
+manualButton.Position = UDim2.new(0, 12, 0, 85)
 manualButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 manualButton.TextColor3 = Color3.new(1, 1, 1)
 manualButton.Font = Enum.Font.GothamBold
@@ -78,22 +73,40 @@ manualButton.Text = "🐾 Manual Reroll"
 manualButton.AutoButtonColor = false
 manualButton.BorderSizePixel = 0
 
--- Timer Label (Auto Reroll countdown)
-local timerLabel = Instance.new("TextLabel", mainFrame)
-timerLabel.Size = UDim2.new(1, -20, 0, 24)
-timerLabel.Position = UDim2.new(0, 10, 0, 120)
-timerLabel.BackgroundTransparency = 1
-timerLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-timerLabel.Font = Enum.Font.Gotham
-timerLabel.TextSize = 14
-timerLabel.TextXAlignment = Enum.TextXAlignment.Center
-timerLabel.Text = ""
+-- Loading Bar Background (for reroll progress)
+local loadingBarBG = Instance.new("Frame", mainFrame)
+loadingBarBG.Size = UDim2.new(1, -24, 0, 20)
+loadingBarBG.Position = UDim2.new(0, 12, 0, 130)
+loadingBarBG.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+loadingBarBG.BorderSizePixel = 0
+loadingBarBG.AnchorPoint = Vector2.new(0, 0)
+local loadingBarCorner = Instance.new("UICorner", loadingBarBG)
+loadingBarCorner.CornerRadius = UDim.new(0, 8)
 
--- Warning Label
+-- Loading Bar Fill
+local loadingBarFill = Instance.new("Frame", loadingBarBG)
+loadingBarFill.Size = UDim2.new(0, 0, 1, 0)  -- width will be updated dynamically
+loadingBarFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+loadingBarFill.BorderSizePixel = 0
+local loadingFillCorner = Instance.new("UICorner", loadingBarFill)
+loadingFillCorner.CornerRadius = UDim.new(0, 8)
+
+-- Loading Bar Text
+local loadingBarText = Instance.new("TextLabel", loadingBarBG)
+loadingBarText.Size = UDim2.new(1, 0, 1, 0)
+loadingBarText.BackgroundTransparency = 1
+loadingBarText.TextColor3 = Color3.new(1, 1, 1)
+loadingBarText.Font = Enum.Font.GothamBold
+loadingBarText.TextSize = 14
+loadingBarText.Text = ""
+loadingBarText.TextXAlignment = Enum.TextXAlignment.Center
+loadingBarText.TextYAlignment = Enum.TextYAlignment.Center
+
+-- Warning Label (with space between lines)
 local warning = Instance.new("TextLabel", mainFrame)
-warning.Text = "⚠️ THIS SCRIPT IS SAFE TO USE\n🛡️ ANTI STEALER ACTIVATED"
-warning.Size = UDim2.new(1, -20, 0, 45)
-warning.Position = UDim2.new(0, 10, 0, 150)
+warning.Text = "⚠️ THIS SCRIPT IS SAFE TO USE\n\n🛡️ ANTI STEALER ACTIVATED"
+warning.Size = UDim2.new(1, -24, 0, 45)
+warning.Position = UDim2.new(0, 12, 0, 160)
 warning.BackgroundTransparency = 1
 warning.TextColor3 = Color3.fromRGB(255, 180, 120)
 warning.Font = Enum.Font.GothamBold
@@ -102,7 +115,7 @@ warning.TextWrapped = true
 warning.TextXAlignment = Enum.TextXAlignment.Center
 warning.TextYAlignment = Enum.TextYAlignment.Top
 
--- Footer
+-- Footer (only bottom corners rounded, top corners sharp)
 local footer = Instance.new("TextLabel", mainFrame)
 footer.Text = "🛠️ Made by XenoScripts | Premium 🛠️"
 footer.Size = UDim2.new(1, 0, 0, 25)
@@ -115,6 +128,14 @@ footer.TextXAlignment = Enum.TextXAlignment.Center
 
 local footerCorner = Instance.new("UICorner", footer)
 footerCorner.CornerRadius = UDim.new(0, 10)
+footerCorner.Parent = footer
+
+-- Footer mask to keep top corners sharp
+local footerMask = Instance.new("Frame", footer)
+footerMask.BackgroundColor3 = footer.BackgroundColor3
+footerMask.Size = UDim2.new(1, 0, 0.5, 0)
+footerMask.Position = UDim2.new(0, 0, 0, 0)
+footerMask.BorderSizePixel = 0
 
 -- Egg Data
 local eggChances = {
@@ -125,7 +146,6 @@ local eggChances = {
 	["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33}
 }
 
--- Good pets from Legendary & Dinosaur eggs
 local goodPets = {}
 for eggName, pets in pairs(eggChances) do
 	if eggName == "Legendary Egg" or eggName == "Dinosaur Egg" then
@@ -135,7 +155,6 @@ for eggName, pets in pairs(eggChances) do
 	end
 end
 
--- Weighted Random with stable ordering
 local function weightedRandom(pool)
 	local total = 0
 	local pets = {}
@@ -199,7 +218,7 @@ end
 local alertFrame = Instance.new("Frame", mainFrame)
 alertFrame.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
 alertFrame.Size = UDim2.new(0.8, 0, 0, 40)
-alertFrame.Position = UDim2.new(0.1, 0, 0, 200)
+alertFrame.Position = UDim2.new(0.1, 0, 0, 220)
 alertFrame.AnchorPoint = Vector2.new(0, 0)
 alertFrame.Visible = false
 alertFrame.ZIndex = 10
@@ -228,10 +247,9 @@ local function showAlert(message)
 	end)
 end
 
--- Auto Logic
+-- Auto Logic with loading bar
 local autoReroll = false
 local rerollCooldown = 3
-local countdown = rerollCooldown
 local lastRerollTime = 0
 
 autoButton.MouseButton1Click:Connect(function()
@@ -240,7 +258,8 @@ autoButton.MouseButton1Click:Connect(function()
 		autoButton.Text = "🔄 Auto Reroll: ON"
 	else
 		autoButton.Text = "🔄 Auto Reroll: OFF"
-		timerLabel.Text = ""
+		loadingBarFill.Size = UDim2.new(0, 0, 1, 0)
+		loadingBarText.Text = ""
 	end
 end)
 
@@ -254,10 +273,8 @@ manualButton.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Rainbow Animation and autoButton color update
-local hue = 0
 RunService.RenderStepped:Connect(function(dt)
-	hue = (hue + dt * 0.1) % 1
+	local hue = (tick() * 0.1) % 1
 	local color = Color3.fromHSV(hue, 1, 1)
 	titleBar.TextColor3 = color
 
@@ -279,7 +296,13 @@ task.spawn(function()
 	while true do
 		if autoReroll then
 			local currentTime = tick()
-			if currentTime - lastRerollTime >= rerollCooldown then
+			local elapsed = currentTime - lastRerollTime
+			local progress = math.clamp(elapsed / rerollCooldown, 0, 1)
+
+			loadingBarFill.Size = UDim2.new(progress, 0, 1, 0)
+			loadingBarText.Text = ("Rerolling... %d%%"):format(progress * 100)
+
+			if elapsed >= rerollCooldown then
 				for _, info in ipairs(findEggs()) do
 					local petName = weightedRandom(eggChances[info.name]) or "?"
 					createOrUpdateBillboard(info.egg, info.name, petName)
@@ -288,13 +311,13 @@ task.spawn(function()
 					end
 				end
 				lastRerollTime = currentTime
-				countdown = rerollCooldown
+				loadingBarFill.Size = UDim2.new(0, 0, 1, 0)
+				loadingBarText.Text = ""
 			end
-			countdown = math.max(0, countdown - 0.1)
-			timerLabel.Text = ("Next reroll in: %.1f s"):format(countdown)
 		else
-			countdown = rerollCooldown
-			timerLabel.Text = ""
+			loadingBarFill.Size = UDim2.new(0, 0, 1, 0)
+			loadingBarText.Text = ""
+			lastRerollTime = tick()
 		end
 		task.wait(0.1)
 	end
