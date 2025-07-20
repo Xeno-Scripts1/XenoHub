@@ -42,9 +42,9 @@ screenGui.ResetOnSpawn = false
 
 -- Main Frame
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 400, 0, 320)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -160)
-mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+mainFrame.Size = UDim2.new(0, 400, 0, 280)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -140)
+mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Dark Grey main body
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
@@ -52,9 +52,15 @@ mainFrame.Draggable = true
 local corner = Instance.new("UICorner", mainFrame)
 corner.CornerRadius = UDim.new(0, 12)
 
--- Title
-local title = Instance.new("TextLabel", mainFrame)
-title.Size = UDim2.new(1, 0, 0, 40)
+-- Title Bar Frame (very dark grey)
+local titleBar = Instance.new("Frame", mainFrame)
+titleBar.Size = UDim2.new(1, 0, 0, 40)
+titleBar.Position = UDim2.new(0, 0, 0, 0)
+titleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- Very dark grey
+titleBar.BorderSizePixel = 0
+
+local title = Instance.new("TextLabel", titleBar)
+title.Size = UDim2.new(1, 0, 1, 0)
 title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "🥚 XENO'S EGG RANDOMIZER 🥚"
@@ -63,18 +69,48 @@ title.TextSize = 22
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 task.spawn(function()
-	local hue = 0
-	while true do
-		hue = (hue + 0.0025) % 1
-		title.TextColor3 = Color3.fromHSV(hue, 1, 1)
-		task.wait(0.05)
-	end
+    local hue = 0
+    while true do
+        hue = (hue + 0.0025) % 1
+        title.TextColor3 = Color3.fromHSV(hue, 1, 1)
+        task.wait(0.05)
+    end
 end)
 
--- Warning Label (Below title, above eggDisplay)
+-- Buttons Container Frame (for centered vertical stacking)
+local buttonsFrame = Instance.new("Frame", mainFrame)
+buttonsFrame.Size = UDim2.new(1, 0, 0, 100)
+buttonsFrame.Position = UDim2.new(0, 0, 0.35, 0)
+buttonsFrame.BackgroundTransparency = 1
+
+-- Manual Reroll Button (centered)
+local manualButton = Instance.new("TextButton", buttonsFrame)
+manualButton.Size = UDim2.new(0.6, 0, 0, 40)
+manualButton.Position = UDim2.new(0.2, 0, 0, 0)
+manualButton.Text = "🎲 REROLL"
+manualButton.Font = Enum.Font.GothamBold
+manualButton.TextSize = 18
+manualButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+manualButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120) -- Grey
+manualButton.BorderSizePixel = 0
+Instance.new("UICorner", manualButton).CornerRadius = UDim.new(0, 12)
+
+-- Auto Reroll Button (centered below manual)
+local autoButton = Instance.new("TextButton", buttonsFrame)
+autoButton.Size = UDim2.new(0.6, 0, 0, 40)
+autoButton.Position = UDim2.new(0.2, 0, 0.6, 0)
+autoButton.Text = "🔁 AUTO REROLL: OFF"
+autoButton.Font = Enum.Font.GothamBold
+autoButton.TextSize = 18
+autoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120) -- Grey start
+autoButton.BorderSizePixel = 0
+Instance.new("UICorner", autoButton).CornerRadius = UDim.new(0, 12)
+
+-- Warning Label (above footer)
 local warningLabel = Instance.new("TextLabel", mainFrame)
 warningLabel.Size = UDim2.new(1, -20, 0, 30)
-warningLabel.Position = UDim2.new(0, 10, 0.15, 0)
+warningLabel.Position = UDim2.new(0, 10, 0.85, 0)
 warningLabel.BackgroundTransparency = 1
 warningLabel.Text = "⚠️ THIS SCRIPT IS NOT STEALING YOUR PETS ⚠️\n✅ ANTI-STEALER ACTIVATED"
 warningLabel.TextWrapped = true
@@ -82,59 +118,15 @@ warningLabel.Font = Enum.Font.Gotham
 warningLabel.TextSize = 14
 warningLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Egg Display Label
-local eggDisplay = Instance.new("TextLabel", mainFrame)
-eggDisplay.Size = UDim2.new(1, 0, 0, 40)
-eggDisplay.Position = UDim2.new(0, 0, 0.3, 0)
-eggDisplay.BackgroundTransparency = 1
-eggDisplay.Font = Enum.Font.GothamBold
-eggDisplay.TextSize = 24
-eggDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
-eggDisplay.Text = "🎲 Roll an Egg!"
-
--- Hover Text for Pet
-local hoverText = Instance.new("TextLabel", mainFrame)
-hoverText.Size = UDim2.new(1, 0, 0, 30)
-hoverText.Position = UDim2.new(0, 0, 0.45, 0)
-hoverText.BackgroundTransparency = 1
-hoverText.Font = Enum.Font.Gotham
-hoverText.TextSize = 18
-hoverText.TextColor3 = Color3.fromRGB(255, 255, 255)
-hoverText.Text = ""
-
--- Hover text color animation
-task.spawn(function()
-	local hue = 0
-	while true do
-		hue = (hue + 0.003) % 1
-		hoverText.TextColor3 = Color3.fromHSV(hue, 1, 1)
-		task.wait(0.05)
-	end
-end)
-
--- Manual Reroll Button
-local manualButton = Instance.new("TextButton", mainFrame)
-manualButton.Size = UDim2.new(0.35, 0, 0, 40)
-manualButton.Position = UDim2.new(0.1, 0, 0.75, 0)
-manualButton.Text = "🎲 REROLL"
-manualButton.Font = Enum.Font.GothamBold
-manualButton.TextSize = 18
-manualButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-manualButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-manualButton.BorderSizePixel = 0
-Instance.new("UICorner", manualButton).CornerRadius = UDim.new(0, 12)
-
--- Auto Reroll Button (background cycles color, text stays white)
-local autoButton = Instance.new("TextButton", mainFrame)
-autoButton.Size = UDim2.new(0.45, 0, 0, 40)
-autoButton.Position = UDim2.new(0.55, 0, 0.75, 0)
-autoButton.Text = "🔁 AUTO REROLL: OFF"
-autoButton.Font = Enum.Font.GothamBold
-autoButton.TextSize = 18
-autoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-autoButton.BorderSizePixel = 0
-Instance.new("UICorner", autoButton).CornerRadius = UDim.new(0, 12)
+-- Footer
+local footer = Instance.new("TextLabel", mainFrame)
+footer.Size = UDim2.new(1, 0, 0, 20)
+footer.Position = UDim2.new(0, 0, 1, -20)
+footer.BackgroundTransparency = 1
+footer.Text = "🧪 Made by XenoScripts"
+footer.Font = Enum.Font.Gotham
+footer.TextSize = 14
+footer.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 local autoRerollEnabled = false
 local autoRerollTask
@@ -142,30 +134,34 @@ local autoRerollTask
 -- Store BillboardGuis for eggs to update text
 local eggBillboards = {}
 
--- Function to create or update billboard gui over eggs in workspace
-local function updateEggBillboard(eggName, petName)
-    -- Remove old billboards first
+-- Remove all previous egg billboards (if any)
+local function clearEggBillboards()
     for _, billboard in pairs(eggBillboards) do
         if billboard and billboard.Parent then
             billboard:Destroy()
         end
     end
     eggBillboards = {}
+end
 
-    -- Try to find egg model in workspace - adjust path as necessary for your game!
+-- Function to create or update billboard gui over eggs in workspace
+local function updateEggBillboard(eggName, petName)
+    clearEggBillboards()
+
+    -- Try to find egg model in workspace - adjust as needed for your game
     local eggModel = workspace:FindFirstChild(eggName)
     if not eggModel then
-        -- Try searching under a folder if you want, for example workspace.Eggs[eggName]
         local eggsFolder = workspace:FindFirstChild("Eggs")
         if eggsFolder then
             eggModel = eggsFolder:FindFirstChild(eggName)
         end
     end
     if eggModel then
-        -- Create BillboardGui
+        local adornee = eggModel.PrimaryPart or eggModel:FindFirstChildWhichIsA("BasePart")
+        if not adornee then return end
+
         local billboard = Instance.new("BillboardGui")
-        billboard.Adornee = eggModel.PrimaryPart or eggModel:FindFirstChildWhichIsA("BasePart")
-        if not billboard.Adornee then return end
+        billboard.Adornee = adornee
         billboard.Size = UDim2.new(0, 150, 0, 50)
         billboard.StudsOffset = Vector3.new(0, 3, 0)
         billboard.AlwaysOnTop = true
@@ -177,10 +173,8 @@ local function updateEggBillboard(eggName, petName)
         frame.BackgroundTransparency = 0.5
         frame.Size = UDim2.new(1, 0, 1, 0)
         frame.BorderSizePixel = 0
-        frame.ClipsDescendants = true
-        frame.CornerRadius = UDim.new(0, 12)
-        local uicorner = Instance.new("UICorner", frame)
-        uicorner.CornerRadius = UDim.new(0, 12)
+        local corner = Instance.new("UICorner", frame)
+        corner.CornerRadius = UDim.new(0, 12)
 
         local eggLabel = Instance.new("TextLabel", frame)
         eggLabel.Size = UDim2.new(1, 0, 0.5, 0)
@@ -211,9 +205,10 @@ local function rollEgg()
     local randomEgg = eggNames[math.random(1, #eggNames)]
     local pets = eggs[randomEgg]
     local randomPet = weightedRandom(pets)
-    eggDisplay.Text = randomEgg
-    hoverText.Text = "🎁 " .. randomPet
 
+    -- No eggDisplay UI label update
+
+    -- Update 3D billboard with pet and egg name only
     updateEggBillboard(randomEgg, randomPet)
 end
 
@@ -225,7 +220,7 @@ autoButton.MouseButton1Click:Connect(function()
     if autoRerollEnabled then
         autoRerollEnabled = false
         autoButton.Text = "🔁 AUTO REROLL: OFF"
-        autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+        autoButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
         if autoRerollTask then
             autoRerollTask:Disconnect()
             autoRerollTask = nil
@@ -238,7 +233,6 @@ autoButton.MouseButton1Click:Connect(function()
             task.wait(1.5)
         end)
 
-        -- Animate button background color in a task.spawn loop
         task.spawn(function()
             local hue = 0
             while autoRerollEnabled do
@@ -246,10 +240,10 @@ autoButton.MouseButton1Click:Connect(function()
                 autoButton.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
                 task.wait(0.05)
             end
-            autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+            autoButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
         end)
     end
 end)
 
--- Initial roll display
+-- Initial roll to display a billboard in game
 rollEgg()
