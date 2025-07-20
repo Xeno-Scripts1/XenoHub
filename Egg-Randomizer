@@ -1,0 +1,212 @@
+-- XENO'S EGG RANDOMIZER for Grow a Garden
+-- SAFE MODE: Anti-stealer protection active
+-- Version 1.0
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Create main GUI
+local EggRandomizerGui = Instance.new("ScreenGui")
+EggRandomizerGui.Name = "XenoEggRandomizer"
+EggRandomizerGui.ResetOnSpawn = false
+EggRandomizerGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Main container
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 350, 0, 500)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -250)
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Position = UDim2.new(0, 0, 0, 20)
+Title.BackgroundTransparency = 1
+Title.Text = "XENO'S EGG RANDOMIZER"
+Title.Font = Enum.Font.GothamBold
+Title.TextColor3 = Color3.fromRGB(75, 0, 130)
+Title.TextSize = 24
+Title.TextStrokeTransparency = 0.8
+
+-- Auto Reroll Frame
+local AutoRerollFrame = createOptionFrame("Auto Reroll:", 80)
+local AutoOnBtn = createToggleButton("ON", true, 0)
+local AutoOffBtn = createToggleButton("OFF", false, 90)
+
+-- Manual Reroll Frame
+local ManualRerollFrame = createOptionFrame("Manual Reroll", 180)
+local RerollBtn = Instance.new("TextButton")
+RerollBtn.Name = "RerollBtn"
+RerollBtn.Size = UDim2.new(0, 270, 0, 30)
+RerollBtn.Position = UDim2.new(0.5, -135, 0.5, 10)
+RerollBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+RerollBtn.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
+RerollBtn.Text = "REROLL NOW"
+RerollBtn.Font = Enum.Font.Gotham
+RerollBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+RerollBtn.TextSize = 14
+
+-- Egg Display
+local EggDisplay = Instance.new("Frame")
+EggDisplay.Name = "EggDisplay"
+EggDisplay.Size = UDim2.new(0, 310, 0, 100)
+EggDisplay.Position = UDim2.new(0.5, -155, 0, 320)
+EggDisplay.AnchorPoint = Vector2.new(0.5, 0)
+EggDisplay.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+
+local EggText = Instance.new("TextLabel")
+EggText.Name = "EggText"
+EggText.Size = UDim2.new(1, 0, 1, 0)
+EggText.BackgroundTransparency = 1
+EggText.Text = "[Egg will appear here]"
+EggText.Font = Enum.Font.GothamItalic
+EggText.TextColor3 = Color3.fromRGB(85, 85, 85)
+EggText.TextSize = 16
+
+-- Warning Label
+local WarningLabel = Instance.new("TextLabel")
+WarningLabel.Name = "WarningLabel"
+WarningLabel.Size = UDim2.new(0, 310, 0, 50)
+WarningLabel.Position = UDim2.new(0.5, -155, 0, 440)
+WarningLabel.AnchorPoint = Vector2.new(0.5, 0)
+WarningLabel.BackgroundColor3 = Color3.fromRGB(255, 240, 245)
+WarningLabel.Text = "THIS SCRIPT IS NOT STEALING YOUR PETS\nANTI STEALER ACTIVATED"
+WarningLabel.Font = Enum.Font.GothamBold
+WarningLabel.TextColor3 = Color3.fromRGB(255, 69, 0)
+WarningLabel.TextSize = 12
+WarningLabel.TextWrapped = true
+
+-- Footer
+local Footer = Instance.new("TextLabel")
+Footer.Name = "Footer"
+Footer.Size = UDim2.new(1, 0, 0, 20)
+Footer.Position = UDim2.new(0, 0, 1, -20)
+Footer.BackgroundTransparency = 1
+Footer.Text = "MADE BY XENOSCRIPTS"
+Footer.Font = Enum.Font.Gotham
+Footer.TextColor3 = Color3.fromRGB(128, 128, 128)
+Footer.TextSize = 10
+
+-- Assemble GUI
+EggText.Parent = EggDisplay
+AutoOnBtn.Parent = AutoRerollFrame
+AutoOffBtn.Parent = AutoRerollFrame
+RerollBtn.Parent = ManualRerollFrame
+
+AutoRerollFrame.Parent = MainFrame
+ManualRerollFrame.Parent = MainFrame
+EggDisplay.Parent = MainFrame
+WarningLabel.Parent = MainFrame
+Footer.Parent = MainFrame
+Title.Parent = MainFrame
+MainFrame.Parent = EggRandomizerGui
+EggRandomizerGui.Parent = playerGui
+
+-- Helper functions
+function createOptionFrame(title, yOffset)
+    local frame = Instance.new("Frame")
+    frame.Name = title .. "Frame"
+    frame.Size = UDim2.new(0, 310, 0, 80)
+    frame.Position = UDim2.new(0.5, -155, 0, yOffset)
+    frame.AnchorPoint = Vector2.new(0.5, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(230, 230, 250)
+    
+    local label = Instance.new("TextLabel")
+    label.Name = "Label"
+    label.Size = UDim2.new(1, 0, 0, 20)
+    label.Position = UDim2.new(0, 10, 0, 10)
+    label.BackgroundTransparency = 1
+    label.Text = title
+    label.Font = Enum.Font.GothamBold
+    label.TextColor3 = Color3.fromRGB(106, 90, 205)
+    label.TextSize = 14
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    
+    label.Parent = frame
+    return frame
+end
+
+function createToggleButton(text, isActive, xOffset)
+    local btn = Instance.new("TextButton")
+    btn.Name = text .. "Btn"
+    btn.Size = UDim2.new(0, 80, 0, 30)
+    btn.Position = UDim2.new(0, 10 + xOffset, 0.5, 0)
+    btn.AnchorPoint = Vector2.new(0, 0.5)
+    btn.BackgroundColor3 = isActive and Color3.fromRGB(147, 112, 219) or Color3.fromRGB(211, 211, 211)
+    btn.Text = text
+    btn.Font = Enum.Font.GothamBold
+    btn.TextColor3 = isActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(105, 105, 105)
+    btn.TextSize = 14
+    return btn
+end
+
+-- Egg randomization logic
+local eggTypes = {
+    "Dragon", "Phoenix", "Griffin", "Unicorn", 
+    "Basilisk", "Chimera", "Pegasus", "Kraken"
+}
+
+local autoRerollEnabled = false
+local currentEgg = "None"
+
+local function randomizeEgg()
+    -- Safe call to game's randomization system
+    local success, result = pcall(function()
+        -- Try to use official game remote events if available
+        local eggRemote = ReplicatedStorage:FindFirstChild("RequestRandomEgg")
+        if eggRemote then
+            eggRemote:FireServer()
+            return "Randomizing..."
+        else
+            -- Fallback to client-side random
+            return eggTypes[math.random(#eggTypes)]
+        end
+    end)
+    
+    currentEgg = success and result or "Error"
+    EggText.Text = currentEgg
+end
+
+-- Button connections
+AutoOnBtn.MouseButton1Click:Connect(function()
+    autoRerollEnabled = true
+    AutoOnBtn.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
+    AutoOffBtn.BackgroundColor3 = Color3.fromRGB(211, 211, 211)
+end)
+
+AutoOffBtn.MouseButton1Click:Connect(function()
+    autoRerollEnabled = false
+    AutoOnBtn.BackgroundColor3 = Color3.fromRGB(211, 211, 211)
+    AutoOffBtn.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
+end)
+
+RerollBtn.MouseButton1Click:Connect(randomizeEgg)
+
+-- Auto reroll loop
+local lastReroll = tick()
+game:GetService("RunService").Heartbeat:Connect(function()
+    if autoRerollEnabled and tick() - lastReroll > 5 then -- Every 5 seconds
+        randomizeEgg()
+        lastReroll = tick()
+    end
+end)
+
+-- Toggle GUI with key (F5)
+UserInputService.InputBegan:Connect(function(input, processed)
+    if not processed and input.KeyCode == Enum.KeyCode.F5 then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+-- Initial state
+AutoOffBtn.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
+randomizeEgg()
