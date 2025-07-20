@@ -1,340 +1,140 @@
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+-- Xeno's Egg Randomizer UI Script (Recycle Theme)
 
--- UI Setup
-local screenGui = Instance.new("ScreenGui", PlayerGui)
-screenGui.Name = "EggRandomizerUI"
-screenGui.ResetOnSpawn = false
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 
-local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-mainFrame.Size = UDim2.new(0, 310, 0, 270) -- a little taller for loading bar
-mainFrame.Position = UDim2.new(0.5, -155, 0.3, 0)
-mainFrame.AnchorPoint = Vector2.new(0.5, 0)
+-- Main Frame
+local mainFrame = Instance.new("Frame", gui)
+mainFrame.Size = UDim2.new(0, 350, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -150)
+mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainFrame.BackgroundTransparency = 0.2
+mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
-mainFrame.BorderSizePixel = 0
-mainFrame.ZIndex = 5
 
-local mainCorner = Instance.new("UICorner", mainFrame)
-mainCorner.CornerRadius = UDim.new(0, 12)
-
--- Title Bar (only top corners rounded, bottom sharp)
+-- Title Bar
 local titleBar = Instance.new("TextLabel", mainFrame)
-titleBar.Text = "♻   Xeno's Egg Randomizer   ♻"
 titleBar.Size = UDim2.new(1, 0, 0, 30)
-titleBar.Position = UDim2.new(0, 0, 0, 0)
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-titleBar.TextColor3 = Color3.new(1, 1, 1)
+titleBar.Text = "♻️ Xeno's Egg Randomizer ♻️"
+titleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleBar.Font = Enum.Font.GothamBold
 titleBar.TextSize = 16
-titleBar.TextWrapped = true
 titleBar.TextXAlignment = Enum.TextXAlignment.Center
 
-local titleTopCorner = Instance.new("UICorner", titleBar)
-titleTopCorner.CornerRadius = UDim.new(0, 10)
-
--- Exit Button (improved style)
-local exitButton = Instance.new("TextButton", mainFrame)
-exitButton.Text = "✕"
-exitButton.Size = UDim2.new(0, 28, 0, 28)
-exitButton.Position = UDim2.new(1, -34, 0, 1)
-exitButton.BackgroundColor3 = Color3.fromRGB(70, 15, 15)
-exitButton.TextColor3 = Color3.new(1, 1, 1)
-exitButton.Font = Enum.Font.GothamBold
-exitButton.TextSize = 18
-exitButton.BorderSizePixel = 0
-exitButton.ZIndex = 10
-exitButton.AutoButtonColor = false
-
--- Hover effect for exit button
-exitButton.MouseEnter:Connect(function()
-	exitButton.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
-end)
-exitButton.MouseLeave:Connect(function()
-	exitButton.BackgroundColor3 = Color3.fromRGB(70, 15, 15)
+-- Exit Button
+local exit = Instance.new("TextButton", titleBar)
+exit.Size = UDim2.new(0, 30, 0, 30)
+exit.Position = UDim2.new(1, -30, 0, 0)
+exit.Text = "✖"
+exit.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+exit.TextColor3 = Color3.fromRGB(255, 80, 80)
+exit.Font = Enum.Font.GothamBold
+exit.TextSize = 16
+exit.MouseButton1Click:Connect(function()
+	gui:Destroy()
 end)
 
-exitButton.MouseButton1Click:Connect(function()
-	screenGui:Destroy()
-end)
-
--- Auto Button (wider and closer to edges)
+-- Auto Reroll Button
 local autoButton = Instance.new("TextButton", mainFrame)
-autoButton.Size = UDim2.new(1, -24, 0, 36)  -- wider, with 12px margin each side
-autoButton.Position = UDim2.new(0, 12, 0, 40)
-autoButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+autoButton.Size = UDim2.new(1, -40, 0, 40)
+autoButton.Position = UDim2.new(0, 20, 0, 60)
+autoButton.Text = "Auto Reroll: OFF"
+autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 autoButton.TextColor3 = Color3.new(1, 1, 1)
 autoButton.Font = Enum.Font.GothamBold
 autoButton.TextSize = 14
-autoButton.Text = "🔄 Auto Reroll: OFF"
-autoButton.AutoButtonColor = false
-autoButton.BorderSizePixel = 0
-autoButton.ZIndex = 6
 
--- Manual Button (wider and closer to edges)
+-- Manual Reroll Button
 local manualButton = Instance.new("TextButton", mainFrame)
-manualButton.Size = UDim2.new(1, -24, 0, 36)
-manualButton.Position = UDim2.new(0, 12, 0, 85)
-manualButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+manualButton.Size = UDim2.new(1, -40, 0, 40)
+manualButton.Position = UDim2.new(0, 20, 0, 110)
+manualButton.Text = "Manual Reroll"
+manualButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 manualButton.TextColor3 = Color3.new(1, 1, 1)
 manualButton.Font = Enum.Font.GothamBold
 manualButton.TextSize = 14
-manualButton.Text = "🐾 Manual Reroll"
-manualButton.AutoButtonColor = false
-manualButton.BorderSizePixel = 0
-manualButton.ZIndex = 6
 
--- Loading Bar Background (for reroll progress)
-local loadingBarBG = Instance.new("Frame", mainFrame)
-loadingBarBG.Size = UDim2.new(1, -24, 0, 20)
-loadingBarBG.Position = UDim2.new(0, 12, 0, 130)
-loadingBarBG.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-loadingBarBG.BorderSizePixel = 0
-loadingBarBG.AnchorPoint = Vector2.new(0, 0)
-loadingBarBG.Visible = false -- hidden by default
-loadingBarBG.ZIndex = 6
-
-local loadingBarCorner = Instance.new("UICorner", loadingBarBG)
-loadingBarCorner.CornerRadius = UDim.new(0, 8)
-
--- Loading Bar Fill
-local loadingBarFill = Instance.new("Frame", loadingBarBG)
-loadingBarFill.Size = UDim2.new(0, 0, 1, 0)  -- width will be updated dynamically
-loadingBarFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-loadingBarFill.BorderSizePixel = 0
-loadingBarFill.ZIndex = 7
-
-local loadingFillCorner = Instance.new("UICorner", loadingBarFill)
-loadingFillCorner.CornerRadius = UDim.new(0, 8)
-
--- Loading Bar Text
-local loadingBarText = Instance.new("TextLabel", loadingBarBG)
-loadingBarText.Size = UDim2.new(1, 0, 1, 0)
-loadingBarText.BackgroundTransparency = 1
-loadingBarText.TextColor3 = Color3.new(1, 1, 1)
-loadingBarText.Font = Enum.Font.GothamBold
-loadingBarText.TextSize = 14
-loadingBarText.Text = ""
-loadingBarText.TextXAlignment = Enum.TextXAlignment.Center
-loadingBarText.TextYAlignment = Enum.TextYAlignment.Center
-loadingBarText.ZIndex = 8
-
--- Warning Label (with space between lines)
+-- Warning Label
 local warning = Instance.new("TextLabel", mainFrame)
-warning.Text = "⚠️ THIS SCRIPT IS SAFE TO USE\n\n🛡️ ANTI STEALER ACTIVATED"
 warning.Size = UDim2.new(1, -24, 0, 45)
 warning.Position = UDim2.new(0, 12, 0, 160)
 warning.BackgroundTransparency = 1
-warning.TextColor3 = Color3.fromRGB(255, 180, 120)
+warning.Text = "⚠️ THIS SCRIPT IS SAFE TO USE\n\n🛡️ ANTI STEALER ACTIVATED"
+warning.TextColor3 = Color3.fromRGB(170, 255, 170)
 warning.Font = Enum.Font.GothamBold
 warning.TextSize = 14
 warning.TextWrapped = true
 warning.TextXAlignment = Enum.TextXAlignment.Center
 warning.TextYAlignment = Enum.TextYAlignment.Top
-warning.ZIndex = 6
 
--- Footer (only bottom corners rounded, top corners sharp)
+-- Footer
 local footer = Instance.new("TextLabel", mainFrame)
-footer.Text = "🛠️ Made by XenoScripts | Premium 🛠️"
 footer.Size = UDim2.new(1, 0, 0, 25)
-footer.Position = UDim2.new(0, 0, 1, -30) -- raised 5px so it’s not at exact bottom edge
-footer.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-footer.TextColor3 = Color3.new(1, 1, 1)
-footer.Font = Enum.Font.Gotham
-footer.TextSize = 13
+footer.Position = UDim2.new(0, 0, 1, -25)
+footer.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+footer.Text = "🛠️ Made by XenoScripts | Premium 🛠️"
+footer.TextColor3 = Color3.fromRGB(255, 255, 255)
+footer.Font = Enum.Font.GothamBold
+footer.TextSize = 12
 footer.TextXAlignment = Enum.TextXAlignment.Center
-footer.ZIndex = 5
 
-local footerCorner = Instance.new("UICorner", footer)
-footerCorner.CornerRadius = UDim.new(0, 10)
+-- Loading Bar (Initially Hidden)
+local loadingBar = Instance.new("Frame", mainFrame)
+loadingBar.Size = UDim2.new(0, 0, 0, 10)
+loadingBar.Position = UDim2.new(0, 0, 1, -35)
+loadingBar.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+loadingBar.Visible = false
 
--- Egg Data
-local eggChances = {
-	["Common Egg"] = {["Dog"] = 33, ["Bunny"] = 33, ["Golden Lab"] = 33},
-	["Uncommon Egg"] = {["Black Bunny"] = 25, ["Chicken"] = 25, ["Cat"] = 25, ["Deer"] = 25},
-	["Rare Egg"] = {["Orange Tabby"] = 33.33, ["Spotted Deer"] = 25, ["Pig"] = 16.67, ["Rooster"] = 16.67, ["Monkey"] = 8.33},
-	["Legendary Egg"] = {["Cow"] = 42.55, ["Silver Monkey"] = 42.55, ["Sea Otter"] = 10.64, ["Turtle"] = 2.13, ["Polar Bear"] = 2.13},
-	["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33}
-}
+local loadingText = Instance.new("TextLabel", mainFrame)
+loadingText.Size = UDim2.new(1, 0, 0, 20)
+loadingText.Position = UDim2.new(0, 0, 1, -60)
+loadingText.Text = ""
+loadingText.BackgroundTransparency = 1
+loadingText.TextColor3 = Color3.fromRGB(0, 255, 100)
+loadingText.Font = Enum.Font.GothamBold
+loadingText.TextSize = 14
+loadingText.TextXAlignment = Enum.TextXAlignment.Center
 
-local goodPets = {}
-for eggName, pets in pairs(eggChances) do
-	if eggName == "Legendary Egg" or eggName == "Dinosaur Egg" then
-		for petName in pairs(pets) do
-			goodPets[petName] = true
-		end
-	end
-end
-
-local function weightedRandom(pool)
-	local total = 0
-	local pets = {}
-	for pet, weight in pairs(pool) do
-		total += weight
-		table.insert(pets, {name = pet, weight = weight})
-	end
-	table.sort(pets, function(a,b) return a.name < b.name end)
-	
-	local roll = math.random() * total
-	local cumulative = 0
-	for _, petInfo in ipairs(pets) do
-		cumulative += petInfo.weight
-		if roll <= cumulative then
-			return petInfo.name
-		end
-	end
-	return pets[#pets].name -- fallback
-end
-
-local function createOrUpdateBillboard(egg, eggName, petName, color)
-	local gui = egg:FindFirstChild("PetESP")
-	if not gui then
-		gui = Instance.new("BillboardGui")
-		gui.Name = "PetESP"
-		gui.AlwaysOnTop = true
-		gui.Size = UDim2.new(0, 200, 0, 50)
-		gui.StudsOffset = Vector3.new(0, 2.5, 0)
-		gui.Adornee = egg:FindFirstChildWhichIsA("BasePart") or egg
-		gui.Parent = egg
-	end
-
-	local label = gui:FindFirstChild("TextLabel")
-	if not label then
-		label = Instance.new("TextLabel", gui)
-		label.Size = UDim2.new(1, 0, 1, 0)
-		label.BackgroundTransparency = 1
-		label.TextStrokeTransparency = 0.4
-		label.TextScaled = true
-		label.Font = Enum.Font.GothamBold
-	end
-
-	label.TextColor3 = color or Color3.new(1, 1, 1)
-	label.Text = eggName .. " | " .. petName
-end
-
-local function findEggs()
-	local eggs = {}
-	for _, desc in ipairs(workspace:GetDescendants()) do
-		if desc:IsA("Model") and desc.Name:match("Egg") and desc:FindFirstChildWhichIsA("BasePart") then
-			local eggName = desc.Name
-			if eggChances[eggName] then
-				table.insert(eggs, {egg = desc, name = eggName})
-			end
-		end
-	end
-	return eggs
-end
-
--- Alert Popup UI
-local alertFrame = Instance.new("Frame", mainFrame)
-alertFrame.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-alertFrame.Size = UDim2.new(0.8, 0, 0, 40)
-alertFrame.Position = UDim2.new(0.1, 0, 0, 220)
-alertFrame.AnchorPoint = Vector2.new(0, 0)
-alertFrame.Visible = false
-alertFrame.ZIndex = 10
-alertFrame.BorderSizePixel = 0
-
-local alertCorner = Instance.new("UICorner", alertFrame)
-alertCorner.CornerRadius = UDim.new(0, 10)
-
-local alertText = Instance.new("TextLabel", alertFrame)
-alertText.Size = UDim2.new(1, 0, 1, 0)
-alertText.BackgroundTransparency = 1
-alertText.TextColor3 = Color3.new(0, 0, 0)
-alertText.Font = Enum.Font.GothamBold
-alertText.TextSize = 18
-alertText.Text = ""
-alertText.TextStrokeTransparency = 0.5
-alertText.TextWrapped = true
-alertText.TextXAlignment = Enum.TextXAlignment.Center
-alertText.TextYAlignment = Enum.TextYAlignment.Center
-
-local function showAlert(message)
-	alertText.Text = "🎉✨ " .. message
-	alertFrame.Visible = true
-	task.delay(3, function()
-		alertFrame.Visible = false
-	end)
-end
-
--- Auto Logic with loading bar
-local autoReroll = false
-local rerollCooldown = 3
-local lastRerollTime = 0
+-- Auto Reroll Logic
+local autoOn = false
 
 autoButton.MouseButton1Click:Connect(function()
-	autoReroll = not autoReroll
-	if autoReroll then
-		autoButton.Text = "🔄 Auto Reroll: ON"
-		loadingBarBG.Visible = true
-	else
-		autoButton.Text = "🔄 Auto Reroll: OFF"
-		loadingBarBG.Visible = false
-		loadingBarFill.Size = UDim2.new(0, 0, 1, 0)
-		loadingBarText.Text = ""
-	end
-end)
+	autoOn = not autoOn
+	autoButton.Text = autoOn and "Auto Reroll: ON" or "Auto Reroll: OFF"
+	autoButton.BackgroundColor3 = autoOn and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(80, 80, 80)
+	
+	loadingBar.Visible = autoOn
+	loadingText.Text = ""
 
-manualButton.MouseButton1Click:Connect(function()
-	for _, info in ipairs(findEggs()) do
-		local petName = weightedRandom(eggChances[info.name]) or "?"
-		createOrUpdateBillboard(info.egg, info.name, petName)
-		if goodPets[petName] then
-			showAlert("You rolled a rare pet: "..petName.."!")
-		end
-	end
-end)
-
-RunService.RenderStepped:Connect(function(dt)
-	local hue = (tick() * 0.1) % 1
-	local color = Color3.fromHSV(hue, 1, 1)
-	titleBar.TextColor3 = color
-
-	if autoReroll then
-		autoButton.BackgroundColor3 = color
-	else
-		autoButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-	end
-
-	for _, info in ipairs(findEggs()) do
-		local gui = info.egg:FindFirstChild("PetESP")
-		if gui and gui:FindFirstChild("TextLabel") then
-			gui.TextLabel.TextColor3 = color
-		end
-	end
-end)
-
-task.spawn(function()
-	while true do
-		if autoReroll then
-			local currentTime = tick()
-			local elapsed = currentTime - lastRerollTime
-			local progress = math.clamp(elapsed / rerollCooldown, 0, 1)
-
-			loadingBarFill.Size = UDim2.new(progress, 0, 1, 0)
-			loadingBarText.Text = ("Rerolling... %d%%"):format(progress * 100)
-
-			if elapsed >= rerollCooldown then
-				for _, info in ipairs(findEggs()) do
-					local petName = weightedRandom(eggChances[info.name]) or "?"
-					createOrUpdateBillboard(info.egg, info.name, petName)
-					if goodPets[petName] then
-						showAlert("You rolled a rare pet: "..petName.."!")
-					end
+	if autoOn then
+		spawn(function()
+			while autoOn do
+				for i = 1, 100 do
+					loadingBar.Size = UDim2.new(i/100, 0, 0, 10)
+					loadingText.Text = "Reroll in " .. tostring(100 - i) .. "%"
+					wait(0.03)
 				end
-				lastRerollTime = currentTime
-				loadingBarFill.Size = UDim2.new(0, 0, 1, 0)
-				loadingBarText.Text = ""
+				loadingText.Text = "Rerolled!"
+				wait(0.2)
 			end
-		else
-			loadingBarFill.Size = UDim2.new(0, 0, 1, 0)
-			loadingBarText.Text = ""
-			lastRerollTime = tick()
-		end
-		task.wait(0.1)
+		end)
 	end
 end)
+
+-- Manual Reroll Placeholder
+manualButton.MouseButton1Click:Connect(function()
+	loadingText.Text = "Manual Reroll Triggered!"
+	loadingBar.Size = UDim2.new(1, 0, 0, 10)
+	wait(0.3)
+	loadingBar.Size = UDim2.new(0, 0, 0, 10)
+	loadingText.Text = ""
+end)
+
+-- Adjust layering
+titleBar.ZIndex = 2
+exit.ZIndex = 3
+mainFrame.ZIndex = 1
+loadingBar.ZIndex = 2
+loadingText.ZIndex = 2
