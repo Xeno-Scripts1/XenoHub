@@ -10,7 +10,7 @@ screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame", screenGui)
 mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-mainFrame.Size = UDim2.new(0, 310, 0, 240)
+mainFrame.Size = UDim2.new(0, 310, 0, 260)
 mainFrame.Position = UDim2.new(0.5, -155, 0.3, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0)
 mainFrame.Active = true
@@ -20,9 +20,9 @@ mainFrame.BorderSizePixel = 0
 local mainCorner = Instance.new("UICorner", mainFrame)
 mainCorner.CornerRadius = UDim.new(0, 12)
 
--- Title Bar
+-- Title Bar (only top corners rounded)
 local titleBar = Instance.new("TextLabel", mainFrame)
-titleBar.Text = "♻️ Xeno's Egg Randomizer ♻️"
+titleBar.Text = "🥚🎯 Xeno's Egg Randomizer 🎯🐣"
 titleBar.Size = UDim2.new(1, 0, 0, 30)
 titleBar.Position = UDim2.new(0, 0, 0, 0)
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -34,13 +34,18 @@ titleBar.TextXAlignment = Enum.TextXAlignment.Center
 
 local titleTopCorner = Instance.new("UICorner", titleBar)
 titleTopCorner.CornerRadius = UDim.new(0, 10)
+-- Hack to keep bottom corners sharp by clipping (optional)
+local bottomClipper = Instance.new("Frame", titleBar)
+bottomClipper.BackgroundTransparency = 1
+bottomClipper.Size = UDim2.new(1, 0, 0, 30)
+bottomClipper.Position = UDim2.new(0, 0, 1, 0)
 
 -- Exit Button
 local exitButton = Instance.new("TextButton", mainFrame)
-exitButton.Text = "❌"
+exitButton.Text = "❎"
 exitButton.Size = UDim2.new(0, 25, 0, 25)
 exitButton.Position = UDim2.new(1, -30, 0, 2)
-exitButton.BackgroundColor3 = Color3.fromRGB(90, 0, 0)
+exitButton.BackgroundColor3 = Color3.fromRGB(110, 15, 15)
 exitButton.TextColor3 = Color3.new(1, 1, 1)
 exitButton.Font = Enum.Font.GothamBold
 exitButton.TextSize = 14
@@ -49,46 +54,57 @@ exitButton.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
 
--- Auto Button
+-- Auto Button (wider)
 local autoButton = Instance.new("TextButton", mainFrame)
-autoButton.Size = UDim2.new(1, -20, 0, 32)
-autoButton.Position = UDim2.new(0, 10, 0, 40)
+autoButton.Size = UDim2.new(1, -40, 0, 32)
+autoButton.Position = UDim2.new(0, 20, 0, 40)
 autoButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 autoButton.TextColor3 = Color3.new(1, 1, 1)
 autoButton.Font = Enum.Font.GothamBold
 autoButton.TextSize = 14
-autoButton.Text = "🎲 Auto Reroll: OFF"
+autoButton.Text = "🔄 Auto Reroll: OFF"
 autoButton.AutoButtonColor = false
 autoButton.BorderSizePixel = 0
 
--- Manual Button
+-- Manual Button (wider)
 local manualButton = Instance.new("TextButton", mainFrame)
-manualButton.Size = UDim2.new(1, -20, 0, 32)
-manualButton.Position = UDim2.new(0, 10, 0, 80)
+manualButton.Size = UDim2.new(1, -40, 0, 32)
+manualButton.Position = UDim2.new(0, 20, 0, 80)
 manualButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 manualButton.TextColor3 = Color3.new(1, 1, 1)
 manualButton.Font = Enum.Font.GothamBold
 manualButton.TextSize = 14
-manualButton.Text = "🎲 Manual Reroll"
+manualButton.Text = "🐾 Manual Reroll"
 manualButton.AutoButtonColor = false
 manualButton.BorderSizePixel = 0
 
+-- Timer Label (Auto Reroll countdown)
+local timerLabel = Instance.new("TextLabel", mainFrame)
+timerLabel.Size = UDim2.new(1, -20, 0, 24)
+timerLabel.Position = UDim2.new(0, 10, 0, 120)
+timerLabel.BackgroundTransparency = 1
+timerLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+timerLabel.Font = Enum.Font.Gotham
+timerLabel.TextSize = 14
+timerLabel.TextXAlignment = Enum.TextXAlignment.Center
+timerLabel.Text = ""
+
 -- Warning Label
 local warning = Instance.new("TextLabel", mainFrame)
-warning.Text = "⚠️ THIS SCRIPT IS NOT STEALING YOUR PETS\n🛡️ ANTI STEALER ACTIVATED"
+warning.Text = "⚠️ THIS SCRIPT IS SAFE TO USE\n🛡️ ANTI STEALER ACTIVATED"
 warning.Size = UDim2.new(1, -20, 0, 45)
-warning.Position = UDim2.new(0, 10, 0, 125)
+warning.Position = UDim2.new(0, 10, 0, 150)
 warning.BackgroundTransparency = 1
-warning.TextColor3 = Color3.fromRGB(255, 120, 120)
-warning.Font = Enum.Font.Gotham
-warning.TextSize = 13
+warning.TextColor3 = Color3.fromRGB(255, 180, 120)
+warning.Font = Enum.Font.GothamBold
+warning.TextSize = 14
 warning.TextWrapped = true
 warning.TextXAlignment = Enum.TextXAlignment.Center
 warning.TextYAlignment = Enum.TextYAlignment.Top
 
 -- Footer
 local footer = Instance.new("TextLabel", mainFrame)
-footer.Text = "🐾 Powered by XenoWare 🐾"
+footer.Text = "🛠️ Made by XenoScripts | Premium 🛠️"
 footer.Size = UDim2.new(1, 0, 0, 25)
 footer.Position = UDim2.new(0, 0, 1, -25)
 footer.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -96,6 +112,9 @@ footer.TextColor3 = Color3.new(1, 1, 1)
 footer.Font = Enum.Font.Gotham
 footer.TextSize = 13
 footer.TextXAlignment = Enum.TextXAlignment.Center
+
+local footerCorner = Instance.new("UICorner", footer)
+footerCorner.CornerRadius = UDim.new(0, 10)
 
 -- Egg Data
 local eggChances = {
@@ -106,35 +125,61 @@ local eggChances = {
 	["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33}
 }
 
--- ESP Logic
-local function weightedRandom(pool)
-	local total = 0
-	for _, weight in pairs(pool) do total += weight end
-	local roll = math.random() * total
-	local cumulative = 0
-	for pet, weight in pairs(pool) do
-		cumulative += weight
-		if roll <= cumulative then return pet end
+-- Good pets from Legendary & Dinosaur eggs
+local goodPets = {}
+for eggName, pets in pairs(eggChances) do
+	if eggName == "Legendary Egg" or eggName == "Dinosaur Egg" then
+		for petName in pairs(pets) do
+			goodPets[petName] = true
+		end
 	end
 end
 
-local function createOrUpdateBillboard(egg, eggName, petName, color)
-	local gui = egg:FindFirstChild("PetESP") or Instance.new("BillboardGui")
-	gui.Name = "PetESP"
-	gui.AlwaysOnTop = true
-	gui.Size = UDim2.new(0, 200, 0, 50)
-	gui.StudsOffset = Vector3.new(0, 2.5, 0)
-	gui.Adornee = egg:FindFirstChildWhichIsA("BasePart") or egg
+-- Weighted Random with stable ordering
+local function weightedRandom(pool)
+	local total = 0
+	local pets = {}
+	for pet, weight in pairs(pool) do
+		total += weight
+		table.insert(pets, {name = pet, weight = weight})
+	end
+	table.sort(pets, function(a,b) return a.name < b.name end)
+	
+	local roll = math.random() * total
+	local cumulative = 0
+	for _, petInfo in ipairs(pets) do
+		cumulative += petInfo.weight
+		if roll <= cumulative then
+			return petInfo.name
+		end
+	end
+	return pets[#pets].name -- fallback
+end
 
-	local label = gui:FindFirstChild("TextLabel") or Instance.new("TextLabel", gui)
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.BackgroundTransparency = 1
+local function createOrUpdateBillboard(egg, eggName, petName, color)
+	local gui = egg:FindFirstChild("PetESP")
+	if not gui then
+		gui = Instance.new("BillboardGui")
+		gui.Name = "PetESP"
+		gui.AlwaysOnTop = true
+		gui.Size = UDim2.new(0, 200, 0, 50)
+		gui.StudsOffset = Vector3.new(0, 2.5, 0)
+		gui.Adornee = egg:FindFirstChildWhichIsA("BasePart") or egg
+		gui.Parent = egg
+	end
+
+	local label = gui:FindFirstChild("TextLabel")
+	if not label then
+		label = Instance.new("TextLabel", gui)
+		label.Size = UDim2.new(1, 0, 1, 0)
+		label.BackgroundTransparency = 1
+		label.TextStrokeTransparency = 0.4
+		label.TextScaled = true
+		label.Font = Enum.Font.GothamBold
+	end
+
 	label.TextColor3 = color or Color3.new(1, 1, 1)
-	label.TextStrokeTransparency = 0.4
-	label.TextScaled = true
-	label.Font = Enum.Font.GothamBold
 	label.Text = eggName .. " | " .. petName
-	gui.Parent = egg
 end
 
 local function findEggs()
@@ -150,27 +195,78 @@ local function findEggs()
 	return eggs
 end
 
+-- Alert Popup UI
+local alertFrame = Instance.new("Frame", mainFrame)
+alertFrame.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+alertFrame.Size = UDim2.new(0.8, 0, 0, 40)
+alertFrame.Position = UDim2.new(0.1, 0, 0, 200)
+alertFrame.AnchorPoint = Vector2.new(0, 0)
+alertFrame.Visible = false
+alertFrame.ZIndex = 10
+alertFrame.BorderSizePixel = 0
+
+local alertCorner = Instance.new("UICorner", alertFrame)
+alertCorner.CornerRadius = UDim.new(0, 10)
+
+local alertText = Instance.new("TextLabel", alertFrame)
+alertText.Size = UDim2.new(1, 0, 1, 0)
+alertText.BackgroundTransparency = 1
+alertText.TextColor3 = Color3.new(0, 0, 0)
+alertText.Font = Enum.Font.GothamBold
+alertText.TextSize = 18
+alertText.Text = ""
+alertText.TextStrokeTransparency = 0.5
+alertText.TextWrapped = true
+alertText.TextXAlignment = Enum.TextXAlignment.Center
+alertText.TextYAlignment = Enum.TextYAlignment.Center
+
+local function showAlert(message)
+	alertText.Text = "🎉✨ " .. message
+	alertFrame.Visible = true
+	task.delay(3, function()
+		alertFrame.Visible = false
+	end)
+end
+
 -- Auto Logic
 local autoReroll = false
+local rerollCooldown = 3
+local countdown = rerollCooldown
+local lastRerollTime = 0
+
 autoButton.MouseButton1Click:Connect(function()
 	autoReroll = not autoReroll
-	autoButton.Text = autoReroll and "🎲 Auto Reroll: ON" or "🎲 Auto Reroll: OFF"
+	if autoReroll then
+		autoButton.Text = "🔄 Auto Reroll: ON"
+	else
+		autoButton.Text = "🔄 Auto Reroll: OFF"
+		timerLabel.Text = ""
+	end
 end)
 
 manualButton.MouseButton1Click:Connect(function()
 	for _, info in ipairs(findEggs()) do
 		local petName = weightedRandom(eggChances[info.name]) or "?"
 		createOrUpdateBillboard(info.egg, info.name, petName)
+		if goodPets[petName] then
+			showAlert("You rolled a rare pet: "..petName.."!")
+		end
 	end
 end)
 
--- Rainbow Animation
+-- Rainbow Animation and autoButton color update
 local hue = 0
 RunService.RenderStepped:Connect(function(dt)
 	hue = (hue + dt * 0.1) % 1
 	local color = Color3.fromHSV(hue, 1, 1)
 	titleBar.TextColor3 = color
-	if autoReroll then autoButton.BackgroundColor3 = color end
+
+	if autoReroll then
+		autoButton.BackgroundColor3 = color
+	else
+		autoButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+	end
+
 	for _, info in ipairs(findEggs()) do
 		local gui = info.egg:FindFirstChild("PetESP")
 		if gui and gui:FindFirstChild("TextLabel") then
@@ -182,11 +278,24 @@ end)
 task.spawn(function()
 	while true do
 		if autoReroll then
-			for _, info in ipairs(findEggs()) do
-				local petName = weightedRandom(eggChances[info.name]) or "?"
-				createOrUpdateBillboard(info.egg, info.name, petName)
+			local currentTime = tick()
+			if currentTime - lastRerollTime >= rerollCooldown then
+				for _, info in ipairs(findEggs()) do
+					local petName = weightedRandom(eggChances[info.name]) or "?"
+					createOrUpdateBillboard(info.egg, info.name, petName)
+					if goodPets[petName] then
+						showAlert("You rolled a rare pet: "..petName.."!")
+					end
+				end
+				lastRerollTime = currentTime
+				countdown = rerollCooldown
 			end
+			countdown = math.max(0, countdown - 0.1)
+			timerLabel.Text = ("Next reroll in: %.1f s"):format(countdown)
+		else
+			countdown = rerollCooldown
+			timerLabel.Text = ""
 		end
-		task.wait(1)
+		task.wait(0.1)
 	end
 end)
