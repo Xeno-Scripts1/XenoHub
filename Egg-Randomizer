@@ -21,7 +21,7 @@ local LocalPlayer = Players.LocalPlayer
 local playerGui = LocalPlayer:WaitForChild("PlayerGui")
 local workspace = game:GetService("Workspace")
 
--- Helper weighted random function
+-- Weighted random helper
 local function weightedRandom(petTable)
     local sum = 0
     for _, weight in pairs(petTable) do
@@ -44,24 +44,23 @@ screenGui.ResetOnSpawn = false
 local mainFrame = Instance.new("Frame", screenGui)
 mainFrame.Size = UDim2.new(0, 400, 0, 280)
 mainFrame.Position = UDim2.new(0.5, -200, 0.5, -140)
-mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Dark Grey main body
+mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- dark grey
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
-mainFrame.Draggable = true
+mainFrame.Draggable = true -- UI is draggable
 
 local corner = Instance.new("UICorner", mainFrame)
 corner.CornerRadius = UDim.new(0, 12)
 
--- Title Bar Frame (very dark grey)
+-- Title bar (very dark grey)
 local titleBar = Instance.new("Frame", mainFrame)
 titleBar.Size = UDim2.new(1, 0, 0, 40)
 titleBar.Position = UDim2.new(0, 0, 0, 0)
-titleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- Very dark grey
+titleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 titleBar.BorderSizePixel = 0
 
 local title = Instance.new("TextLabel", titleBar)
 title.Size = UDim2.new(1, 0, 1, 0)
-title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "🥚 XENO'S EGG RANDOMIZER 🥚"
 title.Font = Enum.Font.GothamBold
@@ -77,40 +76,57 @@ task.spawn(function()
     end
 end)
 
--- Buttons Container Frame (for centered vertical stacking)
+-- Exit Button top right
+local exitButton = Instance.new("TextButton", titleBar)
+exitButton.Size = UDim2.new(0, 40, 0, 30)
+exitButton.Position = UDim2.new(1, -45, 0, 5)
+exitButton.Text = "✕"
+exitButton.Font = Enum.Font.GothamBold
+exitButton.TextSize = 22
+exitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+exitButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+exitButton.BorderSizePixel = 0
+exitButton.AutoButtonColor = true
+Instance.new("UICorner", exitButton).CornerRadius = UDim.new(0, 6)
+
+exitButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Buttons container
 local buttonsFrame = Instance.new("Frame", mainFrame)
 buttonsFrame.Size = UDim2.new(1, 0, 0, 100)
 buttonsFrame.Position = UDim2.new(0, 0, 0.35, 0)
 buttonsFrame.BackgroundTransparency = 1
 
--- Manual Reroll Button (centered)
-local manualButton = Instance.new("TextButton", buttonsFrame)
-manualButton.Size = UDim2.new(0.6, 0, 0, 40)
-manualButton.Position = UDim2.new(0.2, 0, 0, 0)
-manualButton.Text = "🎲 REROLL"
-manualButton.Font = Enum.Font.GothamBold
-manualButton.TextSize = 18
-manualButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-manualButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120) -- Grey
-manualButton.BorderSizePixel = 0
-Instance.new("UICorner", manualButton).CornerRadius = UDim.new(0, 12)
-
--- Auto Reroll Button (centered below manual)
+-- Auto Reroll Button (full width minus margin)
 local autoButton = Instance.new("TextButton", buttonsFrame)
-autoButton.Size = UDim2.new(0.6, 0, 0, 40)
-autoButton.Position = UDim2.new(0.2, 0, 0.6, 0)
+autoButton.Size = UDim2.new(0.95, 0, 0, 40)
+autoButton.Position = UDim2.new(0.025, 0, 0, 0)
 autoButton.Text = "🔁 AUTO REROLL: OFF"
 autoButton.Font = Enum.Font.GothamBold
 autoButton.TextSize = 18
 autoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-autoButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120) -- Grey start
+autoButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120) -- grey off
 autoButton.BorderSizePixel = 0
 Instance.new("UICorner", autoButton).CornerRadius = UDim.new(0, 12)
 
--- Warning Label (above footer)
+-- Manual Reroll Button (full width minus margin, below auto)
+local manualButton = Instance.new("TextButton", buttonsFrame)
+manualButton.Size = UDim2.new(0.95, 0, 0, 40)
+manualButton.Position = UDim2.new(0.025, 0, 0.6, 0)
+manualButton.Text = "🎲 MANUAL REROLL"
+manualButton.Font = Enum.Font.GothamBold
+manualButton.TextSize = 18
+manualButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+manualButton.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+manualButton.BorderSizePixel = 0
+Instance.new("UICorner", manualButton).CornerRadius = UDim.new(0, 12)
+
+-- Warning label above footer (moved up)
 local warningLabel = Instance.new("TextLabel", mainFrame)
 warningLabel.Size = UDim2.new(1, -20, 0, 30)
-warningLabel.Position = UDim2.new(0, 10, 0.85, 0)
+warningLabel.Position = UDim2.new(0, 10, 0.8, 0)
 warningLabel.BackgroundTransparency = 1
 warningLabel.Text = "⚠️ THIS SCRIPT IS NOT STEALING YOUR PETS ⚠️\n✅ ANTI-STEALER ACTIVATED"
 warningLabel.TextWrapped = true
@@ -131,72 +147,89 @@ footer.TextColor3 = Color3.fromRGB(255, 255, 255)
 local autoRerollEnabled = false
 local autoRerollTask
 
--- Store BillboardGuis for eggs to update text
-local eggBillboards = {}
+-- Billboard storage
+local currentBillboard
 
--- Remove all previous egg billboards (if any)
-local function clearEggBillboards()
-    for _, billboard in pairs(eggBillboards) do
-        if billboard and billboard.Parent then
-            billboard:Destroy()
-        end
+local function clearBillboard()
+    if currentBillboard and currentBillboard.Parent then
+        currentBillboard:Destroy()
+        currentBillboard = nil
     end
-    eggBillboards = {}
 end
 
--- Function to create or update billboard gui over eggs in workspace
+local function findEggModel(eggName)
+    -- Try workspace root
+    local model = workspace:FindFirstChild(eggName)
+    if model then return model end
+
+    -- Try folder named "Eggs"
+    local eggsFolder = workspace:FindFirstChild("Eggs")
+    if eggsFolder then
+        model = eggsFolder:FindFirstChild(eggName)
+        if model then return model end
+    end
+
+    -- Try folder named "EggModels" (add more here if you want)
+    local eggsFolder2 = workspace:FindFirstChild("EggModels")
+    if eggsFolder2 then
+        model = eggsFolder2:FindFirstChild(eggName)
+        if model then return model end
+    end
+
+    return nil
+end
+
 local function updateEggBillboard(eggName, petName)
-    clearEggBillboards()
+    clearBillboard()
 
-    -- Try to find egg model in workspace - adjust as needed for your game
-    local eggModel = workspace:FindFirstChild(eggName)
+    local eggModel = findEggModel(eggName)
     if not eggModel then
-        local eggsFolder = workspace:FindFirstChild("Eggs")
-        if eggsFolder then
-            eggModel = eggsFolder:FindFirstChild(eggName)
-        end
+        warn("Egg model not found for: " .. eggName)
+        return
     end
-    if eggModel then
-        local adornee = eggModel.PrimaryPart or eggModel:FindFirstChildWhichIsA("BasePart")
-        if not adornee then return end
 
-        local billboard = Instance.new("BillboardGui")
-        billboard.Adornee = adornee
-        billboard.Size = UDim2.new(0, 150, 0, 50)
-        billboard.StudsOffset = Vector3.new(0, 3, 0)
-        billboard.AlwaysOnTop = true
-        billboard.Name = "EggPetBillboard"
-        billboard.Parent = eggModel
-
-        local frame = Instance.new("Frame", billboard)
-        frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        frame.BackgroundTransparency = 0.5
-        frame.Size = UDim2.new(1, 0, 1, 0)
-        frame.BorderSizePixel = 0
-        local corner = Instance.new("UICorner", frame)
-        corner.CornerRadius = UDim.new(0, 12)
-
-        local eggLabel = Instance.new("TextLabel", frame)
-        eggLabel.Size = UDim2.new(1, 0, 0.5, 0)
-        eggLabel.BackgroundTransparency = 1
-        eggLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        eggLabel.Font = Enum.Font.GothamBold
-        eggLabel.TextSize = 16
-        eggLabel.Text = eggName
-        eggLabel.TextStrokeTransparency = 0.8
-
-        local petLabel = Instance.new("TextLabel", frame)
-        petLabel.Size = UDim2.new(1, 0, 0.5, 0)
-        petLabel.Position = UDim2.new(0, 0, 0.5, 0)
-        petLabel.BackgroundTransparency = 1
-        petLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        petLabel.Font = Enum.Font.Gotham
-        petLabel.TextSize = 14
-        petLabel.Text = petName
-        petLabel.TextStrokeTransparency = 0.8
-
-        eggBillboards[eggModel] = billboard
+    local adornee = eggModel.PrimaryPart or eggModel:FindFirstChildWhichIsA("BasePart")
+    if not adornee then
+        warn("No valid BasePart found on egg model: " .. eggName)
+        return
     end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Adornee = adornee
+    billboard.Size = UDim2.new(0, 150, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Name = "EggPetBillboard"
+    billboard.Parent = eggModel
+
+    local frame = Instance.new("Frame", billboard)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    frame.BackgroundTransparency = 0.5
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BorderSizePixel = 0
+    local corner = Instance.new("UICorner", frame)
+    corner.CornerRadius = UDim.new(0, 12)
+
+    local eggLabel = Instance.new("TextLabel", frame)
+    eggLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    eggLabel.BackgroundTransparency = 1
+    eggLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    eggLabel.Font = Enum.Font.GothamBold
+    eggLabel.TextSize = 16
+    eggLabel.Text = eggName
+    eggLabel.TextStrokeTransparency = 0.8
+
+    local petLabel = Instance.new("TextLabel", frame)
+    petLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    petLabel.Position = UDim2.new(0, 0, 0.5, 0)
+    petLabel.BackgroundTransparency = 1
+    petLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    petLabel.Font = Enum.Font.Gotham
+    petLabel.TextSize = 14
+    petLabel.Text = petName
+    petLabel.TextStrokeTransparency = 0.8
+
+    currentBillboard = billboard
 end
 
 local function rollEgg()
@@ -206,9 +239,6 @@ local function rollEgg()
     local pets = eggs[randomEgg]
     local randomPet = weightedRandom(pets)
 
-    -- No eggDisplay UI label update
-
-    -- Update 3D billboard with pet and egg name only
     updateEggBillboard(randomEgg, randomPet)
 end
 
@@ -245,5 +275,4 @@ autoButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Initial roll to display a billboard in game
 rollEgg()
