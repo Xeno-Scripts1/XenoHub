@@ -1,61 +1,159 @@
--- UI Services
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-
-local player = Players.LocalPlayer
-local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "XenoEggRandomizer"
-screenGui.ResetOnSpawn = false
-
--- Egg data
 local eggs = {
-    ["Common Egg"] = {"Dog", "Bunny", "Golden Lab"},
-    ["Uncommon Egg"] = {"Black Bunny", "Chicken", "Cat", "Deer"},
-    ["Rare Egg"] = {"Orange Tabby", "Spotted Deer", "Pig", "Rooster", "Monkey"},
-    ["Legendary Egg"] = {"Cow", "Silver Monkey", "Sea Otter", "Turtle", "Polar Bear"},
-    ["Mythic Egg"] = {"Grey Mouse", "Brown Mouse", "Squirrel", "Red Giant Ant", "Red Fox"},
-    ["Bug Egg"] = {"Snail", "Giant Ant", "Caterpillar", "Praying Mantis", "Dragon Fly"},
-    ["Night Egg"] = {"Hedgehog", "Mole", "Frog", "Echo Frog", "Night Owl", "Raccoon"},
-    ["Bee Egg"] = {"Bee", "Honey Bee", "Bear Bee", "Petal Bee", "Queen Bee"},
-    ["Anti Bee Egg"] = {"Wasp", "Tarantula Hawk", "Moth", "Butterfly", "Disco Bee"},
-    ["Common Summer Egg"] = {"Starfish", "Seafull", "Crab"},
-    ["Rare Summer Egg"] = {"Flamingo", "Toucan", "Sea Turtle", "Orangutan", "Seal"},
-    ["Paradise Egg"] = {"Ostrich", "Peacock", "Capybara", "Scarlet Macaw", "Mimic Octopus"},
-    ["Premium Night Egg"] = {"Hedgehog", "Mole", "Frog", "Echo Frog"},
-    ["Dinosaur Egg"] = {"Raptor", "Triceratops", "T-Rex", "Stegosaurus", "Pterodactyl", "Brontosaurus"},
+    ["Common Egg"] = {["Dog"] = 33, ["Bunny"] = 33, ["Golden Lab"] = 33},
+    ["Uncommon Egg"] = {["Black Bunny"] = 25, ["Chicken"] = 25, ["Cat"] = 25, ["Deer"] = 25},
+    ["Rare Egg"] = {["Orange Tabby"] = 33.33, ["Spotted Deer"] = 25, ["Pig"] = 16.67, ["Rooster"] = 16.67, ["Monkey"] = 8.33},
+    ["Legendary Egg"] = {["Cow"] = 42.55, ["Silver Monkey"] = 42.55, ["Sea Otter"] = 10.64, ["Turtle"] = 2.13, ["Polar Bear"] = 2.13},
+    ["Mythic Egg"] = {["Grey Mouse"] = 37.5, ["Brown Mouse"] = 26.79, ["Squirrel"] = 26.79, ["Red Giant Ant"] = 8.93, ["Red Fox"] = 0},
+    ["Bug Egg"] = {["Snail"] = 40, ["Giant Ant"] = 35, ["Caterpillar"] = 25, ["Praying Mantis"] = 0, ["Dragon Fly"] = 0},
+    ["Night Egg"] = {["Hedgehog"] = 47, ["Mole"] = 23.5, ["Frog"] = 21.16, ["Echo Frog"] = 8.35, ["Night Owl"] = 0, ["Raccoon"] = 0},
+    ["Bee Egg"] = {["Bee"] = 65, ["Honey Bee"] = 20, ["Bear Bee"] = 10, ["Petal Bee"] = 5, ["Queen Bee"] = 0},
+    ["Anti Bee Egg"] = {["Wasp"] = 55, ["Tarantula Hawk"] = 31, ["Moth"] = 14, ["Butterfly"] = 0, ["Disco Bee"] = 0},
+    ["Common Summer Egg"] = {["Starfish"] = 50, ["Seafull"] = 25, ["Crab"] = 25},
+    ["Rare Summer Egg"] = {["Flamingo"] = 30, ["Toucan"] = 25, ["Sea Turtle"] = 20, ["Orangutan"] = 15, ["Seal"] = 10},
+    ["Paradise Egg"] = {["Ostrich"] = 43, ["Peacock"] = 33, ["Capybara"] = 24, ["Scarlet Macaw"] = 3, ["Mimic Octopus"] = 1},
+    ["Premium Night Egg"] = {["Hedgehog"] = 50, ["Mole"] = 26, ["Frog"] = 14, ["Echo Frog"] = 10},
+    ["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33}
 }
 
+local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+local screenGui = Instance.new("ScreenGui", playerGui)
+screenGui.ResetOnSpawn = false
+
 -- Main Frame
-local main = Instance.new("Frame", screenGui)
-main.AnchorPoint = Vector2.new(0.5, 0.5)
-main.Position = UDim2.new(0.5, 0, 0.5, 0)
-main.Size = UDim2.new(0, 400, 0, 350)
-main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-main.BackgroundTransparency = 0.4
-main.BorderSizePixel = 0
-main.Active = true
-main.Draggable = true
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 400, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+local corner = Instance.new("UICorner", mainFrame)
+corner.CornerRadius = UDim.new(0, 12)
 
 -- Title
-local title = Instance.new("TextLabel", main)
+local title = Instance.new("TextLabel", mainFrame)
 title.Size = UDim2.new(1, 0, 0, 40)
+title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "XENO'S EGG RANDOMIZER"
-title.TextColor3 = Color3.new(1, 1, 1)
+title.Text = "🥚 XENO'S EGG RANDOMIZER 🥚"
 title.Font = Enum.Font.GothamBold
-title.TextScaled = true
+title.TextSize = 22
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- AUTO REROLL Box
-local autoBox = Instance.new("TextButton", main)
-autoBox.Position = UDim2.new(0.05, 0, 0.15, 0)
-autoBox.Size = UDim2.new(0.9, 0, 0, 40)
-autoBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-autoBox.Text = "AUTO REROLL: OFF"
-autoBox.Font = Enum.Font.Gotham
-autoBox.TextColor3 = Color3.new(1, 1, 1)
-autoBox.TextScaled = true
+task.spawn(function()
+	local hue = 0
+	while true do
+		hue = (hue + 0.0025) % 1
+		title.TextColor3 = Color3.fromHSV(hue, 1, 1)
+		task.wait(0.05)
+	end
+end)
 
-local autoOn = false
+-- Warning Label
+local warningLabel = Instance.new("TextLabel", mainFrame)
+warningLabel.Size = UDim2.new(1, -20, 0, 30)
+warningLabel.Position = UDim2.new(0, 10, 0.15, 0)
+warningLabel.BackgroundTransparency = 1
+warningLabel.Text = "⚠️ THIS SCRIPT IS NOT STEALING YOUR PETS ⚠️\n✅ ANTI-STEALER ACTIVATED"
+warningLabel.TextWrapped = true
+warningLabel.Font = Enum.Font.Gotham
+warningLabel.TextSize = 14
+warningLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-autoBox.MouseButton1Click:Connect
+-- Egg Display Label
+local eggDisplay = Instance.new("TextLabel", mainFrame)
+eggDisplay.Size = UDim2.new(1, 0, 0, 40)
+eggDisplay.Position = UDim2.new(0, 0, 0.4, 0)
+eggDisplay.BackgroundTransparency = 1
+eggDisplay.Font = Enum.Font.GothamBold
+eggDisplay.TextSize = 24
+eggDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
+eggDisplay.Text = "🎲 Roll an Egg!"
+
+-- Hover Text for Pet
+local hoverText = Instance.new("TextLabel", mainFrame)
+hoverText.Size = UDim2.new(1, 0, 0, 30)
+hoverText.Position = UDim2.new(0, 0, 0.55, 0)
+hoverText.BackgroundTransparency = 1
+hoverText.Font = Enum.Font.Gotham
+hoverText.TextSize = 18
+hoverText.TextColor3 = Color3.fromRGB(255, 255, 255)
+hoverText.Text = ""
+
+-- Hover text color animation
+task.spawn(function()
+	local hue = 0
+	while true do
+		hue = (hue + 0.003) % 1
+		hoverText.TextColor3 = Color3.fromHSV(hue, 1, 1)
+		task.wait(0.05)
+	end
+end)
+
+-- Footer
+local footer = Instance.new("TextLabel", mainFrame)
+footer.Size = UDim2.new(1, 0, 0, 20)
+footer.Position = UDim2.new(0, 0, 1, -20)
+footer.BackgroundTransparency = 1
+footer.Text = "🧪 Made by XenoScripts"
+footer.Font = Enum.Font.Gotham
+footer.TextSize = 14
+footer.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- Auto Reroll Button
+local autoButton = Instance.new("TextButton", mainFrame)
+autoButton.Size = UDim2.new(0.8, 0, 0, 40)
+autoButton.Position = UDim2.new(0.1, 0, 0.75, 0)
+autoButton.Text = "🔁 AUTO REROLL: OFF"
+autoButton.Font = Enum.Font.GothamBold
+autoButton.TextSize = 18
+autoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+autoButton.BorderSizePixel = 0
+
+local btnCorner = Instance.new("UICorner", autoButton)
+btnCorner.CornerRadius = UDim.new(0, 12)
+
+local autoRerollEnabled = false
+local autoRerollConnection
+local rainbowConn
+
+local function rollEgg()
+	local eggNames = {}
+	for name in pairs(eggs) do table.insert(eggNames, name) end
+	local randomEgg = eggNames[math.random(1, #eggNames)]
+	local pets = eggs[randomEgg]
+	local petNames = {}
+	for pet in pairs(pets) do table.insert(petNames, pet) end
+	local randomPet = petNames[math.random(1, #petNames)]
+	eggDisplay.Text = randomEgg
+	hoverText.Text = "🎁 " .. randomPet
+end
+
+autoButton.MouseButton1Click:Connect(function()
+	if autoRerollEnabled then
+		autoRerollEnabled = false
+		autoButton.Text = "🔁 AUTO REROLL: OFF"
+		autoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+		if autoRerollConnection then autoRerollConnection:Disconnect() end
+		if rainbowConn then rainbowConn = nil end
+	else
+		autoRerollEnabled = true
+		autoButton.Text = "🔁 AUTO REROLL: ON"
+		autoRerollConnection = game:GetService("RunService").Heartbeat:Connect(function()
+			rollEgg()
+			task.wait(1.5)
+		end)
+		rainbowConn = task.spawn(function()
+			local hue = 0
+			while autoRerollEnabled do
+				hue = (hue + 0.003) % 1
+				autoButton.TextColor3 = Color3.fromHSV(hue, 1, 1)
+				autoButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+				task.wait(0.05)
+			end
+		end)
+	end
+end)
