@@ -15,14 +15,35 @@ local eggs = {
     ["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33}
 }
 
-local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+local workspace = game:GetService("Workspace")
+
+-- Helper weighted random function
+local function weightedRandom(petTable)
+    local sum = 0
+    for _, weight in pairs(petTable) do
+        sum = sum + weight
+    end
+    local rand = math.random() * sum
+    local cumulative = 0
+    for pet, weight in pairs(petTable) do
+        cumulative = cumulative + weight
+        if rand <= cumulative then
+            return pet
+        end
+    end
+end
+
 local screenGui = Instance.new("ScreenGui", playerGui)
 screenGui.ResetOnSpawn = false
 
 -- Main Frame
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 400, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+mainFrame.Size = UDim2.new(0, 400, 0, 320)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -160)
 mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -50,7 +71,7 @@ task.spawn(function()
 	end
 end)
 
--- Warning Label
+-- Warning Label (Below title, above eggDisplay)
 local warningLabel = Instance.new("TextLabel", mainFrame)
 warningLabel.Size = UDim2.new(1, -20, 0, 30)
 warningLabel.Position = UDim2.new(0, 10, 0.15, 0)
@@ -64,7 +85,7 @@ warningLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 -- Egg Display Label
 local eggDisplay = Instance.new("TextLabel", mainFrame)
 eggDisplay.Size = UDim2.new(1, 0, 0, 40)
-eggDisplay.Position = UDim2.new(0, 0, 0.4, 0)
+eggDisplay.Position = UDim2.new(0, 0, 0.3, 0)
 eggDisplay.BackgroundTransparency = 1
 eggDisplay.Font = Enum.Font.GothamBold
 eggDisplay.TextSize = 24
@@ -74,7 +95,7 @@ eggDisplay.Text = "🎲 Roll an Egg!"
 -- Hover Text for Pet
 local hoverText = Instance.new("TextLabel", mainFrame)
 hoverText.Size = UDim2.new(1, 0, 0, 30)
-hoverText.Position = UDim2.new(0, 0, 0.55, 0)
+hoverText.Position = UDim2.new(0, 0, 0.45, 0)
 hoverText.BackgroundTransparency = 1
 hoverText.Font = Enum.Font.Gotham
 hoverText.TextSize = 18
@@ -91,69 +112,144 @@ task.spawn(function()
 	end
 end)
 
--- Footer
-local footer = Instance.new("TextLabel", mainFrame)
-footer.Size = UDim2.new(1, 0, 0, 20)
-footer.Position = UDim2.new(0, 0, 1, -20)
-footer.BackgroundTransparency = 1
-footer.Text = "🧪 Made by XenoScripts"
-footer.Font = Enum.Font.Gotham
-footer.TextSize = 14
-footer.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- Manual Reroll Button
+local manualButton = Instance.new("TextButton", mainFrame)
+manualButton.Size = UDim2.new(0.35, 0, 0, 40)
+manualButton.Position = UDim2.new(0.1, 0, 0.75, 0)
+manualButton.Text = "🎲 REROLL"
+manualButton.Font = Enum.Font.GothamBold
+manualButton.TextSize = 18
+manualButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+manualButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+manualButton.BorderSizePixel = 0
+Instance.new("UICorner", manualButton).CornerRadius = UDim.new(0, 12)
 
--- Auto Reroll Button
+-- Auto Reroll Button (background cycles color, text stays white)
 local autoButton = Instance.new("TextButton", mainFrame)
-autoButton.Size = UDim2.new(0.8, 0, 0, 40)
-autoButton.Position = UDim2.new(0.1, 0, 0.75, 0)
+autoButton.Size = UDim2.new(0.45, 0, 0, 40)
+autoButton.Position = UDim2.new(0.55, 0, 0.75, 0)
 autoButton.Text = "🔁 AUTO REROLL: OFF"
 autoButton.Font = Enum.Font.GothamBold
 autoButton.TextSize = 18
 autoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 autoButton.BorderSizePixel = 0
-
-local btnCorner = Instance.new("UICorner", autoButton)
-btnCorner.CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", autoButton).CornerRadius = UDim.new(0, 12)
 
 local autoRerollEnabled = false
-local autoRerollConnection
-local rainbowConn
+local autoRerollTask
 
-local function rollEgg()
-	local eggNames = {}
-	for name in pairs(eggs) do table.insert(eggNames, name) end
-	local randomEgg = eggNames[math.random(1, #eggNames)]
-	local pets = eggs[randomEgg]
-	local petNames = {}
-	for pet in pairs(pets) do table.insert(petNames, pet) end
-	local randomPet = petNames[math.random(1, #petNames)]
-	eggDisplay.Text = randomEgg
-	hoverText.Text = "🎁 " .. randomPet
+-- Store BillboardGuis for eggs to update text
+local eggBillboards = {}
+
+-- Function to create or update billboard gui over eggs in workspace
+local function updateEggBillboard(eggName, petName)
+    -- Remove old billboards first
+    for _, billboard in pairs(eggBillboards) do
+        if billboard and billboard.Parent then
+            billboard:Destroy()
+        end
+    end
+    eggBillboards = {}
+
+    -- Try to find egg model in workspace - adjust path as necessary for your game!
+    local eggModel = workspace:FindFirstChild(eggName)
+    if not eggModel then
+        -- Try searching under a folder if you want, for example workspace.Eggs[eggName]
+        local eggsFolder = workspace:FindFirstChild("Eggs")
+        if eggsFolder then
+            eggModel = eggsFolder:FindFirstChild(eggName)
+        end
+    end
+    if eggModel then
+        -- Create BillboardGui
+        local billboard = Instance.new("BillboardGui")
+        billboard.Adornee = eggModel.PrimaryPart or eggModel:FindFirstChildWhichIsA("BasePart")
+        if not billboard.Adornee then return end
+        billboard.Size = UDim2.new(0, 150, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 3, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Name = "EggPetBillboard"
+        billboard.Parent = eggModel
+
+        local frame = Instance.new("Frame", billboard)
+        frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        frame.BackgroundTransparency = 0.5
+        frame.Size = UDim2.new(1, 0, 1, 0)
+        frame.BorderSizePixel = 0
+        frame.ClipsDescendants = true
+        frame.CornerRadius = UDim.new(0, 12)
+        local uicorner = Instance.new("UICorner", frame)
+        uicorner.CornerRadius = UDim.new(0, 12)
+
+        local eggLabel = Instance.new("TextLabel", frame)
+        eggLabel.Size = UDim2.new(1, 0, 0.5, 0)
+        eggLabel.BackgroundTransparency = 1
+        eggLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        eggLabel.Font = Enum.Font.GothamBold
+        eggLabel.TextSize = 16
+        eggLabel.Text = eggName
+        eggLabel.TextStrokeTransparency = 0.8
+
+        local petLabel = Instance.new("TextLabel", frame)
+        petLabel.Size = UDim2.new(1, 0, 0.5, 0)
+        petLabel.Position = UDim2.new(0, 0, 0.5, 0)
+        petLabel.BackgroundTransparency = 1
+        petLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        petLabel.Font = Enum.Font.Gotham
+        petLabel.TextSize = 14
+        petLabel.Text = petName
+        petLabel.TextStrokeTransparency = 0.8
+
+        eggBillboards[eggModel] = billboard
+    end
 end
 
-autoButton.MouseButton1Click:Connect(function()
-	if autoRerollEnabled then
-		autoRerollEnabled = false
-		autoButton.Text = "🔁 AUTO REROLL: OFF"
-		autoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-		autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-		if autoRerollConnection then autoRerollConnection:Disconnect() end
-		if rainbowConn then rainbowConn = nil end
-	else
-		autoRerollEnabled = true
-		autoButton.Text = "🔁 AUTO REROLL: ON"
-		autoRerollConnection = game:GetService("RunService").Heartbeat:Connect(function()
-			rollEgg()
-			task.wait(1.5)
-		end)
-		rainbowConn = task.spawn(function()
-			local hue = 0
-			while autoRerollEnabled do
-				hue = (hue + 0.003) % 1
-				autoButton.TextColor3 = Color3.fromHSV(hue, 1, 1)
-				autoButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-				task.wait(0.05)
-			end
-		end)
-	end
+local function rollEgg()
+    local eggNames = {}
+    for name in pairs(eggs) do table.insert(eggNames, name) end
+    local randomEgg = eggNames[math.random(1, #eggNames)]
+    local pets = eggs[randomEgg]
+    local randomPet = weightedRandom(pets)
+    eggDisplay.Text = randomEgg
+    hoverText.Text = "🎁 " .. randomPet
+
+    updateEggBillboard(randomEgg, randomPet)
+end
+
+manualButton.MouseButton1Click:Connect(function()
+    rollEgg()
 end)
+
+autoButton.MouseButton1Click:Connect(function()
+    if autoRerollEnabled then
+        autoRerollEnabled = false
+        autoButton.Text = "🔁 AUTO REROLL: OFF"
+        autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+        if autoRerollTask then
+            autoRerollTask:Disconnect()
+            autoRerollTask = nil
+        end
+    else
+        autoRerollEnabled = true
+        autoButton.Text = "🔁 AUTO REROLL: ON"
+        autoRerollTask = RunService.Heartbeat:Connect(function()
+            rollEgg()
+            task.wait(1.5)
+        end)
+
+        -- Animate button background color in a task.spawn loop
+        task.spawn(function()
+            local hue = 0
+            while autoRerollEnabled do
+                hue = (hue + 0.005) % 1
+                autoButton.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+                task.wait(0.05)
+            end
+            autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+        end)
+    end
+end)
+
+-- Initial roll display
+rollEgg()
