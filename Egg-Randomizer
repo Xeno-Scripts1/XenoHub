@@ -15,19 +15,28 @@ mainFrame.Position = UDim2.new(0.5, -150, 0.3, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0)
 mainFrame.Active = true
 mainFrame.Draggable = true
+mainFrame.BackgroundTransparency = 0
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+
+-- Rounded corners
+local corner = Instance.new("UICorner", mainFrame)
+corner.CornerRadius = UDim.new(0, 12)
 
 local titleBar = Instance.new("TextLabel", mainFrame)
-titleBar.Text = "🐾 Egg Pet Randomizer 🐾"
+titleBar.Text = "🥚 Egg Pet Randomizer 🐾"
 titleBar.Size = UDim2.new(1, 0, 0, 30)
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 titleBar.TextColor3 = Color3.new(1, 1, 1)
 titleBar.Font = Enum.Font.GothamBold
 titleBar.TextSize = 16
 titleBar.TextWrapped = true
-titleBar.BackgroundTransparency = 0
 titleBar.BorderSizePixel = 0
 titleBar.TextXAlignment = Enum.TextXAlignment.Center
 titleBar.TextYAlignment = Enum.TextYAlignment.Center
+
+local titleCorner = Instance.new("UICorner", titleBar)
+titleCorner.CornerRadius = UDim.new(0, 10)
 
 local exitButton = Instance.new("TextButton", mainFrame)
 exitButton.Text = "X"
@@ -59,7 +68,7 @@ autoButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
 autoButton.TextColor3 = Color3.new(1, 1, 1)
 autoButton.Font = Enum.Font.GothamBold
 autoButton.TextSize = 14
-autoButton.Text = "♻️ Auto Reroll: OFF"
+autoButton.Text = "🥚 Auto Reroll: OFF"
 
 local manualButton = Instance.new("TextButton", mainFrame)
 manualButton.Size = UDim2.new(1, -10, 0, 30)
@@ -68,38 +77,32 @@ manualButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 manualButton.TextColor3 = Color3.new(1, 1, 1)
 manualButton.Font = Enum.Font.GothamBold
 manualButton.TextSize = 14
-manualButton.Text = "♻️ Manual Reroll"
+manualButton.Text = "🥚 Manual Reroll"
 
 -- Egg Data
 local eggChances = {
-    ["Common Egg"] = {["Dog"] = 33, ["Bunny"] = 33, ["Golden Lab"] = 33},
-    ["Uncommon Egg"] = {["Black Bunny"] = 25, ["Chicken"] = 25, ["Cat"] = 25, ["Deer"] = 25},
-    ["Rare Egg"] = {["Orange Tabby"] = 33.33, ["Spotted Deer"] = 25, ["Pig"] = 16.67, ["Rooster"] = 16.67, ["Monkey"] = 8.33},
-    ["Legendary Egg"] = {["Cow"] = 42.55, ["Silver Monkey"] = 42.55, ["Sea Otter"] = 10.64, ["Turtle"] = 2.13, ["Polar Bear"] = 2.13},
-    ["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33}
+	["Common Egg"] = {["Dog"] = 33, ["Bunny"] = 33, ["Golden Lab"] = 33},
+	["Uncommon Egg"] = {["Black Bunny"] = 25, ["Chicken"] = 25, ["Cat"] = 25, ["Deer"] = 25},
+	["Rare Egg"] = {["Orange Tabby"] = 33.33, ["Spotted Deer"] = 25, ["Pig"] = 16.67, ["Rooster"] = 16.67, ["Monkey"] = 8.33},
+	["Legendary Egg"] = {["Cow"] = 42.55, ["Silver Monkey"] = 42.55, ["Sea Otter"] = 10.64, ["Turtle"] = 2.13, ["Polar Bear"] = 2.13},
+	["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33}
 }
 
 local realESP = {
-    ["Common Egg"] = true,
-    ["Uncommon Egg"] = true,
-    ["Rare Egg"] = true
+	["Common Egg"] = true,
+	["Uncommon Egg"] = true,
+	["Rare Egg"] = true
 }
 
 -- Utility
 local function weightedRandom(pool)
-	local total, pick = 0, nil
-	for pet, weight in pairs(pool) do
-		if weight > 0 then total += weight end
-	end
+	local total = 0
+	for _, w in pairs(pool) do total += w end
 	local roll = math.random() * total
 	local cumulative = 0
 	for pet, weight in pairs(pool) do
-		if weight > 0 then
-			cumulative += weight
-			if roll <= cumulative then
-				return pet
-			end
-		end
+		cumulative += weight
+		if roll <= cumulative then return pet end
 	end
 end
 
@@ -111,43 +114,38 @@ local function createOrUpdateBillboard(egg, text)
 	gui.StudsOffset = Vector3.new(0, 2.5, 0)
 	gui.Adornee = egg:FindFirstChildWhichIsA("BasePart") or egg
 
-	local label = gui:FindFirstChild("TextLabel")
-	if not label then
-		label = Instance.new("TextLabel", gui)
-		label.Size = UDim2.new(1, 0, 1, 0)
-		label.BackgroundTransparency = 1
-		label.TextColor3 = Color3.new(1, 1, 1)
-		label.TextStrokeTransparency = 0
-		label.TextScaled = true
-		label.Font = Enum.Font.SourceSansBold
-	end
+	local label = gui:FindFirstChild("TextLabel") or Instance.new("TextLabel", gui)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextStrokeTransparency = 0.5
+	label.TextScaled = true
+	label.Font = Enum.Font.SourceSansBold
 	label.Text = text
 	gui.Parent = egg
 end
 
--- Scanning
 local function findEggs()
 	local eggs = {}
-	for _, descendant in ipairs(workspace:GetDescendants()) do
-		if descendant:IsA("Model") and descendant.Name:match("Egg") and descendant:FindFirstChildWhichIsA("BasePart") then
-			local eggName = descendant.Name:match("(.+) Egg")
-			if eggName then
-				table.insert(eggs, {egg = descendant, name = eggName .. " Egg"})
+	for _, desc in ipairs(workspace:GetDescendants()) do
+		if desc:IsA("Model") and desc.Name:match("Egg") and desc:FindFirstChildWhichIsA("BasePart") then
+			local name = desc.Name:match("(.+) Egg")
+			if name then
+				table.insert(eggs, {egg = desc, name = name .. " Egg"})
 			end
 		end
 	end
 	return eggs
 end
 
--- Logic
+-- State
 local autoReroll = false
 autoButton.MouseButton1Click:Connect(function()
 	autoReroll = not autoReroll
 	if autoReroll then
-		autoButton.Text = "♻️ Auto Reroll: ON"
-		autoButton.BackgroundColor3 = Color3.fromRGB(110, 160, 110)
+		autoButton.Text = "🥚 Auto Reroll: ON"
 	else
-		autoButton.Text = "♻️ Auto Reroll: OFF"
+		autoButton.Text = "🥚 Auto Reroll: OFF"
 		autoButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
 	end
 end)
@@ -159,7 +157,18 @@ manualButton.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Auto Loop
+-- Animated Title + Auto Loop
+local hue = 0
+RunService.RenderStepped:Connect(function(dt)
+	hue = (hue + dt * 0.1) % 1
+	local color = Color3.fromHSV(hue, 1, 1)
+	titleBar.TextColor3 = color
+	if autoReroll then
+		autoButton.BackgroundColor3 = color
+	end
+end)
+
+-- Auto Randomizer
 task.spawn(function()
 	while true do
 		if autoReroll then
