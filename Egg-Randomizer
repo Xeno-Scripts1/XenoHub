@@ -1,140 +1,118 @@
--- Xeno's Egg Randomizer UI Script (Recycle Theme)
+-- Xeno's Egg Randomizer UI Script (Updated)
 
-local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
--- Main Frame
-local mainFrame = Instance.new("Frame", gui)
-mainFrame.Size = UDim2.new(0, 350, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -175, 0.5, -150)
+-- UI Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "XenoEggRandomizerUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 360, 0, 260)
+mainFrame.Position = UDim2.new(0.5, -180, 0.5, -130)
 mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainFrame.BackgroundTransparency = 0.2
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
+mainFrame.Parent = screenGui
 
 -- Title Bar
-local titleBar = Instance.new("TextLabel", mainFrame)
-titleBar.Size = UDim2.new(1, 0, 0, 30)
+local titleBar = Instance.new("TextLabel")
+titleBar.Size = UDim2.new(1, 0, 0, 32)
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-titleBar.Text = "♻️ Xeno's Egg Randomizer ♻️"
-titleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleBar.BorderSizePixel = 0
 titleBar.Font = Enum.Font.GothamBold
 titleBar.TextSize = 16
-titleBar.TextXAlignment = Enum.TextXAlignment.Center
+titleBar.TextColor3 = Color3.new(1, 1, 1)
+titleBar.Text = "♻️  ♻️  Xeno's Egg Randomizer  ♻️  ♻️"
+titleBar.TextWrapped = true
+titleBar.Parent = mainFrame
 
 -- Exit Button
-local exit = Instance.new("TextButton", titleBar)
-exit.Size = UDim2.new(0, 30, 0, 30)
-exit.Position = UDim2.new(1, -30, 0, 0)
-exit.Text = "✖"
-exit.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-exit.TextColor3 = Color3.fromRGB(255, 80, 80)
-exit.Font = Enum.Font.GothamBold
-exit.TextSize = 16
-exit.MouseButton1Click:Connect(function()
-	gui:Destroy()
+local exitButton = Instance.new("TextButton")
+exitButton.Size = UDim2.new(0, 30, 0, 30)
+exitButton.Position = UDim2.new(1, -35, 0, 1)
+exitButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+exitButton.Text = "X"
+exitButton.TextColor3 = Color3.new(1, 1, 1)
+exitButton.Font = Enum.Font.GothamBold
+exitButton.TextSize = 16
+exitButton.BorderSizePixel = 0
+exitButton.Parent = mainFrame
+
+exitButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
 end)
 
--- Auto Reroll Button
-local autoButton = Instance.new("TextButton", mainFrame)
-autoButton.Size = UDim2.new(1, -40, 0, 40)
-autoButton.Position = UDim2.new(0, 20, 0, 60)
-autoButton.Text = "Auto Reroll: OFF"
-autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-autoButton.TextColor3 = Color3.new(1, 1, 1)
-autoButton.Font = Enum.Font.GothamBold
-autoButton.TextSize = 14
-
--- Manual Reroll Button
-local manualButton = Instance.new("TextButton", mainFrame)
-manualButton.Size = UDim2.new(1, -40, 0, 40)
-manualButton.Position = UDim2.new(0, 20, 0, 110)
-manualButton.Text = "Manual Reroll"
-manualButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-manualButton.TextColor3 = Color3.new(1, 1, 1)
-manualButton.Font = Enum.Font.GothamBold
-manualButton.TextSize = 14
-
 -- Warning Label
-local warning = Instance.new("TextLabel", mainFrame)
+local warning = Instance.new("TextLabel")
 warning.Size = UDim2.new(1, -24, 0, 45)
-warning.Position = UDim2.new(0, 12, 0, 160)
+warning.Position = UDim2.new(0, 12, 0, 140)
 warning.BackgroundTransparency = 1
-warning.Text = "⚠️ THIS SCRIPT IS SAFE TO USE\n\n🛡️ ANTI STEALER ACTIVATED"
 warning.TextColor3 = Color3.fromRGB(170, 255, 170)
 warning.Font = Enum.Font.GothamBold
 warning.TextSize = 14
+warning.Text = "⚠️ THIS SCRIPT IS SAFE TO USE\n\n🛡️ ANTI STEALER ACTIVATED"
 warning.TextWrapped = true
 warning.TextXAlignment = Enum.TextXAlignment.Center
 warning.TextYAlignment = Enum.TextYAlignment.Top
+warning.Parent = mainFrame
 
 -- Footer
-local footer = Instance.new("TextLabel", mainFrame)
-footer.Size = UDim2.new(1, 0, 0, 25)
-footer.Position = UDim2.new(0, 0, 1, -25)
-footer.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-footer.Text = "🛠️ Made by XenoScripts | Premium 🛠️"
+local footer = Instance.new("TextLabel")
+footer.Size = UDim2.new(1, 0, 0, 24)
+footer.Position = UDim2.new(0, 0, 1, -24)
+footer.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+footer.Text = "♻️ Made by XenoScripts | Premium ♻️"
 footer.TextColor3 = Color3.fromRGB(255, 255, 255)
 footer.Font = Enum.Font.GothamBold
 footer.TextSize = 12
+footer.BorderSizePixel = 0
 footer.TextXAlignment = Enum.TextXAlignment.Center
+footer.Parent = mainFrame
 
--- Loading Bar (Initially Hidden)
-local loadingBar = Instance.new("Frame", mainFrame)
-loadingBar.Size = UDim2.new(0, 0, 0, 10)
-loadingBar.Position = UDim2.new(0, 0, 1, -35)
-loadingBar.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
-loadingBar.Visible = false
+-- ESP Logic (Restored)
+local function createBillboardGui(egg, petName)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "XenoPetESP"
+    billboard.Size = UDim2.new(0, 100, 0, 40)
+    billboard.Adornee = egg
+    billboard.AlwaysOnTop = true
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.Parent = egg
 
-local loadingText = Instance.new("TextLabel", mainFrame)
-loadingText.Size = UDim2.new(1, 0, 0, 20)
-loadingText.Position = UDim2.new(0, 0, 1, -60)
-loadingText.Text = ""
-loadingText.BackgroundTransparency = 1
-loadingText.TextColor3 = Color3.fromRGB(0, 255, 100)
-loadingText.Font = Enum.Font.GothamBold
-loadingText.TextSize = 14
-loadingText.TextXAlignment = Enum.TextXAlignment.Center
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 14
+    label.Text = petName
+    label.TextStrokeTransparency = 0.5
+    label.Parent = billboard
+end
 
--- Auto Reroll Logic
-local autoOn = false
+local petNames = {
+    "Golden Bunny", "Mystic Dragon", "Ice Golem", "Shadow Kitty", "Fire Lizard",
+    "Void Serpent", "Crystal Fox", "Pumpkin Bat", "Galaxy Pup", "Emerald Owl"
+}
 
-autoButton.MouseButton1Click:Connect(function()
-	autoOn = not autoOn
-	autoButton.Text = autoOn and "Auto Reroll: ON" or "Auto Reroll: OFF"
-	autoButton.BackgroundColor3 = autoOn and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(80, 80, 80)
-	
-	loadingBar.Visible = autoOn
-	loadingText.Text = ""
+local function getRandomPetName()
+    return petNames[math.random(1, #petNames)]
+end
 
-	if autoOn then
-		spawn(function()
-			while autoOn do
-				for i = 1, 100 do
-					loadingBar.Size = UDim2.new(i/100, 0, 0, 10)
-					loadingText.Text = "Reroll in " .. tostring(100 - i) .. "%"
-					wait(0.03)
-				end
-				loadingText.Text = "Rerolled!"
-				wait(0.2)
-			end
-		end)
-	end
-end)
-
--- Manual Reroll Placeholder
-manualButton.MouseButton1Click:Connect(function()
-	loadingText.Text = "Manual Reroll Triggered!"
-	loadingBar.Size = UDim2.new(1, 0, 0, 10)
-	wait(0.3)
-	loadingBar.Size = UDim2.new(0, 0, 0, 10)
-	loadingText.Text = ""
-end)
-
--- Adjust layering
-titleBar.ZIndex = 2
-exit.ZIndex = 3
-mainFrame.ZIndex = 1
-loadingBar.ZIndex = 2
-loadingText.ZIndex = 2
+while true do
+    task.wait(3)
+    for _, egg in pairs(workspace:GetDescendants()) do
+        if egg:IsA("Model") and egg:FindFirstChild("Egg") and not egg:FindFirstChild("XenoPetESP") then
+            local petName = getRandomPetName()
+            createBillboardGui(egg, petName)
+        end
+    end
+end
