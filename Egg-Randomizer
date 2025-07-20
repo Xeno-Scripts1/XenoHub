@@ -10,7 +10,7 @@ screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame", screenGui)
 mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-mainFrame.Size = UDim2.new(0, 320, 0, 210) -- enough height for footer and warning
+mainFrame.Size = UDim2.new(0, 320, 0, 230) -- Increased height from 210 to 230
 mainFrame.Position = UDim2.new(0.5, -160, 0.3, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0)
 mainFrame.Active = true
@@ -22,11 +22,11 @@ mainFrame.ClipsDescendants = true
 local mainCorner = Instance.new("UICorner", mainFrame)
 mainCorner.CornerRadius = UDim.new(0, 16)
 
--- Title bar (top corners rounded only)
+-- Title bar (top corners rounded only), cover full width and top edge
 local titleBar = Instance.new("TextLabel", mainFrame)
 titleBar.Text = "🔄 Xeno's Egg Randomizer 🔄"
-titleBar.Size = UDim2.new(1, 0, 0, 35)
-titleBar.Position = UDim2.new(0, 0, 0, 10)  -- 10 px from top
+titleBar.Size = UDim2.new(1, 0, 0, 40)  -- taller for better top coverage
+titleBar.Position = UDim2.new(0, 0, 0, 0)  -- aligned at top edge
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 titleBar.TextColor3 = Color3.new(1, 1, 1)
 titleBar.Font = Enum.Font.GothamBold
@@ -50,7 +50,7 @@ clipFrame.Position = UDim2.new(0, 0, 1, -10)
 local exitButton = Instance.new("TextButton", mainFrame)
 exitButton.Text = "X"
 exitButton.Size = UDim2.new(0, 30, 0, 30)
-exitButton.Position = UDim2.new(1, -35, 0, 10)
+exitButton.Position = UDim2.new(1, -35, 0, 5) -- Slightly lower to fit new title height
 exitButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 exitButton.TextColor3 = Color3.fromRGB(220, 220, 220)
 exitButton.Font = Enum.Font.GothamBold
@@ -109,16 +109,16 @@ warning.TextSize = 14
 warning.TextWrapped = true
 warning.TextXAlignment = Enum.TextXAlignment.Center
 
--- Footer label at the bottom
+-- Footer with logo at the bottom
 local footer = Instance.new("TextLabel", mainFrame)
-footer.Text = "© Xeno's Script Hub"
+footer.Text = "🌱"  -- Simple leaf emoji as logo
 footer.Size = UDim2.new(1, -20, 0, 25)
 footer.Position = UDim2.new(0, 10, 1, -30)
 footer.BackgroundTransparency = 1
 footer.TextColor3 = Color3.fromRGB(180, 180, 180)
-footer.Font = Enum.Font.Gotham
-footer.TextSize = 12
-footer.TextWrapped = true
+footer.Font = Enum.Font.GothamBold
+footer.TextSize = 20
+footer.TextWrapped = false
 footer.TextXAlignment = Enum.TextXAlignment.Center
 footer.TextYAlignment = Enum.TextYAlignment.Center
 
