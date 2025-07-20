@@ -1,191 +1,61 @@
+-- UI Services
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "XenoEggRandomizerGui"
-screenGui.Parent = PlayerGui
+local player = Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "XenoEggRandomizer"
+screenGui.ResetOnSpawn = false
 
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 350, 0, 260)
-mainFrame.Position = UDim2.new(0.5, -175, 0.3, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-mainFrame.BackgroundTransparency = 0.2
-mainFrame.BorderSizePixel = 0
-mainFrame.Parent = screenGui
-mainFrame.Active = true
-mainFrame.Draggable = true
+-- Egg data
+local eggs = {
+    ["Common Egg"] = {"Dog", "Bunny", "Golden Lab"},
+    ["Uncommon Egg"] = {"Black Bunny", "Chicken", "Cat", "Deer"},
+    ["Rare Egg"] = {"Orange Tabby", "Spotted Deer", "Pig", "Rooster", "Monkey"},
+    ["Legendary Egg"] = {"Cow", "Silver Monkey", "Sea Otter", "Turtle", "Polar Bear"},
+    ["Mythic Egg"] = {"Grey Mouse", "Brown Mouse", "Squirrel", "Red Giant Ant", "Red Fox"},
+    ["Bug Egg"] = {"Snail", "Giant Ant", "Caterpillar", "Praying Mantis", "Dragon Fly"},
+    ["Night Egg"] = {"Hedgehog", "Mole", "Frog", "Echo Frog", "Night Owl", "Raccoon"},
+    ["Bee Egg"] = {"Bee", "Honey Bee", "Bear Bee", "Petal Bee", "Queen Bee"},
+    ["Anti Bee Egg"] = {"Wasp", "Tarantula Hawk", "Moth", "Butterfly", "Disco Bee"},
+    ["Common Summer Egg"] = {"Starfish", "Seafull", "Crab"},
+    ["Rare Summer Egg"] = {"Flamingo", "Toucan", "Sea Turtle", "Orangutan", "Seal"},
+    ["Paradise Egg"] = {"Ostrich", "Peacock", "Capybara", "Scarlet Macaw", "Mimic Octopus"},
+    ["Premium Night Egg"] = {"Hedgehog", "Mole", "Frog", "Echo Frog"},
+    ["Dinosaur Egg"] = {"Raptor", "Triceratops", "T-Rex", "Stegosaurus", "Pterodactyl", "Brontosaurus"},
+}
 
-local title = Instance.new("TextLabel")
+-- Main Frame
+local main = Instance.new("Frame", screenGui)
+main.AnchorPoint = Vector2.new(0.5, 0.5)
+main.Position = UDim2.new(0.5, 0, 0.5, 0)
+main.Size = UDim2.new(0, 400, 0, 350)
+main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+main.BackgroundTransparency = 0.4
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+
+-- Title
+local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 40)
-title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-title.BorderSizePixel = 0
+title.BackgroundTransparency = 1
 title.Text = "XENO'S EGG RANDOMIZER"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 22
-title.Parent = mainFrame
+title.TextScaled = true
 
-local autoLabel = Instance.new("TextLabel")
-autoLabel.Position = UDim2.new(0.05, 0, 0, 50)
-autoLabel.Size = UDim2.new(0.5, 0, 0, 30)
-autoLabel.BackgroundTransparency = 1
-autoLabel.Text = "AUTO REROLL:"
-autoLabel.TextColor3 = Color3.new(1, 1, 1)
-autoLabel.Font = Enum.Font.Gotham
-autoLabel.TextSize = 18
-autoLabel.TextXAlignment = Enum.TextXAlignment.Left
-autoLabel.Parent = mainFrame
+-- AUTO REROLL Box
+local autoBox = Instance.new("TextButton", main)
+autoBox.Position = UDim2.new(0.05, 0, 0.15, 0)
+autoBox.Size = UDim2.new(0.9, 0, 0, 40)
+autoBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+autoBox.Text = "AUTO REROLL: OFF"
+autoBox.Font = Enum.Font.Gotham
+autoBox.TextColor3 = Color3.new(1, 1, 1)
+autoBox.TextScaled = true
 
-local autoStatus = Instance.new("TextLabel")
-autoStatus.Position = UDim2.new(0.55, 0, 0, 50)
-autoStatus.Size = UDim2.new(0.4, 0, 0, 30)
-autoStatus.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-autoStatus.Text = "OFF"
-autoStatus.TextColor3 = Color3.new(1, 1, 1)
-autoStatus.Font = Enum.Font.GothamBold
-autoStatus.TextSize = 18
-autoStatus.TextXAlignment = Enum.TextXAlignment.Center
-autoStatus.Parent = mainFrame
+local autoOn = false
 
-local manualButton = Instance.new("TextButton")
-manualButton.Position = UDim2.new(0.05, 0, 0, 90)
-manualButton.Size = UDim2.new(0.9, 0, 0, 40)
-manualButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-manualButton.Text = "MANUAL REROLL"
-manualButton.TextColor3 = Color3.new(1, 1, 1)
-manualButton.Font = Enum.Font.GothamBold
-manualButton.TextSize = 20
-manualButton.Parent = mainFrame
-
-local warningLabel = Instance.new("TextLabel")
-warningLabel.Position = UDim2.new(0.05, 0, 0, 140)
-warningLabel.Size = UDim2.new(0.9, 0, 0, 40)
-warningLabel.BackgroundTransparency = 1
-warningLabel.Text = "THIS SCRIPT IS NOT STEALING YOUR PETS, ANTI STEALER ACTIVATED"
-warningLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
-warningLabel.Font = Enum.Font.GothamBold
-warningLabel.TextSize = 14
-warningLabel.TextWrapped = true
-warningLabel.TextXAlignment = Enum.TextXAlignment.Center
-warningLabel.Parent = mainFrame
-
-local footerLabel = Instance.new("TextLabel")
-footerLabel.Position = UDim2.new(0, 0, 1, -25)
-footerLabel.Size = UDim2.new(1, 0, 0, 25)
-footerLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-footerLabel.BorderSizePixel = 0
-footerLabel.Text = "Made by XenoScripts"
-footerLabel.TextColor3 = Color3.new(1, 1, 1)
-footerLabel.Font = Enum.Font.GothamItalic
-footerLabel.TextSize = 14
-footerLabel.Parent = mainFrame
-
-local eggImage = Instance.new("ImageLabel")
-eggImage.Size = UDim2.new(0, 100, 0, 100)
-eggImage.Position = UDim2.new(0.5, -50, 0, 185)
-eggImage.BackgroundTransparency = 1
-eggImage.Parent = mainFrame
-eggImage.Image = "rbxassetid://6031094671" -- placeholder image
-
-local hoverText = Instance.new("TextLabel")
-hoverText.Size = UDim2.new(1, 0, 0, 20)
-hoverText.Position = UDim2.new(0, 0, 0, -22)
-hoverText.BackgroundTransparency = 1
-hoverText.TextColor3 = Color3.new(1, 1, 1) -- will be overridden by color cycling
-hoverText.Font = Enum.Font.GothamBold
-hoverText.TextSize = 16
-hoverText.TextWrapped = true
-hoverText.TextYAlignment = Enum.TextYAlignment.Center
-hoverText.Parent = eggImage
-
-local eggData = {
-    ["Common Egg"] = {Pets = {["Dog"] = 33, ["Bunny"] = 33, ["Golden Lab"] = 33}, ImageId = "rbxassetid://6031094671"},
-    ["Uncommon Egg"] = {Pets = {["Black Bunny"] = 25, ["Chicken"] = 25, ["Cat"] = 25, ["Deer"] = 25}, ImageId = "rbxassetid://6031094789"},
-    ["Rare Egg"] = {Pets = {["Orange Tabby"] = 33.33, ["Spotted Deer"] = 25, ["Pig"] = 16.67, ["Rooster"] = 16.67, ["Monkey"] = 8.33}, ImageId = "rbxassetid://6031094821"},
-    ["Legendary Egg"] = {Pets = {["Cow"] = 42.55, ["Silver Monkey"] = 42.55, ["Sea Otter"] = 10.64, ["Turtle"] = 2.13, ["Polar Bear"] = 2.13}, ImageId = "rbxassetid://6031094842"},
-    ["Mythic Egg"] = {Pets = {["Grey Mouse"] = 37.5, ["Brown Mouse"] = 26.79, ["Squirrel"] = 26.79, ["Red Giant Ant"] = 8.93, ["Red Fox"] = 0}, ImageId = "rbxassetid://6031094875"},
-    ["Bug Egg"] = {Pets = {["Snail"] = 40, ["Giant Ant"] = 35, ["Caterpillar"] = 25, ["Praying Mantis"] = 0, ["Dragon Fly"] = 0}, ImageId = "rbxassetid://6031094900"},
-    ["Night Egg"] = {Pets = {["Hedgehog"] = 47, ["Mole"] = 23.5, ["Frog"] = 21.16, ["Echo Frog"] = 8.35, ["Night Owl"] = 0, ["Raccoon"] = 0}, ImageId = "rbxassetid://6031094910"},
-    ["Bee Egg"] = {Pets = {["Bee"] = 65, ["Honey Bee"] = 20, ["Bear Bee"] = 10, ["Petal Bee"] = 5, ["Queen Bee"] = 0}, ImageId = "rbxassetid://6031094920"},
-    ["Anti Bee Egg"] = {Pets = {["Wasp"] = 55, ["Tarantula Hawk"] = 31, ["Moth"] = 14, ["Butterfly"] = 0, ["Disco Bee"] = 0}, ImageId = "rbxassetid://6031094930"},
-    ["Common Summer Egg"] = {Pets = {["Starfish"] = 50, ["Seafull"] = 25, ["Crab"] = 25}, ImageId = "rbxassetid://6031094940"},
-    ["Rare Summer Egg"] = {Pets = {["Flamingo"] = 30, ["Toucan"] = 25, ["Sea Turtle"] = 20, ["Orangutan"] = 15, ["Seal"] = 10}, ImageId = "rbxassetid://6031094950"},
-    ["Paradise Egg"] = {Pets = {["Ostrich"] = 43, ["Peacock"] = 33, ["Capybara"] = 24, ["Scarlet Macaw"] = 3, ["Mimic Octopus"] = 1}, ImageId = "rbxassetid://6031094960"},
-    ["Premium Night Egg"] = {Pets = {["Hedgehog"] = 50, ["Mole"] = 26, ["Frog"] = 14, ["Echo Frog"] = 10}, ImageId = "rbxassetid://6031094970"},
-    ["Dinosaur Egg"] = {Pets = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33}, ImageId = "rbxassetid://6031094980"},
-}
-
-local eggNames = {}
-for eggName in pairs(eggData) do
-    table.insert(eggNames, eggName)
-end
-
-local function weightedRandom(petWeights)
-    local sum = 0
-    for _, weight in pairs(petWeights) do
-        sum = sum + weight
-    end
-    local randomPoint = math.random() * sum
-    local runningSum = 0
-    for pet, weight in pairs(petWeights) do
-        runningSum = runningSum + weight
-        if randomPoint <= runningSum then
-            return pet
-        end
-    end
-    -- fallback
-    for pet, _ in pairs(petWeights) do
-        return pet
-    end
-end
-
-local autoReroll = false
-
-local function randomizeEgg()
-    local chosenEggName = eggNames[math.random(#eggNames)]
-    local eggInfo = eggData[chosenEggName]
-    local pet = weightedRandom(eggInfo.Pets)
-    
-    eggImage.Image = eggInfo.ImageId or "rbxassetid://6031094671"
-    hoverText.Text = chosenEggName .. " - " .. pet
-    manualButton.Text = "MANUAL REROLL"
-end
-
-manualButton.MouseButton1Click:Connect(function()
-    randomizeEgg()
-end)
-
-local autoToggleButton = Instance.new("TextButton")
-autoToggleButton.Size = autoStatus.Size
-autoToggleButton.Position = autoStatus.Position
-autoToggleButton.BackgroundTransparency = 1
-autoToggleButton.Text = ""
-autoToggleButton.Parent = mainFrame
-autoToggleButton.MouseButton1Click:Connect(function()
-    autoReroll = not autoReroll
-    if autoReroll then
-        autoStatus.Text = "ON"
-        autoStatus.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-        spawn(function()
-            while autoReroll do
-                randomizeEgg()
-                wait(5)
-            end
-        end)
-    else
-        autoStatus.Text = "OFF"
-        autoStatus.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-    end
-end)
-
-autoStatus.Text = "OFF"
-autoStatus.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-
--- Color cycling for hoverText
-local hue = 0
-RunService.RenderStepped:Connect(function(dt)
-    hue = (hue + dt * 0.2) % 1 -- adjust speed here
-    hoverText.TextColor3 = Color3.fromHSV(hue, 1, 1)
-end)
+autoBox.MouseButton1Click:Connect
