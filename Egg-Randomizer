@@ -10,7 +10,7 @@ screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame", screenGui)
 mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-mainFrame.Size = UDim2.new(0, 320, 0, 190)
+mainFrame.Size = UDim2.new(0, 320, 0, 210) -- enough height for footer and warning
 mainFrame.Position = UDim2.new(0.5, -160, 0.3, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0)
 mainFrame.Active = true
@@ -22,9 +22,11 @@ mainFrame.ClipsDescendants = true
 local mainCorner = Instance.new("UICorner", mainFrame)
 mainCorner.CornerRadius = UDim.new(0, 16)
 
+-- Title bar (top corners rounded only)
 local titleBar = Instance.new("TextLabel", mainFrame)
 titleBar.Text = "🔄 Xeno's Egg Randomizer 🔄"
 titleBar.Size = UDim2.new(1, 0, 0, 35)
+titleBar.Position = UDim2.new(0, 0, 0, 10)  -- 10 px from top
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 titleBar.TextColor3 = Color3.new(1, 1, 1)
 titleBar.Font = Enum.Font.GothamBold
@@ -37,44 +39,43 @@ titleBar.TextYAlignment = Enum.TextYAlignment.Center
 local titleCorner = Instance.new("UICorner", titleBar)
 titleCorner.CornerRadius = UDim.new(0, 16)
 
+-- Mask bottom corners of title bar (to keep only top corners rounded)
+local clipFrame = Instance.new("Frame", titleBar)
+clipFrame.BackgroundColor3 = titleBar.BackgroundColor3
+clipFrame.BorderSizePixel = 0
+clipFrame.Size = UDim2.new(1, 0, 0, 10)
+clipFrame.Position = UDim2.new(0, 0, 1, -10)
+
+-- Exit button with original X, styled colors
 local exitButton = Instance.new("TextButton", mainFrame)
 exitButton.Text = "X"
 exitButton.Size = UDim2.new(0, 30, 0, 30)
-exitButton.Position = UDim2.new(1, -35, 0, 2)
-exitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-exitButton.TextColor3 = Color3.new(1, 1, 1)
+exitButton.Position = UDim2.new(1, -35, 0, 10)
+exitButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+exitButton.TextColor3 = Color3.fromRGB(220, 220, 220)
 exitButton.Font = Enum.Font.GothamBold
-exitButton.TextSize = 16
+exitButton.TextSize = 18
 exitButton.AutoButtonColor = false
 
 local exitCorner = Instance.new("UICorner", exitButton)
 exitCorner.CornerRadius = UDim.new(0, 10)
 
 exitButton.MouseEnter:Connect(function()
-    exitButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+    exitButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
 end)
+
 exitButton.MouseLeave:Connect(function()
-    exitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    exitButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 end)
 
 exitButton.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
-local warning = Instance.new("TextLabel", mainFrame)
-warning.Text = "⚠️ WARNING: This is NOT a visual dupe! Use at your own risk!"
-warning.Size = UDim2.new(1, -20, 0, 30)
-warning.Position = UDim2.new(0, 10, 0, 40)
-warning.BackgroundTransparency = 1
-warning.TextColor3 = Color3.fromRGB(255, 80, 80)
-warning.Font = Enum.Font.GothamBold
-warning.TextSize = 14
-warning.TextWrapped = true
-warning.TextXAlignment = Enum.TextXAlignment.Center
-
+-- Buttons - wider with dice emojis, rounded corners
 local autoButton = Instance.new("TextButton", mainFrame)
 autoButton.Size = UDim2.new(1, -20, 0, 40)
-autoButton.Position = UDim2.new(0, 10, 0, 80)
+autoButton.Position = UDim2.new(0, 10, 0, 60)
 autoButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
 autoButton.TextColor3 = Color3.new(1, 1, 1)
 autoButton.Font = Enum.Font.GothamBold
@@ -86,7 +87,7 @@ autoCorner.CornerRadius = UDim.new(0, 12)
 
 local manualButton = Instance.new("TextButton", mainFrame)
 manualButton.Size = UDim2.new(1, -20, 0, 40)
-manualButton.Position = UDim2.new(0, 10, 0, 130)
+manualButton.Position = UDim2.new(0, 10, 0, 110)
 manualButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 manualButton.TextColor3 = Color3.new(1, 1, 1)
 manualButton.Font = Enum.Font.GothamBold
@@ -96,6 +97,32 @@ manualButton.Text = "🎲 Manual Reroll 🐾"
 local manualCorner = Instance.new("UICorner", manualButton)
 manualCorner.CornerRadius = UDim.new(0, 12)
 
+-- Warning label below buttons and above footer
+local warning = Instance.new("TextLabel", mainFrame)
+warning.Text = "⚠️ WARNING: This is NOT a visual dupe! Use at your own risk!"
+warning.Size = UDim2.new(1, -20, 0, 30)
+warning.Position = UDim2.new(0, 10, 0, 160)
+warning.BackgroundTransparency = 1
+warning.TextColor3 = Color3.fromRGB(255, 80, 80)
+warning.Font = Enum.Font.GothamBold
+warning.TextSize = 14
+warning.TextWrapped = true
+warning.TextXAlignment = Enum.TextXAlignment.Center
+
+-- Footer label at the bottom
+local footer = Instance.new("TextLabel", mainFrame)
+footer.Text = "© Xeno's Script Hub"
+footer.Size = UDim2.new(1, -20, 0, 25)
+footer.Position = UDim2.new(0, 10, 1, -30)
+footer.BackgroundTransparency = 1
+footer.TextColor3 = Color3.fromRGB(180, 180, 180)
+footer.Font = Enum.Font.Gotham
+footer.TextSize = 12
+footer.TextWrapped = true
+footer.TextXAlignment = Enum.TextXAlignment.Center
+footer.TextYAlignment = Enum.TextYAlignment.Center
+
+-- Egg Data
 local eggChances = {
     ["Common Egg"] = {["Dog"] = 33, ["Bunny"] = 33, ["Golden Lab"] = 33},
     ["Uncommon Egg"] = {["Black Bunny"] = 25, ["Chicken"] = 25, ["Cat"] = 25, ["Deer"] = 25},
@@ -110,6 +137,7 @@ local realESP = {
     ["Rare Egg"] = true
 }
 
+-- Utility: weighted random selection
 local function weightedRandom(pool)
     local total = 0
     for _, w in pairs(pool) do total += w end
@@ -123,6 +151,7 @@ local function weightedRandom(pool)
     end
 end
 
+-- Create or update BillboardGui on eggs with pet name and color
 local function createOrUpdateBillboard(egg, text, color)
     local gui = egg:FindFirstChild("PetESP")
     if gui then
@@ -153,6 +182,7 @@ local function createOrUpdateBillboard(egg, text, color)
     end
 end
 
+-- Find eggs in workspace
 local function findEggs()
     local eggs = {}
     for _, desc in ipairs(workspace:GetDescendants()) do
@@ -166,6 +196,7 @@ local function findEggs()
     return eggs
 end
 
+-- State
 local autoReroll = false
 
 autoButton.MouseButton1Click:Connect(function()
@@ -185,11 +216,11 @@ manualButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Animate title text color and button bg color when auto reroll is on
 local hue = 0
 RunService.RenderStepped:Connect(function(dt)
     hue = (hue + dt * 0.1) % 1
     local color = Color3.fromHSV(hue, 1, 1)
-
     titleBar.TextColor3 = color
 
     if autoReroll then
@@ -197,6 +228,7 @@ RunService.RenderStepped:Connect(function(dt)
     end
 end)
 
+-- Auto reroll loop updating egg pet names with cycling color
 task.spawn(function()
     while true do
         if autoReroll then
