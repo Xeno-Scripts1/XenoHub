@@ -16,13 +16,14 @@ mainFrame.AnchorPoint = Vector2.new(0.5, 0)
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.BorderSizePixel = 0
+mainFrame.ZIndex = 5
 
 local mainCorner = Instance.new("UICorner", mainFrame)
 mainCorner.CornerRadius = UDim.new(0, 12)
 
 -- Title Bar (only top corners rounded, bottom sharp)
 local titleBar = Instance.new("TextLabel", mainFrame)
-titleBar.Text = "♻️  ♻️  Xeno's Egg Randomizer  ♻️  ♻️"
+titleBar.Text = "♻   Xeno's Egg Randomizer   ♻"
 titleBar.Size = UDim2.new(1, 0, 0, 30)
 titleBar.Position = UDim2.new(0, 0, 0, 0)
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -35,16 +36,27 @@ titleBar.TextXAlignment = Enum.TextXAlignment.Center
 local titleTopCorner = Instance.new("UICorner", titleBar)
 titleTopCorner.CornerRadius = UDim.new(0, 10)
 
--- Exit Button
+-- Exit Button (improved style)
 local exitButton = Instance.new("TextButton", mainFrame)
-exitButton.Text = "❎"
-exitButton.Size = UDim2.new(0, 25, 0, 25)
-exitButton.Position = UDim2.new(1, -30, 0, 2)
-exitButton.BackgroundColor3 = Color3.fromRGB(110, 15, 15)
+exitButton.Text = "✕"
+exitButton.Size = UDim2.new(0, 28, 0, 28)
+exitButton.Position = UDim2.new(1, -34, 0, 1)
+exitButton.BackgroundColor3 = Color3.fromRGB(70, 15, 15)
 exitButton.TextColor3 = Color3.new(1, 1, 1)
 exitButton.Font = Enum.Font.GothamBold
-exitButton.TextSize = 14
+exitButton.TextSize = 18
 exitButton.BorderSizePixel = 0
+exitButton.ZIndex = 10
+exitButton.AutoButtonColor = false
+
+-- Hover effect for exit button
+exitButton.MouseEnter:Connect(function()
+	exitButton.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+end)
+exitButton.MouseLeave:Connect(function()
+	exitButton.BackgroundColor3 = Color3.fromRGB(70, 15, 15)
+end)
+
 exitButton.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
@@ -60,6 +72,7 @@ autoButton.TextSize = 14
 autoButton.Text = "🔄 Auto Reroll: OFF"
 autoButton.AutoButtonColor = false
 autoButton.BorderSizePixel = 0
+autoButton.ZIndex = 6
 
 -- Manual Button (wider and closer to edges)
 local manualButton = Instance.new("TextButton", mainFrame)
@@ -72,6 +85,7 @@ manualButton.TextSize = 14
 manualButton.Text = "🐾 Manual Reroll"
 manualButton.AutoButtonColor = false
 manualButton.BorderSizePixel = 0
+manualButton.ZIndex = 6
 
 -- Loading Bar Background (for reroll progress)
 local loadingBarBG = Instance.new("Frame", mainFrame)
@@ -80,6 +94,9 @@ loadingBarBG.Position = UDim2.new(0, 12, 0, 130)
 loadingBarBG.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 loadingBarBG.BorderSizePixel = 0
 loadingBarBG.AnchorPoint = Vector2.new(0, 0)
+loadingBarBG.Visible = false -- hidden by default
+loadingBarBG.ZIndex = 6
+
 local loadingBarCorner = Instance.new("UICorner", loadingBarBG)
 loadingBarCorner.CornerRadius = UDim.new(0, 8)
 
@@ -88,6 +105,8 @@ local loadingBarFill = Instance.new("Frame", loadingBarBG)
 loadingBarFill.Size = UDim2.new(0, 0, 1, 0)  -- width will be updated dynamically
 loadingBarFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 loadingBarFill.BorderSizePixel = 0
+loadingBarFill.ZIndex = 7
+
 local loadingFillCorner = Instance.new("UICorner", loadingBarFill)
 loadingFillCorner.CornerRadius = UDim.new(0, 8)
 
@@ -101,6 +120,7 @@ loadingBarText.TextSize = 14
 loadingBarText.Text = ""
 loadingBarText.TextXAlignment = Enum.TextXAlignment.Center
 loadingBarText.TextYAlignment = Enum.TextYAlignment.Center
+loadingBarText.ZIndex = 8
 
 -- Warning Label (with space between lines)
 local warning = Instance.new("TextLabel", mainFrame)
@@ -114,28 +134,22 @@ warning.TextSize = 14
 warning.TextWrapped = true
 warning.TextXAlignment = Enum.TextXAlignment.Center
 warning.TextYAlignment = Enum.TextYAlignment.Top
+warning.ZIndex = 6
 
 -- Footer (only bottom corners rounded, top corners sharp)
 local footer = Instance.new("TextLabel", mainFrame)
 footer.Text = "🛠️ Made by XenoScripts | Premium 🛠️"
 footer.Size = UDim2.new(1, 0, 0, 25)
-footer.Position = UDim2.new(0, 0, 1, -25)
+footer.Position = UDim2.new(0, 0, 1, -30) -- raised 5px so it’s not at exact bottom edge
 footer.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 footer.TextColor3 = Color3.new(1, 1, 1)
 footer.Font = Enum.Font.Gotham
 footer.TextSize = 13
 footer.TextXAlignment = Enum.TextXAlignment.Center
+footer.ZIndex = 5
 
 local footerCorner = Instance.new("UICorner", footer)
 footerCorner.CornerRadius = UDim.new(0, 10)
-footerCorner.Parent = footer
-
--- Footer mask to keep top corners sharp
-local footerMask = Instance.new("Frame", footer)
-footerMask.BackgroundColor3 = footer.BackgroundColor3
-footerMask.Size = UDim2.new(1, 0, 0.5, 0)
-footerMask.Position = UDim2.new(0, 0, 0, 0)
-footerMask.BorderSizePixel = 0
 
 -- Egg Data
 local eggChances = {
@@ -256,8 +270,10 @@ autoButton.MouseButton1Click:Connect(function()
 	autoReroll = not autoReroll
 	if autoReroll then
 		autoButton.Text = "🔄 Auto Reroll: ON"
+		loadingBarBG.Visible = true
 	else
 		autoButton.Text = "🔄 Auto Reroll: OFF"
+		loadingBarBG.Visible = false
 		loadingBarFill.Size = UDim2.new(0, 0, 1, 0)
 		loadingBarText.Text = ""
 	end
