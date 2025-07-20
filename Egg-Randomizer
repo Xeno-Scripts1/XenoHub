@@ -1,4 +1,4 @@
--- UI-Only Script for Xeno's Egg Randomizer
+-- UI-Only Script for Xeno's Egg Randomizer (Rounded + Updated)
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -8,15 +8,20 @@ screenGui.Name = "XenoEggRandomizerUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
+-- Main Frame with Rounded Corners
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 360, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -180, 0.5, -150)
+mainFrame.Size = UDim2.new(0, 360, 0, 310)
+mainFrame.Position = UDim2.new(0.5, -180, 0.5, -155)
 mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainFrame.BackgroundTransparency = 0.2
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = mainFrame
 
 -- Title Bar
 local titleBar = Instance.new("TextLabel")
@@ -26,7 +31,7 @@ titleBar.BorderSizePixel = 0
 titleBar.Font = Enum.Font.GothamBold
 titleBar.TextSize = 16
 titleBar.TextColor3 = Color3.new(1, 1, 1)
-titleBar.Text = "♻️  ♻️  Xeno's Egg Randomizer  ♻️  ♻️"
+titleBar.Text = "♻️ Xeno's Egg Randomizer ♻️"
 titleBar.TextWrapped = true
 titleBar.Parent = mainFrame
 
@@ -48,32 +53,40 @@ end)
 
 -- Auto Reroll Button
 local autoButton = Instance.new("TextButton")
-autoButton.Size = UDim2.new(0.8, 0, 0, 36)
-autoButton.Position = UDim2.new(0.1, 0, 0, 50)
+autoButton.Size = UDim2.new(1, -40, 0, 42)
+autoButton.Position = UDim2.new(0, 20, 0, 50)
 autoButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 autoButton.Text = "♻️ Auto Reroll: OFF ♻️"
 autoButton.TextColor3 = Color3.new(1, 1, 1)
 autoButton.Font = Enum.Font.GothamBold
-autoButton.TextSize = 14
+autoButton.TextSize = 16
 autoButton.BorderSizePixel = 0
 autoButton.Parent = mainFrame
 
+local autoCorner = Instance.new("UICorner")
+autoCorner.CornerRadius = UDim.new(0, 8)
+autoCorner.Parent = autoButton
+
 -- Manual Reroll Button
 local manualButton = Instance.new("TextButton")
-manualButton.Size = UDim2.new(0.8, 0, 0, 36)
-manualButton.Position = UDim2.new(0.1, 0, 0, 96)
+manualButton.Size = UDim2.new(1, -40, 0, 42)
+manualButton.Position = UDim2.new(0, 20, 0, 100)
 manualButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 manualButton.Text = "🔁 Manual Reroll 🔁"
 manualButton.TextColor3 = Color3.new(1, 1, 1)
 manualButton.Font = Enum.Font.GothamBold
-manualButton.TextSize = 14
+manualButton.TextSize = 16
 manualButton.BorderSizePixel = 0
 manualButton.Parent = mainFrame
+
+local manualCorner = Instance.new("UICorner")
+manualCorner.CornerRadius = UDim.new(0, 8)
+manualCorner.Parent = manualButton
 
 -- Loading Bar
 local loadingBar = Instance.new("Frame")
 loadingBar.Size = UDim2.new(0, 0, 0, 6)
-loadingBar.Position = UDim2.new(0.1, 0, 0, 138)
+loadingBar.Position = UDim2.new(0.055, 0, 0, 155)
 loadingBar.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
 loadingBar.BorderSizePixel = 0
 loadingBar.Visible = false
@@ -81,7 +94,7 @@ loadingBar.Parent = mainFrame
 
 local loadingLabel = Instance.new("TextLabel")
 loadingLabel.Size = UDim2.new(1, 0, 0, 20)
-loadingLabel.Position = UDim2.new(0, 0, 0, 144)
+loadingLabel.Position = UDim2.new(0, 0, 0, 162)
 loadingLabel.BackgroundTransparency = 1
 loadingLabel.TextColor3 = Color3.new(1, 1, 1)
 loadingLabel.Font = Enum.Font.GothamBold
@@ -93,7 +106,7 @@ loadingLabel.Parent = mainFrame
 -- Warning Label
 local warning = Instance.new("TextLabel")
 warning.Size = UDim2.new(1, -24, 0, 45)
-warning.Position = UDim2.new(0, 12, 0, 168)
+warning.Position = UDim2.new(0, 12, 0, 188)
 warning.BackgroundTransparency = 1
 warning.TextColor3 = Color3.fromRGB(170, 255, 170)
 warning.Font = Enum.Font.GothamBold
@@ -116,3 +129,11 @@ footer.TextSize = 12
 footer.BorderSizePixel = 0
 footer.TextXAlignment = Enum.TextXAlignment.Center
 footer.Parent = mainFrame
+
+-- Button Color Toggle
+local autoEnabled = false
+autoButton.MouseButton1Click:Connect(function()
+	autoEnabled = not autoEnabled
+	autoButton.Text = autoEnabled and "♻️ Auto Reroll: ON ♻️" or "♻️ Auto Reroll: OFF ♻️"
+	autoButton.BackgroundColor3 = autoEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(60, 60, 60)
+end)
