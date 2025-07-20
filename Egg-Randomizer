@@ -1,5 +1,5 @@
 -- XENO'S EGG RANDOMIZER for Grow a Garden
--- Version 1.1 with Rainbow Egg Text
+-- Version 2.0 with Accurate Egg Probabilities
 -- SAFE MODE: Anti-stealer protection active
 
 local Players = game:GetService("Players")
@@ -9,6 +9,104 @@ local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+
+-- Egg data with exact probabilities
+local EGG_DATA = {
+    ["Common Egg"] = {
+        ["Dog"] = 33, 
+        ["Bunny"] = 33, 
+        ["Golden Lab"] = 33
+    },
+    ["Uncommon Egg"] = {
+        ["Black Bunny"] = 25, 
+        ["Chicken"] = 25, 
+        ["Cat"] = 25, 
+        ["Deer"] = 25
+    },
+    ["Rare Egg"] = {
+        ["Orange Tabby"] = 33.33, 
+        ["Spotted Deer"] = 25, 
+        ["Pig"] = 16.67, 
+        ["Rooster"] = 16.67, 
+        ["Monkey"] = 8.33
+    },
+    ["Legendary Egg"] = {
+        ["Cow"] = 42.55, 
+        ["Silver Monkey"] = 42.55, 
+        ["Sea Otter"] = 10.64, 
+        ["Turtle"] = 2.13, 
+        ["Polar Bear"] = 2.13
+    },
+    ["Mythic Egg"] = {
+        ["Grey Mouse"] = 37.5, 
+        ["Brown Mouse"] = 26.79, 
+        ["Squirrel"] = 26.79, 
+        ["Red Giant Ant"] = 8.93, 
+        ["Red Fox"] = 0
+    },
+    ["Bug Egg"] = {
+        ["Snail"] = 40, 
+        ["Giant Ant"] = 35, 
+        ["Caterpillar"] = 25, 
+        ["Praying Mantis"] = 0, 
+        ["Dragon Fly"] = 0
+    },
+    ["Night Egg"] = {
+        ["Hedgehog"] = 47, 
+        ["Mole"] = 23.5, 
+        ["Frog"] = 21.16, 
+        ["Echo Frog"] = 8.35, 
+        ["Night Owl"] = 0, 
+        ["Raccoon"] = 0
+    },
+    ["Bee Egg"] = {
+        ["Bee"] = 65, 
+        ["Honey Bee"] = 20, 
+        ["Bear Bee"] = 10, 
+        ["Petal Bee"] = 5, 
+        ["Queen Bee"] = 0
+    },
+    ["Anti Bee Egg"] = {
+        ["Wasp"] = 55, 
+        ["Tarantula Hawk"] = 31, 
+        ["Moth"] = 14, 
+        ["Butterfly"] = 0, 
+        ["Disco Bee"] = 0
+    },
+    ["Common Summer Egg"] = {
+        ["Starfish"] = 50, 
+        ["Seafull"] = 25, 
+        ["Crab"] = 25
+    },
+    ["Rare Summer Egg"] = {
+        ["Flamingo"] = 30, 
+        ["Toucan"] = 25, 
+        ["Sea Turtle"] = 20, 
+        ["Orangutan"] = 15, 
+        ["Seal"] = 10
+    },
+    ["Paradise Egg"] = {
+        ["Ostrich"] = 43, 
+        ["Peacock"] = 33, 
+        ["Capybara"] = 24, 
+        ["Scarlet Macaw"] = 3, 
+        ["Mimic Octopus"] = 1
+    },
+    ["Premium Night Egg"] = {
+        ["Hedgehog"] = 50, 
+        ["Mole"] = 26, 
+        ["Frog"] = 14, 
+        ["Echo Frog"] = 10
+    },
+    ["Dinosaur Egg"] = {
+        ["Raptor"] = 33, 
+        ["Triceratops"] = 33, 
+        ["T-Rex"] = 1, 
+        ["Stegosaurus"] = 33, 
+        ["Pterodactyl"] = 33, 
+        ["Brontosaurus"] = 33
+    }
+}
 
 -- Create main GUI
 local EggRandomizerGui = Instance.new("ScreenGui")
@@ -38,13 +136,39 @@ Title.TextColor3 = Color3.fromRGB(75, 0, 130)
 Title.TextSize = 24
 Title.TextStrokeTransparency = 0.8
 
+-- Egg Selection Dropdown
+local EggDropdown = Instance.new("Frame")
+EggDropdown.Name = "EggDropdown"
+EggDropdown.Size = UDim2.new(0, 310, 0, 30)
+EggDropdown.Position = UDim2.new(0.5, -155, 0, 70)
+EggDropdown.AnchorPoint = Vector2.new(0.5, 0)
+EggDropdown.BackgroundColor3 = Color3.fromRGB(230, 230, 250)
+
+local DropdownButton = Instance.new("TextButton")
+DropdownButton.Name = "DropdownButton"
+DropdownButton.Size = UDim2.new(1, 0, 1, 0)
+DropdownButton.BackgroundTransparency = 1
+DropdownButton.Text = "Select Egg Type ▼"
+DropdownButton.Font = Enum.Font.Gotham
+DropdownButton.TextColor3 = Color3.fromRGB(106, 90, 205)
+DropdownButton.TextSize = 14
+
+local DropdownList = Instance.new("ScrollingFrame")
+DropdownList.Name = "DropdownList"
+DropdownList.Size = UDim2.new(1, 0, 0, 150)
+DropdownList.Position = UDim2.new(0, 0, 1, 0)
+DropdownList.BackgroundColor3 = Color3.fromRGB(240, 240, 250)
+DropdownList.Visible = false
+DropdownList.CanvasSize = UDim2.new(0, 0, 0, 0)
+DropdownList.ScrollBarThickness = 5
+
 -- Auto Reroll Frame
-local AutoRerollFrame = createOptionFrame("Auto Reroll:", 80)
+local AutoRerollFrame = createOptionFrame("Auto Reroll:", 120)
 local AutoOnBtn = createToggleButton("ON", true, 0)
 local AutoOffBtn = createToggleButton("OFF", false, 90)
 
 -- Manual Reroll Frame
-local ManualRerollFrame = createOptionFrame("Manual Reroll", 180)
+local ManualRerollFrame = createOptionFrame("Manual Reroll", 220)
 local RerollBtn = Instance.new("TextButton")
 RerollBtn.Name = "RerollBtn"
 RerollBtn.Size = UDim2.new(0, 270, 0, 30)
@@ -68,10 +192,11 @@ local EggText = Instance.new("TextLabel")
 EggText.Name = "EggText"
 EggText.Size = UDim2.new(1, 0, 1, 0)
 EggText.BackgroundTransparency = 1
-EggText.Text = "[Egg will appear here]"
+EggText.Text = "Select an egg type first"
 EggText.Font = Enum.Font.GothamItalic
-EggText.TextColor3 = Color3.fromRGB(255, 0, 0) -- Start with red
+EggText.TextColor3 = Color3.fromRGB(255, 0, 0)
 EggText.TextSize = 16
+EggText.TextWrapped = true
 
 -- Warning Label
 local WarningLabel = Instance.new("TextLabel")
@@ -98,11 +223,14 @@ Footer.TextColor3 = Color3.fromRGB(128, 128, 128)
 Footer.TextSize = 10
 
 -- Assemble GUI
+DropdownButton.Parent = EggDropdown
+DropdownList.Parent = EggDropdown
 EggText.Parent = EggDisplay
 AutoOnBtn.Parent = AutoRerollFrame
 AutoOffBtn.Parent = AutoRerollFrame
 RerollBtn.Parent = ManualRerollFrame
 
+EggDropdown.Parent = MainFrame
 AutoRerollFrame.Parent = MainFrame
 ManualRerollFrame.Parent = MainFrame
 EggDisplay.Parent = MainFrame
@@ -150,6 +278,32 @@ function createToggleButton(text, isActive, xOffset)
     return btn
 end
 
+-- Populate dropdown with egg types
+local function populateDropdown()
+    for eggType in pairs(EGG_DATA) do
+        local option = Instance.new("TextButton")
+        option.Name = eggType
+        option.Size = UDim2.new(1, -10, 0, 30)
+        option.Position = UDim2.new(0, 5, 0, #DropdownList:GetChildren() * 30)
+        option.BackgroundColor3 = Color3.fromRGB(230, 230, 250)
+        option.Text = eggType
+        option.Font = Enum.Font.Gotham
+        option.TextColor3 = Color3.fromRGB(106, 90, 205)
+        option.TextSize = 14
+        option.TextXAlignment = Enum.TextXAlignment.Left
+        
+        option.MouseButton1Click:Connect(function()
+            currentEggType = eggType
+            DropdownButton.Text = eggType
+            DropdownList.Visible = false
+            randomizeEgg()
+        end)
+        
+        option.Parent = DropdownList
+        DropdownList.CanvasSize = UDim2.new(0, 0, 0, #DropdownList:GetChildren() * 30)
+    end
+end
+
 -- Rainbow color effect
 local hue = 0
 local function updateRainbowEffect()
@@ -158,33 +312,60 @@ local function updateRainbowEffect()
 end
 
 -- Egg randomization logic
-local eggTypes = {
-    "Dragon", "Phoenix", "Griffin", "Unicorn", 
-    "Basilisk", "Chimera", "Pegasus", "Kraken"
-}
-
+local currentEggType = nil
 local autoRerollEnabled = false
-local currentEgg = "None"
+
+local function getRandomPet(eggType)
+    local pets = EGG_DATA[eggType]
+    local total = 0
+    local cumulative = {}
+    
+    -- Create cumulative probability table
+    for pet, chance in pairs(pets) do
+        if chance > 0 then -- Skip 0% chance pets
+            total = total + chance
+            table.insert(cumulative, {pet = pet, threshold = total})
+        end
+    end
+    
+    -- Generate random number up to total
+    local randomValue = math.random() * total
+    
+    -- Find which pet this corresponds to
+    for _, entry in ipairs(cumulative) do
+        if randomValue <= entry.threshold then
+            return entry.pet
+        end
+    end
+    
+    return "Unknown Pet"
+end
 
 local function randomizeEgg()
+    if not currentEggType then return end
+    
     -- Safe call to game's randomization system
     local success, result = pcall(function()
         -- Try to use official game remote events if available
         local eggRemote = ReplicatedStorage:FindFirstChild("RequestRandomEgg")
         if eggRemote then
-            eggRemote:FireServer()
-            return "Randomizing..."
+            eggRemote:FireServer(currentEggType)
+            return "Randomizing "..currentEggType.."..."
         else
-            -- Fallback to client-side random
-            return eggTypes[math.random(#eggTypes)]
+            -- Fallback to client-side random with accurate probabilities
+            local pet = getRandomPet(currentEggType)
+            return currentEggType..": "..pet
         end
     end)
     
-    currentEgg = success and result or "Error"
-    EggText.Text = currentEgg
+    EggText.Text = success and result or "Error randomizing egg"
 end
 
 -- Button connections
+DropdownButton.MouseButton1Click:Connect(function()
+    DropdownList.Visible = not DropdownList.Visible
+end)
+
 AutoOnBtn.MouseButton1Click:Connect(function()
     autoRerollEnabled = true
     AutoOnBtn.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
@@ -206,15 +387,27 @@ RunService.Heartbeat:Connect(function(deltaTime)
     updateRainbowEffect()
     
     -- Auto reroll logic
-    if autoRerollEnabled and tick() - lastReroll > 5 then -- Every 5 seconds
+    if autoRerollEnabled and currentEggType and tick() - lastReroll > 5 then
         randomizeEgg()
         lastReroll = tick()
     end
 end)
 
--- Initial state
+-- Initialize
+populateDropdown()
 AutoOffBtn.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
-randomizeEgg()
-
--- Make sure GUI stays visible
 MainFrame.Visible = true
+
+-- Close dropdown when clicking elsewhere
+UserInputService.InputBegan:Connect(function(input, processed)
+    if not processed and input.UserInputType == Enum.UserInputType.MouseButton1 then
+        local mousePos = UserInputService:GetMouseLocation()
+        local dropdownAbsPos = DropdownList.AbsolutePosition
+        local dropdownSize = DropdownList.AbsoluteSize
+        
+        if not (mousePos.X >= dropdownAbsPos.X and mousePos.X <= dropdownAbsPos.X + dropdownSize.X and
+               mousePos.Y >= dropdownAbsPos.Y and mousePos.Y <= dropdownAbsPos.Y + dropdownSize.Y) then
+            DropdownList.Visible = false
+        end
+    end
+end)
