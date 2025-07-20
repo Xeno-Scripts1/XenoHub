@@ -10,8 +10,8 @@ screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame", screenGui)
 mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-mainFrame.Size = UDim2.new(0, 300, 0, 180)
-mainFrame.Position = UDim2.new(0.5, -150, 0.3, 0)
+mainFrame.Size = UDim2.new(0, 320, 0, 190)
+mainFrame.Position = UDim2.new(0.5, -160, 0.3, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0)
 mainFrame.Active = true
 mainFrame.Draggable = true
@@ -19,164 +19,200 @@ mainFrame.BackgroundTransparency = 0
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
 
--- Rounded corners
-local corner = Instance.new("UICorner", mainFrame)
-corner.CornerRadius = UDim.new(0, 12)
+local mainCorner = Instance.new("UICorner", mainFrame)
+mainCorner.CornerRadius = UDim.new(0, 16)
 
 local titleBar = Instance.new("TextLabel", mainFrame)
-titleBar.Text = "🥚 Egg Pet Randomizer 🐾"
-titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.Text = "🔄 Xeno's Egg Randomizer 🔄"
+titleBar.Size = UDim2.new(1, 0, 0, 35)
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 titleBar.TextColor3 = Color3.new(1, 1, 1)
 titleBar.Font = Enum.Font.GothamBold
-titleBar.TextSize = 16
+titleBar.TextSize = 18
 titleBar.TextWrapped = true
 titleBar.BorderSizePixel = 0
 titleBar.TextXAlignment = Enum.TextXAlignment.Center
 titleBar.TextYAlignment = Enum.TextYAlignment.Center
 
 local titleCorner = Instance.new("UICorner", titleBar)
-titleCorner.CornerRadius = UDim.new(0, 10)
+titleCorner.CornerRadius = UDim.new(0, 16)
 
 local exitButton = Instance.new("TextButton", mainFrame)
 exitButton.Text = "X"
-exitButton.Size = UDim2.new(0, 25, 0, 25)
-exitButton.Position = UDim2.new(1, -30, 0, 2)
+exitButton.Size = UDim2.new(0, 30, 0, 30)
+exitButton.Position = UDim2.new(1, -35, 0, 2)
 exitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 exitButton.TextColor3 = Color3.new(1, 1, 1)
 exitButton.Font = Enum.Font.GothamBold
-exitButton.TextSize = 14
+exitButton.TextSize = 16
+exitButton.AutoButtonColor = false
+
+local exitCorner = Instance.new("UICorner", exitButton)
+exitCorner.CornerRadius = UDim.new(0, 10)
+
+exitButton.MouseEnter:Connect(function()
+    exitButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+end)
+exitButton.MouseLeave:Connect(function()
+    exitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+
 exitButton.MouseButton1Click:Connect(function()
-	screenGui:Destroy()
+    screenGui:Destroy()
 end)
 
 local warning = Instance.new("TextLabel", mainFrame)
-warning.Text = "⚠️ WARNING: This is NOT a visual dupe!"
-warning.Size = UDim2.new(1, -10, 0, 25)
-warning.Position = UDim2.new(0, 5, 0, 35)
+warning.Text = "⚠️ WARNING: This is NOT a visual dupe! Use at your own risk!"
+warning.Size = UDim2.new(1, -20, 0, 30)
+warning.Position = UDim2.new(0, 10, 0, 40)
 warning.BackgroundTransparency = 1
-warning.TextColor3 = Color3.fromRGB(255, 100, 100)
-warning.Font = Enum.Font.Gotham
-warning.TextSize = 13
+warning.TextColor3 = Color3.fromRGB(255, 80, 80)
+warning.Font = Enum.Font.GothamBold
+warning.TextSize = 14
 warning.TextWrapped = true
 warning.TextXAlignment = Enum.TextXAlignment.Center
 
 local autoButton = Instance.new("TextButton", mainFrame)
-autoButton.Size = UDim2.new(1, -10, 0, 30)
-autoButton.Position = UDim2.new(0, 5, 0, 65)
+autoButton.Size = UDim2.new(1, -20, 0, 40)
+autoButton.Position = UDim2.new(0, 10, 0, 80)
 autoButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
 autoButton.TextColor3 = Color3.new(1, 1, 1)
 autoButton.Font = Enum.Font.GothamBold
-autoButton.TextSize = 14
-autoButton.Text = "🥚 Auto Reroll: OFF"
+autoButton.TextSize = 16
+autoButton.Text = "🎲 Auto Reroll: OFF"
+
+local autoCorner = Instance.new("UICorner", autoButton)
+autoCorner.CornerRadius = UDim.new(0, 12)
 
 local manualButton = Instance.new("TextButton", mainFrame)
-manualButton.Size = UDim2.new(1, -10, 0, 30)
-manualButton.Position = UDim2.new(0, 5, 0, 100)
+manualButton.Size = UDim2.new(1, -20, 0, 40)
+manualButton.Position = UDim2.new(0, 10, 0, 130)
 manualButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 manualButton.TextColor3 = Color3.new(1, 1, 1)
 manualButton.Font = Enum.Font.GothamBold
-manualButton.TextSize = 14
-manualButton.Text = "🥚 Manual Reroll"
+manualButton.TextSize = 16
+manualButton.Text = "🎲 Manual Reroll 🐾"
 
--- Egg Data
+local manualCorner = Instance.new("UICorner", manualButton)
+manualCorner.CornerRadius = UDim.new(0, 12)
+
 local eggChances = {
-	["Common Egg"] = {["Dog"] = 33, ["Bunny"] = 33, ["Golden Lab"] = 33},
-	["Uncommon Egg"] = {["Black Bunny"] = 25, ["Chicken"] = 25, ["Cat"] = 25, ["Deer"] = 25},
-	["Rare Egg"] = {["Orange Tabby"] = 33.33, ["Spotted Deer"] = 25, ["Pig"] = 16.67, ["Rooster"] = 16.67, ["Monkey"] = 8.33},
-	["Legendary Egg"] = {["Cow"] = 42.55, ["Silver Monkey"] = 42.55, ["Sea Otter"] = 10.64, ["Turtle"] = 2.13, ["Polar Bear"] = 2.13},
-	["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33}
+    ["Common Egg"] = {["Dog"] = 33, ["Bunny"] = 33, ["Golden Lab"] = 33},
+    ["Uncommon Egg"] = {["Black Bunny"] = 25, ["Chicken"] = 25, ["Cat"] = 25, ["Deer"] = 25},
+    ["Rare Egg"] = {["Orange Tabby"] = 33.33, ["Spotted Deer"] = 25, ["Pig"] = 16.67, ["Rooster"] = 16.67, ["Monkey"] = 8.33},
+    ["Legendary Egg"] = {["Cow"] = 42.55, ["Silver Monkey"] = 42.55, ["Sea Otter"] = 10.64, ["Turtle"] = 2.13, ["Polar Bear"] = 2.13},
+    ["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33}
 }
 
 local realESP = {
-	["Common Egg"] = true,
-	["Uncommon Egg"] = true,
-	["Rare Egg"] = true
+    ["Common Egg"] = true,
+    ["Uncommon Egg"] = true,
+    ["Rare Egg"] = true
 }
 
--- Utility
 local function weightedRandom(pool)
-	local total = 0
-	for _, w in pairs(pool) do total += w end
-	local roll = math.random() * total
-	local cumulative = 0
-	for pet, weight in pairs(pool) do
-		cumulative += weight
-		if roll <= cumulative then return pet end
-	end
+    local total = 0
+    for _, w in pairs(pool) do total += w end
+    local roll = math.random() * total
+    local cumulative = 0
+    for pet, weight in pairs(pool) do
+        cumulative += weight
+        if roll <= cumulative then
+            return pet
+        end
+    end
 end
 
-local function createOrUpdateBillboard(egg, text)
-	local gui = egg:FindFirstChild("PetESP") or Instance.new("BillboardGui")
-	gui.Name = "PetESP"
-	gui.AlwaysOnTop = true
-	gui.Size = UDim2.new(0, 200, 0, 50)
-	gui.StudsOffset = Vector3.new(0, 2.5, 0)
-	gui.Adornee = egg:FindFirstChildWhichIsA("BasePart") or egg
+local function createOrUpdateBillboard(egg, text, color)
+    local gui = egg:FindFirstChild("PetESP")
+    if gui then
+        local label = gui:FindFirstChild("TextLabel")
+        if label then
+            label.Text = text
+            label.TextColor3 = color
+        end
+    else
+        gui = Instance.new("BillboardGui")
+        gui.Name = "PetESP"
+        gui.AlwaysOnTop = true
+        gui.Size = UDim2.new(0, 200, 0, 50)
+        gui.StudsOffset = Vector3.new(0, 2.5, 0)
+        gui.Adornee = egg:FindFirstChildWhichIsA("BasePart") or egg
 
-	local label = gui:FindFirstChild("TextLabel") or Instance.new("TextLabel", gui)
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.new(1, 1, 1)
-	label.TextStrokeTransparency = 0.5
-	label.TextScaled = true
-	label.Font = Enum.Font.SourceSansBold
-	label.Text = text
-	gui.Parent = egg
+        local label = Instance.new("TextLabel", gui)
+        label.Name = "TextLabel"
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.TextStrokeTransparency = 0.5
+        label.TextScaled = true
+        label.Font = Enum.Font.SourceSansBold
+        label.Text = text
+        label.TextColor3 = color
+
+        gui.Parent = egg
+    end
 end
 
 local function findEggs()
-	local eggs = {}
-	for _, desc in ipairs(workspace:GetDescendants()) do
-		if desc:IsA("Model") and desc.Name:match("Egg") and desc:FindFirstChildWhichIsA("BasePart") then
-			local name = desc.Name:match("(.+) Egg")
-			if name then
-				table.insert(eggs, {egg = desc, name = name .. " Egg"})
-			end
-		end
-	end
-	return eggs
+    local eggs = {}
+    for _, desc in ipairs(workspace:GetDescendants()) do
+        if desc:IsA("Model") and desc.Name:match("Egg") and desc:FindFirstChildWhichIsA("BasePart") then
+            local name = desc.Name:match("(.+) Egg")
+            if name then
+                table.insert(eggs, {egg = desc, name = name .. " Egg"})
+            end
+        end
+    end
+    return eggs
 end
 
--- State
 local autoReroll = false
+
 autoButton.MouseButton1Click:Connect(function()
-	autoReroll = not autoReroll
-	if autoReroll then
-		autoButton.Text = "🥚 Auto Reroll: ON"
-	else
-		autoButton.Text = "🥚 Auto Reroll: OFF"
-		autoButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
-	end
+    autoReroll = not autoReroll
+    if autoReroll then
+        autoButton.Text = "🎲 Auto Reroll: ON"
+    else
+        autoButton.Text = "🎲 Auto Reroll: OFF"
+        autoButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+    end
 end)
 
 manualButton.MouseButton1Click:Connect(function()
-	for _, info in ipairs(findEggs()) do
-		local petName = realESP[info.name] and info.name or (info.name .. " | " .. (weightedRandom(eggChances[info.name]) or "?"))
-		createOrUpdateBillboard(info.egg, petName)
-	end
+    for _, info in ipairs(findEggs()) do
+        local petName = realESP[info.name] and info.name or (info.name .. " | " .. (weightedRandom(eggChances[info.name]) or "?"))
+        createOrUpdateBillboard(info.egg, petName, Color3.new(1, 1, 1))
+    end
 end)
 
--- Animated Title + Auto Loop
 local hue = 0
 RunService.RenderStepped:Connect(function(dt)
-	hue = (hue + dt * 0.1) % 1
-	local color = Color3.fromHSV(hue, 1, 1)
-	titleBar.TextColor3 = color
-	if autoReroll then
-		autoButton.BackgroundColor3 = color
-	end
+    hue = (hue + dt * 0.1) % 1
+    local color = Color3.fromHSV(hue, 1, 1)
+
+    titleBar.TextColor3 = color
+
+    if autoReroll then
+        autoButton.BackgroundColor3 = color
+    end
 end)
 
--- Auto Randomizer
 task.spawn(function()
-	while true do
-		if autoReroll then
-			for _, info in ipairs(findEggs()) do
-				local petName = realESP[info.name] and info.name or (info.name .. " | " .. (weightedRandom(eggChances[info.name]) or "?"))
-				createOrUpdateBillboard(info.egg, petName)
-			end
-		end
-		task.wait(1)
-	end
+    while true do
+        if autoReroll then
+            local hue2 = tick() % 1
+            local petColor = Color3.fromHSV(hue2, 1, 1)
+            for _, info in ipairs(findEggs()) do
+                local petName = ""
+                if realESP[info.name] then
+                    petName = info.name
+                else
+                    local weightedPet = weightedRandom(eggChances[info.name]) or "?"
+                    petName = info.name .. " | " .. weightedPet
+                end
+                createOrUpdateBillboard(info.egg, petName, petColor)
+            end
+        end
+        task.wait(1)
+    end
 end)
