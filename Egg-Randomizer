@@ -1,10 +1,11 @@
 -- XENO'S EGG RANDOMIZER for Grow a Garden
+-- Version 1.1 with Rainbow Egg Text
 -- SAFE MODE: Anti-stealer protection active
--- Version 1.0
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -69,7 +70,7 @@ EggText.Size = UDim2.new(1, 0, 1, 0)
 EggText.BackgroundTransparency = 1
 EggText.Text = "[Egg will appear here]"
 EggText.Font = Enum.Font.GothamItalic
-EggText.TextColor3 = Color3.fromRGB(85, 85, 85)
+EggText.TextColor3 = Color3.fromRGB(255, 0, 0) -- Start with red
 EggText.TextSize = 16
 
 -- Warning Label
@@ -149,6 +150,13 @@ function createToggleButton(text, isActive, xOffset)
     return btn
 end
 
+-- Rainbow color effect
+local hue = 0
+local function updateRainbowEffect()
+    hue = (hue + 0.01) % 1
+    EggText.TextColor3 = Color3.fromHSV(hue, 1, 1)
+end
+
 -- Egg randomization logic
 local eggTypes = {
     "Dragon", "Phoenix", "Griffin", "Unicorn", 
@@ -193,20 +201,20 @@ RerollBtn.MouseButton1Click:Connect(randomizeEgg)
 
 -- Auto reroll loop
 local lastReroll = tick()
-game:GetService("RunService").Heartbeat:Connect(function()
+RunService.Heartbeat:Connect(function(deltaTime)
+    -- Update rainbow effect
+    updateRainbowEffect()
+    
+    -- Auto reroll logic
     if autoRerollEnabled and tick() - lastReroll > 5 then -- Every 5 seconds
         randomizeEgg()
         lastReroll = tick()
     end
 end)
 
--- Toggle GUI with key (F5)
-UserInputService.InputBegan:Connect(function(input, processed)
-    if not processed and input.KeyCode == Enum.KeyCode.F5 then
-        MainFrame.Visible = not MainFrame.Visible
-    end
-end)
-
 -- Initial state
 AutoOffBtn.BackgroundColor3 = Color3.fromRGB(147, 112, 219)
 randomizeEgg()
+
+-- Make sure GUI stays visible
+MainFrame.Visible = true
