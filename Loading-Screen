@@ -1,161 +1,236 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 
-local player = Players.LocalPlayer
-local gui = Instance.new("ScreenGui")
-gui.Name = "FakeLoadingScreen"
-gui.IgnoreGuiInset = true
-gui.ResetOnSpawn = false
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.Parent = player:WaitForChild("PlayerGui")
+local LocalPlayer = Players.LocalPlayer
 
--- ⬛ Black Gradient Background
-local bg = Instance.new("Frame")
-bg.Size = UDim2.new(1, 0, 1, 0)
-bg.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-bg.BorderSizePixel = 0
-bg.Parent = gui
+-- UI Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CustomLoadingUI"
+screenGui.IgnoreGuiInset = true
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- 🔲 Fullscreen Black Background
+local blackBg = Instance.new("Frame")
+blackBg.Size = UDim2.new(1, 0, 1, 0)
+blackBg.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+blackBg.BorderSizePixel = 0
+blackBg.Parent = screenGui
 
 local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 15, 30)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0)),
-})
+gradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 5))
+}
 gradient.Rotation = 90
-gradient.Parent = bg
+gradient.Parent = blackBg
 
--- 🌟 Drop shadow effect
-local blur = Instance.new("BlurEffect")
-blur.Size = 25
-blur.Parent = game:GetService("Lighting")
+-- Pet List
+local pets = {"Raccoon", "T-Rex", "Dragon Fly", "Mimic Octopus", "Kitsune", "Disco Bee", "Butterfly"}
 
--- 🧪 Loading Container
-local loadBox = Instance.new("Frame")
-loadBox.Size = UDim2.new(0.4, 0, 0.05, 0)
-loadBox.Position = UDim2.new(0.3, 0, 0.45, 0)
-loadBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-loadBox.BorderSizePixel = 0
-loadBox.Parent = bg
+-- 🐾 Pet Selection Dropdown
+local petLabel = Instance.new("TextLabel")
+petLabel.Text = "Choose a Pet to Spawn"
+petLabel.Size = UDim2.new(0, 300, 0, 30)
+petLabel.Position = UDim2.new(0.05, 0, 0.15, 0)
+petLabel.BackgroundTransparency = 1
+petLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+petLabel.Font = Enum.Font.GothamBold
+petLabel.TextSize = 20
+petLabel.TextXAlignment = Enum.TextXAlignment.Left
+petLabel.Parent = blackBg
 
-local loadCorner = Instance.new("UICorner")
-loadCorner.CornerRadius = UDim.new(0, 10)
-loadCorner.Parent = loadBox
+local petDropdown = Instance.new("TextButton")
+petDropdown.Size = UDim2.new(0, 300, 0, 35)
+petDropdown.Position = UDim2.new(0.05, 0, 0.2, 0)
+petDropdown.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+petDropdown.Text = "Select Pet"
+petDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+petDropdown.Font = Enum.Font.Gotham
+petDropdown.TextSize = 18
+petDropdown.Parent = blackBg
 
--- ✅ Loading Fill Bar
-local bar = Instance.new("Frame")
-bar.Size = UDim2.new(0, 0, 1, 0)
-bar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-bar.BorderSizePixel = 0
-bar.Parent = loadBox
+local selectedPet = pets[1]
 
-local fillCorner = Instance.new("UICorner")
-fillCorner.CornerRadius = UDim.new(0, 10)
-fillCorner.Parent = bar
+-- Dropdown logic
+local petMenu = Instance.new("Frame")
+petMenu.Size = UDim2.new(0, 300, 0, #pets * 30)
+petMenu.Position = petDropdown.Position + UDim2.new(0, 0, 0, 35)
+petMenu.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+petMenu.BorderSizePixel = 0
+petMenu.Visible = false
+petMenu.Parent = blackBg
 
--- % Text Inside Bar
-local percent = Instance.new("TextLabel")
-percent.Size = UDim2.new(1, 0, 1, 0)
-percent.BackgroundTransparency = 1
-percent.Text = "0%"
-percent.Font = Enum.Font.GothamBold
-percent.TextColor3 = Color3.fromRGB(255, 255, 255)
-percent.TextScaled = true
-percent.TextStrokeTransparency = 0.4
-percent.Parent = loadBox
+for _, pet in ipairs(pets) do
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 30)
+	btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	btn.Text = pet
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 16
+	btn.Parent = petMenu
 
--- 🔔 Recent Duplications Panel
+	btn.MouseButton1Click:Connect(function()
+		selectedPet = pet
+		petDropdown.Text = pet
+		petMenu.Visible = false
+	end)
+end
+
+petDropdown.MouseButton1Click:Connect(function()
+	petMenu.Visible = not petMenu.Visible
+end)
+
+-- 🧮 Amount Selector
+local amtLabel = Instance.new("TextLabel")
+amtLabel.Text = "How many pets to spawn? (1–5)"
+amtLabel.Size = UDim2.new(0, 300, 0, 30)
+amtLabel.Position = UDim2.new(0.05, 0, 0.35, 0)
+amtLabel.BackgroundTransparency = 1
+amtLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+amtLabel.Font = Enum.Font.GothamBold
+amtLabel.TextSize = 18
+amtLabel.TextXAlignment = Enum.TextXAlignment.Left
+amtLabel.Parent = blackBg
+
+local amtBox = Instance.new("TextBox")
+amtBox.Size = UDim2.new(0, 60, 0, 35)
+amtBox.Position = UDim2.new(0.05, 0, 0.4, 0)
+amtBox.PlaceholderText = "1–5"
+amtBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+amtBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+amtBox.Font = Enum.Font.Gotham
+amtBox.TextSize = 18
+amtBox.Text = ""
+amtBox.Parent = blackBg
+
+-- 📄 Description
+local desc = Instance.new("TextLabel")
+desc.Size = UDim2.new(0, 400, 0, 40)
+desc.Position = UDim2.new(0.05, 0, 0.48, 0)
+desc.Text = "Each pet adds 1 minute of loading time (Max 5 minutes)."
+desc.TextColor3 = Color3.fromRGB(200, 200, 200)
+desc.Font = Enum.Font.Gotham
+desc.TextSize = 16
+desc.BackgroundTransparency = 1
+desc.TextXAlignment = Enum.TextXAlignment.Left
+desc.Parent = blackBg
+
+-- 🟢 Start Button
+local startBtn = Instance.new("TextButton")
+startBtn.Size = UDim2.new(0, 180, 0, 40)
+startBtn.Position = UDim2.new(0.05, 0, 0.56, 0)
+startBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+startBtn.Text = "Start Duplication"
+startBtn.TextColor3 = Color3.new(1,1,1)
+startBtn.Font = Enum.Font.GothamBold
+startBtn.TextSize = 18
+startBtn.Parent = blackBg
+
+-- 🔁 Notification Box (Top Right)
 local notifBox = Instance.new("Frame")
-notifBox.Size = UDim2.new(0, 300, 0, 200)
-notifBox.Position = UDim2.new(1, -310, 1, -220)
+notifBox.Size = UDim2.new(0, 300, 0, 160)
+notifBox.Position = UDim2.new(1, -310, 0.05, 0)
 notifBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-notifBox.BackgroundTransparency = 0.1
-notifBox.BorderSizePixel = 0
-notifBox.Parent = bg
-
-local notifCorner = Instance.new("UICorner")
-notifCorner.CornerRadius = UDim.new(0, 8)
-notifCorner.Parent = notifBox
+notifBox.Parent = blackBg
 
 local notifTitle = Instance.new("TextLabel")
-notifTitle.Size = UDim2.new(1, -10, 0, 28)
-notifTitle.Position = UDim2.new(0, 10, 0, 0)
-notifTitle.BackgroundTransparency = 1
+notifTitle.Size = UDim2.new(1, 0, 0, 28)
+notifTitle.Text = "📝 Duplication Log"
 notifTitle.Font = Enum.Font.GothamBold
 notifTitle.TextSize = 18
-notifTitle.Text = "📦 Recent Duplications"
 notifTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-notifTitle.TextXAlignment = Enum.TextXAlignment.Left
+notifTitle.BackgroundTransparency = 1
 notifTitle.Parent = notifBox
 
 local notifList = Instance.new("Frame")
-notifList.Size = UDim2.new(1, -20, 1, -35)
-notifList.Position = UDim2.new(0, 10, 0, 30)
+notifList.Size = UDim2.new(1, -10, 1, -30)
+notifList.Position = UDim2.new(0, 5, 0, 30)
 notifList.BackgroundTransparency = 1
-notifList.ClipsDescendants = true
 notifList.Parent = notifBox
 
 local layout = Instance.new("UIListLayout")
 layout.SortOrder = Enum.SortOrder.LayoutOrder
-layout.Padding = UDim.new(0, 6)
+layout.Padding = UDim.new(0, 4)
 layout.Parent = notifList
 
--- 🧪 Notification Data
-local usernames = {"XenoWarrior", "PixelPawsYT", "MagmaKid07", "Glitcher999", "SparkleNova", "Dupemaster", "PetFlexer", "TradeKing"}
-local pets = {"Raccoon", "T-Rex", "Dragon Fly", "Mimic Octopus", "Kitsune", "Disco Bee", "Butterfly"}
+-- 🔄 Loading UI Elements
+local loadingBarFrame = Instance.new("Frame")
+loadingBarFrame.Size = UDim2.new(0.4, 0, 0.05, 0)
+loadingBarFrame.Position = UDim2.new(0.3, 0, 0.8, 0)
+loadingBarFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+loadingBarFrame.Visible = false
+loadingBarFrame.Parent = blackBg
 
--- 🎬 Notification Function with Animation
-local function createNotif()
-	local name = usernames[math.random(#usernames)]
-	local pet = pets[math.random(#pets)]
-	local amount = math.random(1, 15)
+local loadingFill = Instance.new("Frame")
+loadingFill.BackgroundColor3 = Color3.fromRGB(0, 255, 140)
+loadingFill.Size = UDim2.new(0, 0, 1, 0)
+loadingFill.Parent = loadingBarFrame
+
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(1, 0, 1, 0)
+loadingText.Text = "0%"
+loadingText.Font = Enum.Font.GothamBold
+loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+loadingText.TextScaled = true
+loadingText.BackgroundTransparency = 1
+loadingText.Parent = loadingBarFrame
+
+-- 🔔 Fake notification spawner
+local function spawnNotification()
+	local names = {"XenoWarrior", "TradeKing", "SparkleNova", "Dupemaster"}
+	local user = names[math.random(1, #names)]
+	local pet = pets[math.random(1, #pets)]
+	local amount = math.random(1, 5)
 
 	local notif = Instance.new("TextLabel")
 	notif.Size = UDim2.new(1, 0, 0, 24)
-	notif.BackgroundTransparency = 0.15
-	notif.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	notif.Text = name .. " duplicated " .. amount .. "x " .. pet
-	notif.Font = Enum.Font.Gotham
+	notif.Text = user .. " spawned " .. amount .. "x " .. pet
+	notif.TextColor3 = Color3.fromRGB(0, 255, 170)
+	notif.BackgroundTransparency = 1
 	notif.TextSize = 16
+	notif.Font = Enum.Font.Gotham
 	notif.TextXAlignment = Enum.TextXAlignment.Left
-	notif.TextColor3 = Color3.fromRGB(0, 255, 180)
-	notif.TextTransparency = 1
 	notif.Parent = notifList
 
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 6)
-	corner.Parent = notif
-
-	notif.Position = UDim2.new(0, 0, 0, 0)
-	TweenService:Create(notif, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
-
-	task.delay(4.5, function()
-		TweenService:Create(notif, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
-		task.wait(0.4)
-		notif:Destroy()
-	end)
+	game.Debris:AddItem(notif, 8)
 end
 
--- ⏳ 60-Second Loading Bar Animation
-task.spawn(function()
-	local totalTime = 60
+-- 🚀 Start Logic
+startBtn.MouseButton1Click:Connect(function()
+	local amount = tonumber(amtBox.Text)
+	if not amount or amount < 1 or amount > 5 then
+		startBtn.Text = "Enter 1–5"
+		return
+	end
+
+	-- Hide UI and begin loading
+	for _, obj in pairs(blackBg:GetChildren()) do
+		if obj ~= loadingBarFrame then obj.Visible = false end
+	end
+
+	loadingBarFrame.Visible = true
+
+	local totalTime = amount * 60
 	local steps = 100
-	for i = 0, steps do
-		local percentValue = i / steps
-		bar:TweenSize(UDim2.new(percentValue, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
-		percent.Text = math.floor(percentValue * 100) .. "%"
-		wait(totalTime / steps)
-	end
 
-	wait(1)
-	gui:Destroy()
-	blur:Destroy()
-end)
+	task.spawn(function()
+		for i = 1, steps do
+			local progress = i / steps
+			loadingFill:TweenSize(UDim2.new(progress, 0, 1, 0), "Out", "Quad", 0.2, true)
+			loadingText.Text = tostring(math.floor(progress * 100)) .. "%"
+			wait(totalTime / steps)
+		end
 
--- 🔁 Notification Spawner
-task.spawn(function()
-	while gui and gui.Parent do
-		createNotif()
-		wait(math.random(3, 5))
-	end
+		screenGui:Destroy()
+	end)
+
+	task.spawn(function()
+		while screenGui and screenGui.Parent do
+			spawnNotification()
+			wait(math.random(3, 6))
+		end
+	end)
 end)
