@@ -1,8 +1,140 @@
+-- Xeno's Egg Randomizer (Final Tweaked Version)
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
+-- UI Setup
+local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+screenGui.Name = "XenoEggRandomizer"
+screenGui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 330, 0, 330)
+mainFrame.Position = UDim2.new(0.5, -165, 0.5, -165)
+mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+mainFrame.Parent = screenGui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 18)
+mainCorner.Parent = mainFrame
+
+-- Title Bar
+local titleBar = Instance.new("TextLabel")
+titleBar.Size = UDim2.new(1, 0, 0, 40)
+titleBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+titleBar.Text = "♻️ Xeno's Egg Randomizer ♻️"
+titleBar.TextColor3 = Color3.fromRGB(0, 255, 0)
+titleBar.Font = Enum.Font.GothamBold
+titleBar.TextSize = 16
+titleBar.Parent = mainFrame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 18)
+titleCorner.Parent = titleBar
+
+-- Buttons
+local autoButton = Instance.new("TextButton")
+autoButton.Size = UDim2.new(0.85, 0, 0, 40)
+autoButton.Position = UDim2.new(0.075, 0, 0, 60)
+autoButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+autoButton.Text = "🔁 Auto Reroll [OFF]"
+autoButton.TextColor3 = Color3.new(1, 1, 1)
+autoButton.Font = Enum.Font.Gotham
+autoButton.TextSize = 14
+autoButton.Parent = mainFrame
+
+local manualButton = Instance.new("TextButton")
+manualButton.Size = UDim2.new(0.85, 0, 0, 40)
+manualButton.Position = UDim2.new(0.075, 0, 0, 110)
+manualButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+manualButton.Text = "🎲 Manual Reroll"
+manualButton.TextColor3 = Color3.new(1, 1, 1)
+manualButton.Font = Enum.Font.Gotham
+manualButton.TextSize = 14
+manualButton.Parent = mainFrame
+
+-- Warning Label
+local warning = Instance.new("TextLabel")
+warning.Size = UDim2.new(0.9, 0, 0, 60)
+warning.Position = UDim2.new(0.05, 0, 0, 170)
+warning.BackgroundTransparency = 1
+warning.Text = "⚠️  THIS SCRIPT IS SAFE TO USE\n\n🛡️  ANTI STEALER ACTIVATED"
+warning.TextColor3 = Color3.new(1, 1, 0)
+warning.TextWrapped = true
+warning.TextXAlignment = Enum.TextXAlignment.Left
+warning.Font = Enum.Font.Gotham
+warning.TextSize = 13
+warning.Parent = mainFrame
+
+-- Footer
+local footer = Instance.new("TextLabel")
+footer.Size = UDim2.new(1, 0, 0, 24)
+footer.Position = UDim2.new(0, 0, 1, -24)
+footer.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+footer.Text = "Made by XenoScripts | Premium"
+footer.TextColor3 = Color3.fromRGB(150, 150, 150)
+footer.Font = Enum.Font.Gotham
+footer.TextSize = 12
+footer.Parent = mainFrame
+
+local footerCorner = Instance.new("UICorner")
+footerCorner.CornerRadius = UDim.new(0, 18)
+footerCorner.Parent = footer
+
+-- Exit Button
+local exitButton = Instance.new("TextButton")
+exitButton.Size = UDim2.new(0, 24, 0, 24)
+exitButton.Position = UDim2.new(1, -28, 0, 4)
+exitButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+exitButton.Text = "X"
+exitButton.TextColor3 = Color3.new(1, 1, 1)
+exitButton.Font = Enum.Font.GothamBold
+exitButton.TextSize = 14
+exitButton.Parent = titleBar
+
+local exitCorner = Instance.new("UICorner")
+exitCorner.CornerRadius = UDim.new(1, 0)
+exitCorner.Parent = exitButton
+
+exitButton.MouseButton1Click:Connect(function()
+	screenGui:Destroy()
+end)
+
+-- Loading Bar
+local loadingBarBackground = Instance.new("Frame")
+loadingBarBackground.Size = UDim2.new(0.9, 0, 0, 10)
+loadingBarBackground.Position = UDim2.new(0.05, 0, 1, -60)
+loadingBarBackground.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+loadingBarBackground.BorderSizePixel = 0
+loadingBarBackground.Visible = false
+loadingBarBackground.Parent = mainFrame
+
+local loadingBar = Instance.new("Frame")
+loadingBar.Size = UDim2.new(0, 0, 1, 0)
+loadingBar.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+loadingBar.BorderSizePixel = 0
+loadingBar.Parent = loadingBarBackground
+
+local loadingCorner = Instance.new("UICorner")
+loadingCorner.CornerRadius = UDim.new(0, 6)
+loadingCorner.Parent = loadingBar
+local loadingBackCorner = Instance.new("UICorner")
+loadingBackCorner.CornerRadius = UDim.new(0, 6)
+loadingBackCorner.Parent = loadingBarBackground
+
+local loadingLabel = Instance.new("TextLabel")
+loadingLabel.Size = UDim2.new(1, 0, 0, 20)
+loadingLabel.Position = UDim2.new(0, 0, 1, -78)
+loadingLabel.BackgroundTransparency = 1
+loadingLabel.TextColor3 = Color3.new(1, 1, 1)
+loadingLabel.Font = Enum.Font.GothamBold
+loadingLabel.TextSize = 14
+loadingLabel.Text = ""
+loadingLabel.Visible = false
+loadingLabel.Parent = mainFrame
+
+-- Egg Data
 local eggChances = {
     ["Common Egg"] = {["Dog"] = 33, ["Bunny"] = 33, ["Golden Lab"] = 33},
     ["Uncommon Egg"] = {["Black Bunny"] = 25, ["Chicken"] = 25, ["Cat"] = 25, ["Deer"] = 25},
@@ -17,173 +149,70 @@ local eggChances = {
     ["Rare Summer Egg"] = {["Flamingo"] = 30, ["Toucan"] = 25, ["Sea Turtle"] = 20, ["Orangutan"] = 15, ["Seal"] = 10},
     ["Paradise Egg"] = {["Ostrich"] = 43, ["Peacock"] = 33, ["Capybara"] = 24, ["Scarlet Macaw"] = 3, ["Mimic Octopus"] = 1},
     ["Premium Night Egg"] = {["Hedgehog"] = 50, ["Mole"] = 26, ["Frog"] = 14, ["Echo Frog"] = 10},
-    ["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33},
+    ["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33}
 }
 
-local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-screenGui.ResetOnSpawn = false
+-- ESP + Logic
+local autoEnabled = false
 
-local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 350, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -175, 0.5, -150)
-mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-mainFrame.BorderSizePixel = 0
-mainFrame.Active = true
-mainFrame.Draggable = true
+local function getWeightedPetName(eggName)
+    local pets = eggChances[eggName]
+    if not pets then return "???" end
 
-local mainCorner = Instance.new("UICorner", mainFrame)
-mainCorner.CornerRadius = UDim.new(0, 16)
-
-local titleBar = Instance.new("Frame", mainFrame)
-titleBar.Size = UDim2.new(1, 0, 0, 30)
-titleBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-titleBar.BorderSizePixel = 0
-
-local titleCorner = Instance.new("UICorner", titleBar)
-titleCorner.CornerRadius = UDim.new(0, 16)
-
-local titleLabel = Instance.new("TextLabel", titleBar)
-titleLabel.Size = UDim2.new(1, 0, 1, 0)
-titleLabel.Text = "♻️ Xeno's Egg Randomizer ♻️"
-titleLabel.TextColor3 = Color3.new(1, 1, 1)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 16
-
-local autoReroll = Instance.new("TextButton", mainFrame)
-autoReroll.Size = UDim2.new(0.85, 0, 0, 30)
-autoReroll.Position = UDim2.new(0.075, 0, 0, 60)
-autoReroll.Text = "Auto Reroll: OFF"
-autoReroll.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-autoReroll.TextColor3 = Color3.new(1, 1, 1)
-autoReroll.Font = Enum.Font.Gotham
-autoReroll.TextSize = 14
-
-local manualReroll = autoReroll:Clone()
-manualReroll.Text = "Manual Reroll"
-manualReroll.Position = UDim2.new(0.075, 0, 0, 100)
-manualReroll.Parent = mainFrame
-
-local warning = Instance.new("TextLabel", mainFrame)
-warning.Size = UDim2.new(0.85, 0, 0, 60)
-warning.Position = UDim2.new(0.075, 0, 0, 178)
-warning.BackgroundTransparency = 1
-warning.TextColor3 = Color3.fromRGB(255, 255, 0)
-warning.Text = "⚠️  THIS SCRIPT IS SAFE TO USE\n\n🛡️  ANTI STEALER ACTIVATED"
-warning.TextWrapped = true
-warning.Font = Enum.Font.GothamSemibold
-warning.TextSize = 13
-
-local footer = Instance.new("Frame", mainFrame)
-footer.Size = UDim2.new(1, 0, 0, 30)
-footer.Position = UDim2.new(0, 0, 1, -30)
-footer.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-footer.BorderSizePixel = 0
-
-local footerCorner = Instance.new("UICorner", footer)
-footerCorner.CornerRadius = UDim.new(0, 16)
-
-local footerLabel = Instance.new("TextLabel", footer)
-footerLabel.Size = UDim2.new(1, 0, 1, 0)
-footerLabel.Text = "Made by XenoScripts | Premium"
-footerLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-footerLabel.BackgroundTransparency = 1
-footerLabel.Font = Enum.Font.Gotham
-footerLabel.TextSize = 12
-
-local exitButton = Instance.new("TextButton", titleBar)
-exitButton.Size = UDim2.new(0, 30, 0, 30)
-exitButton.Position = UDim2.new(1, -30, 0, 0)
-exitButton.Text = "✖"
-exitButton.TextColor3 = Color3.new(1, 0.3, 0.3)
-exitButton.Font = Enum.Font.GothamBold
-exitButton.TextSize = 16
-exitButton.BackgroundTransparency = 1
-
-exitButton.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
-end)
-
--- Loading bar UI
-local loadingBarBackground = Instance.new("Frame", mainFrame)
-loadingBarBackground.Size = UDim2.new(0.9, 0, 0, 10)
-loadingBarBackground.Position = UDim2.new(0.05, 0, 1, -64)
-loadingBarBackground.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-loadingBarBackground.BorderSizePixel = 0
-loadingBarBackground.Visible = false
-
-local loadingBar = Instance.new("Frame", loadingBarBackground)
-loadingBar.Size = UDim2.new(0, 0, 1, 0)
-loadingBar.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-loadingBar.BorderSizePixel = 0
-
-Instance.new("UICorner", loadingBar).CornerRadius = UDim.new(0, 6)
-Instance.new("UICorner", loadingBarBackground).CornerRadius = UDim.new(0, 6)
-
-local loadingLabel = Instance.new("TextLabel", mainFrame)
-loadingLabel.Size = UDim2.new(1, 0, 0, 20)
-loadingLabel.Position = UDim2.new(0, 0, 1, -82)
-loadingLabel.BackgroundTransparency = 1
-loadingLabel.TextColor3 = Color3.new(1, 1, 1)
-loadingLabel.Font = Enum.Font.GothamBold
-loadingLabel.TextSize = 14
-loadingLabel.Text = ""
-loadingLabel.Visible = false
-
--- ESP Function
-local function weightedRandom(t)
     local total = 0
-    for _, weight in pairs(t) do
-        total = total + weight
+    for _, weight in pairs(pets) do total += weight end
+
+    local rand = math.random() * total
+    local sum = 0
+
+    for pet, weight in pairs(pets) do
+        sum += weight
+        if rand <= sum then return pet end
     end
-    local threshold = math.random() * total
-    local cumulative = 0
-    for item, weight in pairs(t) do
-        cumulative = cumulative + weight
-        if threshold <= cumulative then
-            return item
-        end
-    end
+    return "???"
 end
 
 local function updateESP()
     for _, egg in pairs(workspace:GetDescendants()) do
-        if egg:IsA("Model") and egg:FindFirstChild("MeshPart") and egg.Name:find("Egg") then
-            local eggName = egg.Name:match("^(.- Egg)")
-            if eggChances[eggName] then
-                local gui = egg:FindFirstChild("NameGui") or Instance.new("BillboardGui", egg)
-                gui.Name = "NameGui"
+        if egg:IsA("Model") and egg:FindFirstChild("Main") and egg.Name:find("Egg") then
+            local eggName = egg.Name:gsub("%sJ.*", "")
+            local gui = egg:FindFirstChild("ESP")
+            if not gui then
+                gui = Instance.new("BillboardGui", egg)
+                gui.Name = "ESP"
                 gui.Size = UDim2.new(0, 200, 0, 50)
+                gui.Adornee = egg:FindFirstChild("Main")
                 gui.AlwaysOnTop = true
-                gui.Adornee = egg:FindFirstChildWhichIsA("BasePart") or egg.PrimaryPart
-
-                local label = gui:FindFirstChild("Label") or Instance.new("TextLabel", gui)
-                label.Name = "Label"
+                local label = Instance.new("TextLabel", gui)
                 label.Size = UDim2.new(1, 0, 1, 0)
                 label.BackgroundTransparency = 1
                 label.TextColor3 = Color3.fromHSV(tick() % 5 / 5, 1, 1)
                 label.Font = Enum.Font.GothamBold
                 label.TextScaled = true
-
-                local pet = weightedRandom(eggChances[eggName])
+                label.TextStrokeTransparency = 0
+            end
+            local label = gui:FindFirstChildOfClass("TextLabel")
+            if label then
+                local pet = getWeightedPetName(eggName)
                 label.Text = eggName .. " | " .. pet
+                label.TextColor3 = Color3.fromHSV(tick() % 5 / 5, 1, 1)
             end
         end
     end
 end
 
--- Logic
-local autoEnabled = false
-
-autoReroll.MouseButton1Click:Connect(function()
+-- Buttons
+autoButton.MouseButton1Click:Connect(function()
     autoEnabled = not autoEnabled
-    autoReroll.Text = "Auto Reroll: " .. (autoEnabled and "ON" or "OFF")
-    autoReroll.BackgroundColor3 = autoEnabled and Color3.fromRGB(80, 160, 80) or Color3.fromRGB(100, 100, 100)
+    autoButton.Text = autoEnabled and "🔁 Auto Reroll [ON]" or "🔁 Auto Reroll [OFF]"
+    autoButton.BackgroundColor3 = autoEnabled and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(80, 80, 80)
 end)
 
-manualReroll.MouseButton1Click:Connect(updateESP)
+manualButton.MouseButton1Click:Connect(function()
+    updateESP()
+end)
 
--- Smooth loading loop
+-- Auto Loop
 spawn(function()
     while true do
         if autoEnabled then
@@ -195,8 +224,7 @@ spawn(function()
             loadingBar.Size = UDim2.new(0, 0, 1, 0)
             wait(0.1)
 
-            local tween = TweenService:Create(loadingBar, TweenInfo.new(3, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)})
-            tween:Play()
+            TweenService:Create(loadingBar, TweenInfo.new(3, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)}):Play()
 
             for i = 3, 1, -1 do
                 loadingLabel.Text = "Refreshing in " .. i .. "s"
