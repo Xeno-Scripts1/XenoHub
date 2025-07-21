@@ -1,106 +1,126 @@
--- Xeno's Egg Randomizer UI + ESP Integration (Rounded + Refreshed)
-
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "XenoEggRandomizerUI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+local eggChances = {
+    ["Common Egg"] = {["Dog"] = 33, ["Bunny"] = 33, ["Golden Lab"] = 33},
+    ["Uncommon Egg"] = {["Black Bunny"] = 25, ["Chicken"] = 25, ["Cat"] = 25, ["Deer"] = 25},
+    ["Rare Egg"] = {["Orange Tabby"] = 33.33, ["Spotted Deer"] = 25, ["Pig"] = 16.67, ["Rooster"] = 16.67, ["Monkey"] = 8.33},
+    ["Legendary Egg"] = {["Cow"] = 42.55, ["Silver Monkey"] = 42.55, ["Sea Otter"] = 10.64, ["Turtle"] = 2.13, ["Polar Bear"] = 2.13},
+    ["Mythic Egg"] = {["Grey Mouse"] = 37.5, ["Brown Mouse"] = 26.79, ["Squirrel"] = 26.79, ["Red Giant Ant"] = 8.93, ["Red Fox"] = 0},
+    ["Bug Egg"] = {["Snail"] = 40, ["Giant Ant"] = 35, ["Caterpillar"] = 25, ["Praying Mantis"] = 0, ["Dragon Fly"] = 0},
+    ["Night Egg"] = {["Hedgehog"] = 47, ["Mole"] = 23.5, ["Frog"] = 21.16, ["Echo Frog"] = 8.35, ["Night Owl"] = 0, ["Raccoon"] = 0},
+    ["Bee Egg"] = {["Bee"] = 65, ["Honey Bee"] = 20, ["Bear Bee"] = 10, ["Petal Bee"] = 5, ["Queen Bee"] = 0},
+    ["Anti Bee Egg"] = {["Wasp"] = 55, ["Tarantula Hawk"] = 31, ["Moth"] = 14, ["Butterfly"] = 0, ["Disco Bee"] = 0},
+    ["Common Summer Egg"] = {["Starfish"] = 50, ["Seafull"] = 25, ["Crab"] = 25},
+    ["Rare Summer Egg"] = {["Flamingo"] = 30, ["Toucan"] = 25, ["Sea Turtle"] = 20, ["Orangutan"] = 15, ["Seal"] = 10},
+    ["Paradise Egg"] = {["Ostrich"] = 43, ["Peacock"] = 33, ["Capybara"] = 24, ["Scarlet Macaw"] = 3, ["Mimic Octopus"] = 1},
+    ["Premium Night Egg"] = {["Hedgehog"] = 50, ["Mole"] = 26, ["Frog"] = 14, ["Echo Frog"] = 10},
+    ["Dinosaur Egg"] = {["Raptor"] = 33, ["Triceratops"] = 33, ["T-Rex"] = 1, ["Stegosaurus"] = 33, ["Pterodactyl"] = 33, ["Brontosaurus"] = 33},
+}
 
--- Main Frame (Rounded)
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 360, 0, 330)
-mainFrame.Position = UDim2.new(0.5, -180, 0.5, -165)
+local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+screenGui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 350, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -150)
 mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-mainFrame.BackgroundTransparency = 0.2
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
-mainFrame.Parent = screenGui
 
-local mainCorner = Instance.new("UICorner")
+local mainCorner = Instance.new("UICorner", mainFrame)
 mainCorner.CornerRadius = UDim.new(0, 16)
-mainCorner.Parent = mainFrame
 
--- Title Bar
-local titleBar = Instance.new("TextLabel")
-titleBar.Size = UDim2.new(1, 0, 0, 36)
-titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+local titleBar = Instance.new("Frame", mainFrame)
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 titleBar.BorderSizePixel = 0
-titleBar.Font = Enum.Font.GothamBold
-titleBar.TextSize = 18
-titleBar.TextColor3 = Color3.new(1, 1, 1)
-titleBar.Text = "♻️ Xeno's Egg Randomizer ♻️"
-titleBar.TextWrapped = true
-titleBar.Parent = mainFrame
 
--- Exit Button
-local exitButton = Instance.new("TextButton")
-exitButton.Size = UDim2.new(0, 32, 0, 32)
-exitButton.Position = UDim2.new(1, -40, 0, 2)
-exitButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-exitButton.Text = "X"
-exitButton.TextColor3 = Color3.new(1, 1, 1)
+local titleCorner = Instance.new("UICorner", titleBar)
+titleCorner.CornerRadius = UDim.new(0, 16)
+
+local titleLabel = Instance.new("TextLabel", titleBar)
+titleLabel.Size = UDim2.new(1, 0, 1, 0)
+titleLabel.Text = "♻️ Xeno's Egg Randomizer ♻️"
+titleLabel.TextColor3 = Color3.new(1, 1, 1)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 16
+
+local autoReroll = Instance.new("TextButton", mainFrame)
+autoReroll.Size = UDim2.new(0.85, 0, 0, 30)
+autoReroll.Position = UDim2.new(0.075, 0, 0, 60)
+autoReroll.Text = "Auto Reroll: OFF"
+autoReroll.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+autoReroll.TextColor3 = Color3.new(1, 1, 1)
+autoReroll.Font = Enum.Font.Gotham
+autoReroll.TextSize = 14
+
+local manualReroll = autoReroll:Clone()
+manualReroll.Text = "Manual Reroll"
+manualReroll.Position = UDim2.new(0.075, 0, 0, 100)
+manualReroll.Parent = mainFrame
+
+local warning = Instance.new("TextLabel", mainFrame)
+warning.Size = UDim2.new(0.85, 0, 0, 60)
+warning.Position = UDim2.new(0.075, 0, 0, 178)
+warning.BackgroundTransparency = 1
+warning.TextColor3 = Color3.fromRGB(255, 255, 0)
+warning.Text = "⚠️  THIS SCRIPT IS SAFE TO USE\n\n🛡️  ANTI STEALER ACTIVATED"
+warning.TextWrapped = true
+warning.Font = Enum.Font.GothamSemibold
+warning.TextSize = 13
+
+local footer = Instance.new("Frame", mainFrame)
+footer.Size = UDim2.new(1, 0, 0, 30)
+footer.Position = UDim2.new(0, 0, 1, -30)
+footer.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+footer.BorderSizePixel = 0
+
+local footerCorner = Instance.new("UICorner", footer)
+footerCorner.CornerRadius = UDim.new(0, 16)
+
+local footerLabel = Instance.new("TextLabel", footer)
+footerLabel.Size = UDim2.new(1, 0, 1, 0)
+footerLabel.Text = "Made by XenoScripts | Premium"
+footerLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+footerLabel.BackgroundTransparency = 1
+footerLabel.Font = Enum.Font.Gotham
+footerLabel.TextSize = 12
+
+local exitButton = Instance.new("TextButton", titleBar)
+exitButton.Size = UDim2.new(0, 30, 0, 30)
+exitButton.Position = UDim2.new(1, -30, 0, 0)
+exitButton.Text = "✖"
+exitButton.TextColor3 = Color3.new(1, 0.3, 0.3)
 exitButton.Font = Enum.Font.GothamBold
-exitButton.TextSize = 18
-exitButton.BorderSizePixel = 0
-exitButton.Parent = mainFrame
+exitButton.TextSize = 16
+exitButton.BackgroundTransparency = 1
 
 exitButton.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
-exitButton.MouseEnter:Connect(function()
-    exitButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-end)
-exitButton.MouseLeave:Connect(function()
-    exitButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-end)
+-- Loading bar UI
+local loadingBarBackground = Instance.new("Frame", mainFrame)
+loadingBarBackground.Size = UDim2.new(0.9, 0, 0, 10)
+loadingBarBackground.Position = UDim2.new(0.05, 0, 1, -64)
+loadingBarBackground.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+loadingBarBackground.BorderSizePixel = 0
+loadingBarBackground.Visible = false
 
--- Auto Reroll Button
-local autoButton = Instance.new("TextButton")
-autoButton.Size = UDim2.new(1, -40, 0, 46)
-autoButton.Position = UDim2.new(0, 20, 0, 52)
-autoButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-autoButton.Text = "♻️ Auto Reroll: OFF ♻️"
-autoButton.TextColor3 = Color3.new(1, 1, 1)
-autoButton.Font = Enum.Font.GothamBold
-autoButton.TextSize = 16
-autoButton.BorderSizePixel = 0
-autoButton.Parent = mainFrame
-
-local autoCorner = Instance.new("UICorner")
-autoCorner.CornerRadius = UDim.new(0, 8)
-autoCorner.Parent = autoButton
-
--- Manual Reroll Button
-local manualButton = Instance.new("TextButton")
-manualButton.Size = UDim2.new(1, -40, 0, 46)
-manualButton.Position = UDim2.new(0, 20, 0, 112)
-manualButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-manualButton.Text = "🔁 Manual Reroll 🔁"
-manualButton.TextColor3 = Color3.new(1, 1, 1)
-manualButton.Font = Enum.Font.GothamBold
-manualButton.TextSize = 16
-manualButton.BorderSizePixel = 0
-manualButton.Parent = mainFrame
-
-local manualCorner = Instance.new("UICorner")
-manualCorner.CornerRadius = UDim.new(0, 8)
-manualCorner.Parent = manualButton
-
--- Loading Bar (above footer)
-local loadingBar = Instance.new("Frame")
-loadingBar.Size = UDim2.new(0, 0, 0, 8)
-loadingBar.Position = UDim2.new(0.05, 0, 1, -64)
+local loadingBar = Instance.new("Frame", loadingBarBackground)
+loadingBar.Size = UDim2.new(0, 0, 1, 0)
 loadingBar.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
 loadingBar.BorderSizePixel = 0
-loadingBar.Visible = false
-loadingBar.Parent = mainFrame
 
-local loadingLabel = Instance.new("TextLabel")
+Instance.new("UICorner", loadingBar).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", loadingBarBackground).CornerRadius = UDim.new(0, 6)
+
+local loadingLabel = Instance.new("TextLabel", mainFrame)
 loadingLabel.Size = UDim2.new(1, 0, 0, 20)
 loadingLabel.Position = UDim2.new(0, 0, 1, -82)
 loadingLabel.BackgroundTransparency = 1
@@ -109,199 +129,84 @@ loadingLabel.Font = Enum.Font.GothamBold
 loadingLabel.TextSize = 14
 loadingLabel.Text = ""
 loadingLabel.Visible = false
-loadingLabel.Parent = mainFrame
 
--- Warning
-local warning = Instance.new("TextLabel")
-warning.Size = UDim2.new(1, -24, 0, 45)
-warning.Position = UDim2.new(0, 12, 0, 172)
-warning.BackgroundTransparency = 1
-warning.TextColor3 = Color3.fromRGB(170, 255, 170)
-warning.Font = Enum.Font.GothamBold
-warning.TextSize = 14
-warning.Text = "⚠️ THIS SCRIPT IS SAFE TO USE\n🛡️ ANTI STEALER ACTIVATED"
-warning.TextWrapped = true
-warning.TextXAlignment = Enum.TextXAlignment.Center
-warning.TextYAlignment = Enum.TextYAlignment.Top
-warning.Parent = mainFrame
-
--- Footer
-local footer = Instance.new("TextLabel")
-footer.Size = UDim2.new(1, 0, 0, 28)
-footer.Position = UDim2.new(0, 0, 1, -28)
-footer.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-footer.Text = "♻️ Made by XenoScripts | Premium ♻️"
-footer.TextColor3 = Color3.new(1, 1, 1)
-footer.Font = Enum.Font.GothamBold
-footer.TextSize = 12
-footer.TextXAlignment = Enum.TextXAlignment.Center
-footer.Parent = mainFrame
-
--- Pet Eggs & Names with Weighted Chances (Your data)
-local eggsData = {
-    ["Common Egg"] = {
-        {name = "Dog", chance = 33},
-        {name = "Bunny", chance = 33},
-        {name = "Golden Lab", chance = 33}
-    },
-    ["Uncommon Egg"] = {
-        {name = "Black Bunny", chance = 25},
-        {name = "Chicken", chance = 25},
-        {name = "Cat", chance = 25},
-        {name = "Deer", chance = 25}
-    },
-    ["Rare Egg"] = {
-        {name = "Orange Tabby", chance = 33.33},
-        {name = "Spotted Deer", chance = 25},
-        {name = "Pig", chance = 16.67},
-        {name = "Rooster", chance = 16.67},
-        {name = "Monkey", chance = 8.33}
-    },
-    ["Legendary Egg"] = {
-        {name = "Cow", chance = 42.55},
-        {name = "Silver Monkey", chance = 42.55},
-        {name = "Sea Otter", chance = 10.64},
-        {name = "Turtle", chance = 2.13},
-        {name = "Polar Bear", chance = 2.13}
-    },
-    ["Mythic Egg"] = {
-        {name = "Grey Mouse", chance = 37.5},
-        {name = "Brown Mouse", chance = 26.79},
-        {name = "Squirrel", chance = 26.79},
-        {name = "Red Giant Ant", chance = 8.93},
-        {name = "Red Fox", chance = 0}
-    },
-    ["Bug Egg"] = {
-        {name = "Snail", chance = 40},
-        {name = "Giant Ant", chance = 35},
-        {name = "Caterpillar", chance = 25},
-        {name = "Praying Mantis", chance = 0},
-        {name = "Dragon Fly", chance = 0}
-    },
-    ["Night Egg"] = {
-        {name = "Hedgehog", chance = 47},
-        {name = "Mole", chance = 23.5},
-        {name = "Frog", chance = 21.16},
-        {name = "Echo Frog", chance = 8.35},
-        {name = "Night Owl", chance = 0},
-        {name = "Raccoon", chance = 0}
-    },
-    ["Bee Egg"] = {
-        {name = "Bee", chance = 65},
-        {name = "Honey Bee", chance = 20},
-        {name = "Bear Bee", chance = 10},
-        {name = "Petal Bee", chance = 5},
-        {name = "Queen Bee", chance = 0}
-    },
-    ["Anti Bee Egg"] = {
-        {name = "Wasp", chance = 55},
-        {name = "Tarantula Hawk", chance = 31},
-        {name = "Moth", chance = 14},
-        {name = "Butterfly", chance = 0},
-        {name = "Disco Bee", chance = 0}
-    },
-    ["Common Summer Egg"] = {
-        {name = "Starfish", chance = 50},
-        {name = "Seafull", chance = 25},
-        {name = "Crab", chance = 25}
-    },
-    ["Rare Summer Egg"] = {
-        {name = "Flamingo", chance = 30},
-        {name = "Toucan", chance = 25},
-        {name = "Sea Turtle", chance = 20},
-        {name = "Orangutan", chance = 15},
-        {name = "Seal", chance = 10}
-    },
-    ["Paradise Egg"] = {
-        {name = "Ostrich", chance = 43},
-        {name = "Peacock", chance = 33},
-        {name = "Capybara", chance = 24},
-        {name = "Scarlet Macaw", chance = 3},
-        {name = "Mimic Octopus", chance = 1}
-    },
-    ["Premium Night Egg"] = {
-        {name = "Hedgehog", chance = 50},
-        {name = "Mole", chance = 26},
-        {name = "Frog", chance = 14},
-        {name = "Echo Frog", chance = 10}
-    },
-    ["Dinosaur Egg"] = {
-        {name = "Raptor", chance = 33},
-        {name = "Triceratops", chance = 33},
-        {name = "T-Rex", chance = 1},
-        {name = "Stegosaurus", chance = 33},
-        {name = "Pterodactyl", chance = 33},
-        {name = "Brontosaurus", chance = 33}
-    }
-}
-
--- Weighted Random Selection Function
-local function choosePet(list)
+-- ESP Function
+local function weightedRandom(t)
     local total = 0
-    for _, v in ipairs(list) do total += v.chance end
-    local roll = math.random() * total
-    local acc = 0
-    for _, v in ipairs(list) do
-        acc += v.chance
-        if roll <= acc then return v.name end
+    for _, weight in pairs(t) do
+        total = total + weight
     end
-    return list[#list].name -- fallback
-end
-
--- Update ESP to display egg name and random pet name from your data
-local function updateESP()
-    for _, egg in ipairs(workspace:GetDescendants()) do
-        if egg:IsA("Model") and eggsData[egg.Name] then
-            local orig = egg.Name
-            local pet = choosePet(eggsData[egg.Name])
-            local gui = egg:FindFirstChild("XenoPetESP")
-            if not gui then
-                gui = Instance.new("BillboardGui")
-                gui.Name = "XenoPetESP"
-                gui.Size = UDim2.new(0, 150, 0, 60)
-                gui.Adornee = egg.PrimaryPart or egg:FindFirstChildWhichIsA("BasePart")
-                gui.StudsOffset = Vector3.new(0, 2, 0)
-                gui.AlwaysOnTop = true
-                gui.Parent = egg
-
-                local label = Instance.new("TextLabel")
-                label.Name = "InfoLabel"
-                label.Size = UDim2.new(1, 0, 1, 0)
-                label.BackgroundTransparency = 1
-                label.Font = Enum.Font.GothamBold
-                label.TextSize = 14
-                label.TextColor3 = Color3.new(1,1,1)
-                label.TextStrokeTransparency = 0.5
-                label.TextStrokeColor3 = Color3.new(0, 0, 0)
-                label.Parent = gui
-            end
-            gui.InfoLabel.Text = orig .. " ➟ " .. pet
+    local threshold = math.random() * total
+    local cumulative = 0
+    for item, weight in pairs(t) do
+        cumulative = cumulative + weight
+        if threshold <= cumulative then
+            return item
         end
     end
 end
 
--- Auto Reroll & Loading Logic
+local function updateESP()
+    for _, egg in pairs(workspace:GetDescendants()) do
+        if egg:IsA("Model") and egg:FindFirstChild("MeshPart") and egg.Name:find("Egg") then
+            local eggName = egg.Name:match("^(.- Egg)")
+            if eggChances[eggName] then
+                local gui = egg:FindFirstChild("NameGui") or Instance.new("BillboardGui", egg)
+                gui.Name = "NameGui"
+                gui.Size = UDim2.new(0, 200, 0, 50)
+                gui.AlwaysOnTop = true
+                gui.Adornee = egg:FindFirstChildWhichIsA("BasePart") or egg.PrimaryPart
+
+                local label = gui:FindFirstChild("Label") or Instance.new("TextLabel", gui)
+                label.Name = "Label"
+                label.Size = UDim2.new(1, 0, 1, 0)
+                label.BackgroundTransparency = 1
+                label.TextColor3 = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+                label.Font = Enum.Font.GothamBold
+                label.TextScaled = true
+
+                local pet = weightedRandom(eggChances[eggName])
+                label.Text = eggName .. " | " .. pet
+            end
+        end
+    end
+end
+
+-- Logic
 local autoEnabled = false
-autoButton.MouseButton1Click:Connect(function()
+
+autoReroll.MouseButton1Click:Connect(function()
     autoEnabled = not autoEnabled
-    autoButton.Text = autoEnabled and "♻️ Auto Reroll: ON ♻️" or "♻️ Auto Reroll: OFF ♻️"
-    autoButton.BackgroundColor3 = autoEnabled and Color3.fromRGB(100, 230, 100) or Color3.fromRGB(100, 100, 100)
-    loadingBar.Visible = autoEnabled
-    loadingLabel.Visible = autoEnabled
+    autoReroll.Text = "Auto Reroll: " .. (autoEnabled and "ON" or "OFF")
+    autoReroll.BackgroundColor3 = autoEnabled and Color3.fromRGB(80, 160, 80) or Color3.fromRGB(100, 100, 100)
 end)
 
-manualButton.MouseButton1Click:Connect(updateESP)
+manualReroll.MouseButton1Click:Connect(updateESP)
 
--- Repeat every 3 seconds when enabled
+-- Smooth loading loop
 spawn(function()
     while true do
         if autoEnabled then
-            for i = 0, 100, 5 do
-                loadingBar.Size = UDim2.new(i/100, 0, 0, 8)
-                loadingLabel.Text = ("Refreshing in %ds"):format(math.ceil((100 - i) * 3 / 100))
-                wait(0.15)
+            loadingBar:TweenSize(UDim2.new(0, 0, 1, 0), "Out", "Linear", 0)
+            loadingBarBackground.Visible = true
+            loadingLabel.Visible = true
+
+            loadingLabel.Text = "Refreshing in 3s"
+            loadingBar.Size = UDim2.new(0, 0, 1, 0)
+            wait(0.1)
+
+            local tween = TweenService:Create(loadingBar, TweenInfo.new(3, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)})
+            tween:Play()
+
+            for i = 3, 1, -1 do
+                loadingLabel.Text = "Refreshing in " .. i .. "s"
+                wait(1)
             end
+
             updateESP()
+        else
+            loadingBarBackground.Visible = false
+            loadingLabel.Visible = false
         end
         wait(0.1)
     end
