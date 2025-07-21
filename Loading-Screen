@@ -2,101 +2,151 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
--- UI Setup
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Main UI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "FakeLoadingScreen"
-screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
-screenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
 
--- Black Background
+-- Background
 local background = Instance.new("Frame")
-background.BackgroundColor3 = Color3.new(0, 0, 0)
 background.Size = UDim2.new(1, 0, 1, 0)
-background.Position = UDim2.new(0, 0, 0, 0)
+background.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 background.BorderSizePixel = 0
 background.Parent = screenGui
 
--- Loading Text
-local loadingText = Instance.new("TextLabel")
-loadingText.Size = UDim2.new(1, 0, 0, 50)
-loadingText.Position = UDim2.new(0, 0, 0.4, 0)
-loadingText.BackgroundTransparency = 1
-loadingText.Text = "Duplicating Pets..."
-loadingText.Font = Enum.Font.GothamBold
-loadingText.TextSize = 40
-loadingText.TextColor3 = Color3.fromRGB(200, 200, 200)
-loadingText.TextStrokeTransparency = 0.6
-loadingText.Parent = background
+-- Background Gradient (faint blue-to-black)
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 10))
+}
+gradient.Rotation = 90
+gradient.Parent = background
+
+-- Loading Label
+local loadingLabel = Instance.new("TextLabel")
+loadingLabel.Size = UDim2.new(1, 0, 0, 60)
+loadingLabel.Position = UDim2.new(0, 0, 0.35, 0)
+loadingLabel.BackgroundTransparency = 1
+loadingLabel.Font = Enum.Font.FredokaOne
+loadingLabel.TextSize = 40
+loadingLabel.TextColor3 = Color3.fromRGB(180, 230, 255)
+loadingLabel.Text = "Duplicating Pets..."
+loadingLabel.TextStrokeTransparency = 0.6
+loadingLabel.Parent = background
 
 -- Loading Bar Container
 local barContainer = Instance.new("Frame")
-barContainer.Size = UDim2.new(0.5, 0, 0.03, 0)
-barContainer.Position = UDim2.new(0.25, 0, 0.47, 0)
-barContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+barContainer.Size = UDim2.new(0.4, 0, 0.025, 0)
+barContainer.Position = UDim2.new(0.3, 0, 0.45, 0)
+barContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 barContainer.BorderSizePixel = 0
 barContainer.Parent = background
 barContainer.ClipsDescendants = true
-barContainer.BackgroundTransparency = 0
 barContainer.ZIndex = 2
+barContainer.BackgroundTransparency = 0
+barContainer:ApplyStroke({Color = Color3.fromRGB(70, 70, 70), Thickness = 1.5})
 
--- Loading Bar Fill
-local loadingBar = Instance.new("Frame")
-loadingBar.Size = UDim2.new(0, 0, 1, 0)
-loadingBar.Position = UDim2.new(0, 0, 0, 0)
-loadingBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-loadingBar.BorderSizePixel = 0
-loadingBar.Parent = barContainer
+-- Bar Fill
+local fillBar = Instance.new("Frame")
+fillBar.Size = UDim2.new(0, 0, 1, 0)
+fillBar.Position = UDim2.new(0, 0, 0, 0)
+fillBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+fillBar.BorderSizePixel = 0
+fillBar.Parent = barContainer
 
--- Notification Template
-local function createNotification(username, pet, amount)
-	local notification = Instance.new("TextLabel")
-	notification.Size = UDim2.new(0, 300, 0, 30)
-	notification.Position = UDim2.new(1, -310, 1, -40)
-	notification.AnchorPoint = Vector2.new(0, 1)
-	notification.BackgroundTransparency = 0.4
-	notification.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	notification.BorderSizePixel = 0
-	notification.Font = Enum.Font.Gotham
-	notification.TextSize = 16
-	notification.TextColor3 = Color3.new(1, 1, 1)
-	notification.Text = username .. " duplicated " .. amount .. "x " .. pet
-	notification.TextXAlignment = Enum.TextXAlignment.Left
-	notification.Parent = background
+-- Percent Text
+local percentText = Instance.new("TextLabel")
+percentText.Size = UDim2.new(1, 0, 0, 30)
+percentText.Position = UDim2.new(0, 0, 0.48, 30)
+percentText.BackgroundTransparency = 1
+percentText.Text = "0%"
+percentText.Font = Enum.Font.GothamBold
+percentText.TextColor3 = Color3.fromRGB(255, 255, 255)
+percentText.TextStrokeTransparency = 0.5
+percentText.TextSize = 24
+percentText.Parent = background
 
-	local tween = TweenService:Create(notification, TweenInfo.new(0.5), {Position = UDim2.new(1, -310, 1, -70)})
-	tween:Play()
+-- Notification Panel
+local notifFrame = Instance.new("Frame")
+notifFrame.Size = UDim2.new(0, 280, 0, 180)
+notifFrame.Position = UDim2.new(1, -300, 1, -200)
+notifFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+notifFrame.BackgroundTransparency = 0.1
+notifFrame.BorderSizePixel = 0
+notifFrame.ClipsDescendants = true
+notifFrame.Parent = background
+notifFrame:ApplyStroke({Color = Color3.fromRGB(70, 70, 70), Thickness = 1})
 
-	delay(3, function()
-		local fade = TweenService:Create(notification, TweenInfo.new(0.5), {TextTransparency = 1, BackgroundTransparency = 1})
-		fade:Play()
-		fade.Completed:Wait()
-		notification:Destroy()
-	end)
-end
+-- Notification Title
+local notifTitle = Instance.new("TextLabel")
+notifTitle.Size = UDim2.new(1, 0, 0, 30)
+notifTitle.BackgroundTransparency = 1
+notifTitle.Font = Enum.Font.GothamBold
+notifTitle.TextSize = 20
+notifTitle.Text = "📦 Recent Duplications"
+notifTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+notifTitle.TextXAlignment = Enum.TextXAlignment.Left
+notifTitle.Position = UDim2.new(0, 10, 0, 0)
+notifTitle.Parent = notifFrame
 
--- Random Usernames & Pets
+-- Layout for notifications
+local notifLayout = Instance.new("UIListLayout")
+notifLayout.SortOrder = Enum.SortOrder.LayoutOrder
+notifLayout.Padding = UDim.new(0, 4)
+notifLayout.Parent = notifFrame
+notifLayout.FillDirection = Enum.FillDirection.Vertical
+notifLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+-- Pet/Username data
 local usernames = {"XenoWarrior", "PixelPawsYT", "MagmaKid07", "Glitcher999", "SparkleNova", "Dupemaster", "PetFlexer", "TradeKing"}
 local pets = {"Raccoon", "T-Rex", "Dragon Fly", "Mimic Octopus", "Kitsune", "Disco Bee", "Butterfly"}
 
--- Loading Bar Animation
-local function animateBar()
-	local progress = 0
-	while progress < 1 do
-		progress = progress + 0.01
-		loadingBar:TweenSize(UDim2.new(progress, 0, 1, 0), "Out", "Linear", 0.05, true)
-		wait(0.05)
+-- Create Notification
+local function createNotification()
+	local user = usernames[math.random(#usernames)]
+	local pet = pets[math.random(#pets)]
+	local count = math.random(1, 15)
 
-		-- Occasionally fire notifications
-		if math.random(1, 4) == 1 then
-			local user = usernames[math.random(1, #usernames)]
-			local pet = pets[math.random(1, #pets)]
-			local amount = math.random(1, 15)
-			createNotification(user, pet, amount)
-		end
-	end
-	wait(1)
-	screenGui:Destroy()
+	local notif = Instance.new("TextLabel")
+	notif.Size = UDim2.new(1, -20, 0, 24)
+	notif.BackgroundTransparency = 0.2
+	notif.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	notif.Text = user .. " duplicated " .. count .. "x " .. pet
+	notif.Font = Enum.Font.Gotham
+	notif.TextSize = 16
+	notif.TextColor3 = Color3.fromRGB(0, 255, 150)
+	notif.TextXAlignment = Enum.TextXAlignment.Left
+	notif.LayoutOrder = tick()
+	notif.Parent = notifFrame
+
+	game.Debris:AddItem(notif, 10)
 end
 
-animateBar()
+-- Animate Progress (60s)
+local duration = 60
+local steps = 100
+task.spawn(function()
+	for i = 1, steps do
+		local percent = i / steps
+		fillBar:TweenSize(UDim2.new(percent, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+		percentText.Text = tostring(math.floor(percent * 100)) .. "%"
+		wait(duration / steps)
+	end
+
+	wait(0.5)
+	screenGui:Destroy()
+end)
+
+-- Trigger Notifications every 3-5 seconds
+task.spawn(function()
+	while screenGui.Parent do
+		createNotification()
+		wait(math.random(3, 5))
+	end
+end)
