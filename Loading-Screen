@@ -1,51 +1,61 @@
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Remove old if exists
+-- Remove old UI if exists
 if playerGui:FindFirstChild("FakeLoadingUI") then
 	playerGui.FakeLoadingUI:Destroy()
 end
 
--- GUI and Blur
+-- Blur effect
+local Lighting = game:GetService("Lighting")
+local blur = Lighting:FindFirstChildOfClass("BlurEffect")
+if not blur then
+	blur = Instance.new("BlurEffect")
+	blur.Size = 24
+	blur.Parent = Lighting
+else
+	blur.Size = 24
+end
+
+-- Fullscreen black background covering everything
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "FakeLoadingUI"
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
 screenGui.Parent = playerGui
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local blur = Instance.new("BlurEffect")
-blur.Size = 24
-blur.Parent = game:GetService("Lighting")
-
--- Black full background
 local background = Instance.new("Frame", screenGui)
-background.BackgroundColor3 = Color3.new(0, 0, 0)
 background.Size = UDim2.new(1, 0, 1, 0)
 background.Position = UDim2.new(0, 0, 0, 0)
+background.BackgroundColor3 = Color3.new(0, 0, 0)
 background.BorderSizePixel = 0
 background.ZIndex = 0
 
--- Main UI frame
-local frame = Instance.new("Frame", screenGui)
+-- Main UI frame inside the black background (centered)
+local frame = Instance.new("Frame", background)
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
 frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-frame.Size = UDim2.new(0, 400, 0, 300)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.Size = UDim2.new(0, 420, 0, 320)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 frame.BorderSizePixel = 0
-frame.ZIndex = 2
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+frame.ZIndex = 5
+local uicorner = Instance.new("UICorner", frame)
+uicorner.CornerRadius = UDim.new(0, 14)
 
+-- Title label
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, 0, 0, 50)
+title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "🌀 Pet Spawner Loading Hub"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 20
-title.ZIndex = 3
+title.TextSize = 22
+title.ZIndex = 6
 
 -- Pets list
 local pets = {
@@ -53,185 +63,175 @@ local pets = {
 	"Kitsune", "Disco Bee", "Butterfly"
 }
 
--- Pet dropdown
-local petDropdown = Instance.new("TextButton", frame)
-petDropdown.Size = UDim2.new(1, -40, 0, 40)
-petDropdown.Position = UDim2.new(0, 20, 0, 70)
-petDropdown.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-petDropdown.TextColor3 = Color3.new(1, 1, 1)
-petDropdown.Font = Enum.Font.Gotham
-petDropdown.Text = "Select a Pet"
-petDropdown.TextSize = 16
-petDropdown.ZIndex = 3
-Instance.new("UICorner", petDropdown).CornerRadius = UDim.new(0, 6)
-
-local dropdownMenu = Instance.new("Frame", screenGui)
-dropdownMenu.Size = UDim2.new(0, 200, 0, #pets * 30)
-dropdownMenu.Position = UDim2.new(0.5, -100, 0.5, -80)
-dropdownMenu.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-dropdownMenu.Visible = false
-dropdownMenu.ZIndex = 4
-Instance.new("UICorner", dropdownMenu).CornerRadius = UDim.new(0, 6)
-
-local petListLayout = Instance.new("UIListLayout", dropdownMenu)
-petListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-for _, pet in ipairs(pets) do
-	local button = Instance.new("TextButton", dropdownMenu)
-	button.Size = UDim2.new(1, 0, 0, 30)
-	button.Text = pet
-	button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+-- Dropdown template function
+local function createDropdown(parent, labelText, options, positionY)
+	local dropdown = Instance.new("Frame", parent)
+	dropdown.Size = UDim2.new(1, -40, 0, 45)
+	dropdown.Position = UDim2.new(0, 20, 0, positionY)
+	dropdown.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	dropdown.ZIndex = 6
+	local uicorner = Instance.new("UICorner", dropdown)
+	uicorner.CornerRadius = UDim.new(0, 8)
+	
+	local label = Instance.new("TextLabel", dropdown)
+	label.Size = UDim2.new(0.4, 0, 1, 0)
+	label.Position = UDim2.new(0, 10, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Text = labelText
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 16
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.ZIndex = 7
+	
+	local button = Instance.new("TextButton", dropdown)
+	button.Size = UDim2.new(0.55, -10, 0, 35)
+	button.Position = UDim2.new(0.45, 0, 0.1, 0)
+	button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 	button.TextColor3 = Color3.new(1, 1, 1)
 	button.Font = Enum.Font.Gotham
-	button.TextSize = 14
-	Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+	button.TextSize = 16
+	button.Text = "Select"
+	button.ZIndex = 7
+	local btnCorner = Instance.new("UICorner", button)
+	btnCorner.CornerRadius = UDim.new(0, 6)
+	
+	local dropdownMenu = Instance.new("Frame", dropdown)
+	dropdownMenu.Size = UDim2.new(1, 0, 0, #options * 32)
+	dropdownMenu.Position = UDim2.new(0, 0, 1, 5)
+	dropdownMenu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	dropdownMenu.Visible = false
+	dropdownMenu.ZIndex = 8
+	local menuCorner = Instance.new("UICorner", dropdownMenu)
+	menuCorner.CornerRadius = UDim.new(0, 6)
+	
+	local layout = Instance.new("UIListLayout", dropdownMenu)
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Padding = UDim.new(0, 2)
+	
+	for _, option in ipairs(options) do
+		local optBtn = Instance.new("TextButton", dropdownMenu)
+		optBtn.Size = UDim2.new(1, -10, 0, 28)
+		optBtn.Position = UDim2.new(0, 5, 0, 0)
+		optBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		optBtn.TextColor3 = Color3.new(1, 1, 1)
+		optBtn.Font = Enum.Font.Gotham
+		optBtn.TextSize = 14
+		optBtn.Text = option
+		optBtn.ZIndex = 9
+		local optCorner = Instance.new("UICorner", optBtn)
+		optCorner.CornerRadius = UDim.new(0, 6)
+		
+		optBtn.MouseButton1Click:Connect(function()
+			button.Text = option
+			dropdownMenu.Visible = false
+		end)
+	end
 	
 	button.MouseButton1Click:Connect(function()
-		petDropdown.Text = pet
-		dropdownMenu.Visible = false
+		dropdownMenu.Visible = not dropdownMenu.Visible
 	end)
+	
+	return button
 end
 
-petDropdown.MouseButton1Click:Connect(function()
-	dropdownMenu.Visible = not dropdownMenu.Visible
-	amountMenu.Visible = false -- hide other dropdown if open
-end)
-
--- Amount dropdown (1–5)
-local amountDropdown = Instance.new("TextButton", frame)
-amountDropdown.Size = UDim2.new(1, -40, 0, 40)
-amountDropdown.Position = UDim2.new(0, 20, 0, 130)
-amountDropdown.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-amountDropdown.TextColor3 = Color3.new(1, 1, 1)
-amountDropdown.Font = Enum.Font.Gotham
-amountDropdown.Text = "Select Amount"
-amountDropdown.TextSize = 16
-amountDropdown.ZIndex = 3
-Instance.new("UICorner", amountDropdown).CornerRadius = UDim.new(0, 6)
-
-local amountMenu = Instance.new("Frame", screenGui)
-amountMenu.Size = UDim2.new(0, 200, 0, 5 * 30)
-amountMenu.Position = UDim2.new(0.5, -100, 0.5, -20)
-amountMenu.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-amountMenu.Visible = false
-amountMenu.ZIndex = 4
-Instance.new("UICorner", amountMenu).CornerRadius = UDim.new(0, 6)
-
-local amtListLayout = Instance.new("UIListLayout", amountMenu)
-amtListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-for i = 1, 5 do
-	local button = Instance.new("TextButton", amountMenu)
-	button.Size = UDim2.new(1, 0, 0, 30)
-	button.Text = tostring(i)
-	button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	button.TextColor3 = Color3.new(1, 1, 1)
-	button.Font = Enum.Font.Gotham
-	button.TextSize = 14
-	Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-	button.MouseButton1Click:Connect(function()
-		amountDropdown.Text = tostring(i)
-		amountMenu.Visible = false
-	end)
-end
-
-amountDropdown.MouseButton1Click:Connect(function()
-	amountMenu.Visible = not amountMenu.Visible
-	dropdownMenu.Visible = false -- hide other dropdown if open
-end)
+local petDropdown = createDropdown(frame, "Pet:", pets, 70)
+local amountOptions = {"1", "2", "3", "4", "5"}
+local amountDropdown = createDropdown(frame, "Amount:", amountOptions, 130)
 
 -- Description label
 local description = Instance.new("TextLabel", frame)
 description.Size = UDim2.new(1, -40, 0, 40)
-description.Position = UDim2.new(0, 20, 0, 180)
+description.Position = UDim2.new(0, 20, 0, 190)
 description.BackgroundTransparency = 1
 description.Text = "Each pet adds 1 minute to the loading screen"
 description.TextColor3 = Color3.new(0.8, 0.8, 0.8)
 description.Font = Enum.Font.Gotham
-description.TextSize = 13
+description.TextSize = 14
 description.TextWrapped = true
 description.TextXAlignment = Enum.TextXAlignment.Center
-description.ZIndex = 3
+description.ZIndex = 6
 
 -- Start button
 local startBtn = Instance.new("TextButton", frame)
-startBtn.Size = UDim2.new(0, 150, 0, 40)
-startBtn.Position = UDim2.new(0.5, -75, 1, -60)
+startBtn.Size = UDim2.new(0, 160, 0, 42)
+startBtn.Position = UDim2.new(0.5, -80, 1, -65)
 startBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 startBtn.TextColor3 = Color3.new(1, 1, 1)
 startBtn.Font = Enum.Font.GothamBold
 startBtn.Text = "Start Spawning"
-startBtn.TextSize = 16
-startBtn.ZIndex = 3
-Instance.new("UICorner", startBtn).CornerRadius = UDim.new(0, 8)
+startBtn.TextSize = 18
+startBtn.ZIndex = 6
+local startCorner = Instance.new("UICorner", startBtn)
+startCorner.CornerRadius = UDim.new(0, 10)
 
--- Loading bar background
+-- Loading bar container
 local loadingBarBg = Instance.new("Frame", frame)
-loadingBarBg.Size = UDim2.new(0.8, 0, 0, 25)
-loadingBarBg.Position = UDim2.new(0.1, 0, 1, -110)
+loadingBarBg.Size = UDim2.new(0.8, 0, 0, 28)
+loadingBarBg.Position = UDim2.new(0.1, 0, 1, -115)
 loadingBarBg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 loadingBarBg.BorderSizePixel = 0
-loadingBarBg.ZIndex = 3
-Instance.new("UICorner", loadingBarBg).CornerRadius = UDim.new(0, 6)
+loadingBarBg.ZIndex = 6
+local loadingCorner = Instance.new("UICorner", loadingBarBg)
+loadingCorner.CornerRadius = UDim.new(0, 8)
 
--- Loading bar fill
 local loadingBarFill = Instance.new("Frame", loadingBarBg)
-loadingBarFill.Size = UDim2.new(0, 0, 1, 0) -- starts empty
+loadingBarFill.Size = UDim2.new(0, 0, 1, 0)
 loadingBarFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 loadingBarFill.BorderSizePixel = 0
-loadingBarFill.ZIndex = 4
-Instance.new("UICorner", loadingBarFill).CornerRadius = UDim.new(0, 6)
+loadingBarFill.ZIndex = 7
+local fillCorner = Instance.new("UICorner", loadingBarFill)
+fillCorner.CornerRadius = UDim.new(0, 8)
 
--- Loading percent text
 local loadingPercent = Instance.new("TextLabel", loadingBarBg)
 loadingPercent.Size = UDim2.new(1, 0, 1, 0)
 loadingPercent.BackgroundTransparency = 1
 loadingPercent.TextColor3 = Color3.new(1, 1, 1)
 loadingPercent.Font = Enum.Font.GothamBold
-loadingPercent.TextSize = 14
+loadingPercent.TextSize = 16
 loadingPercent.Text = "0%"
-loadingPercent.ZIndex = 5
+loadingPercent.ZIndex = 8
 
--- Notification panel (top right)
+-- Notification panel top right
 local notificationPanel = Instance.new("Frame", screenGui)
-notificationPanel.Size = UDim2.new(0, 250, 0, 150)
-notificationPanel.Position = UDim2.new(1, -260, 0, 20)
+notificationPanel.Size = UDim2.new(0, 280, 0, 160)
+notificationPanel.Position = UDim2.new(1, -290, 0, 20)
 notificationPanel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 notificationPanel.BorderSizePixel = 0
-notificationPanel.ZIndex = 5
-Instance.new("UICorner", notificationPanel).CornerRadius = UDim.new(0, 10)
+notificationPanel.ZIndex = 7
+local notifCorner = Instance.new("UICorner", notificationPanel)
+notifCorner.CornerRadius = UDim.new(0, 12)
 
 local notifTitle = Instance.new("TextLabel", notificationPanel)
-notifTitle.Size = UDim2.new(1, 0, 0, 30)
+notifTitle.Size = UDim2.new(1, 0, 0, 36)
 notifTitle.BackgroundTransparency = 1
 notifTitle.Text = "Recent Spawned Pets"
 notifTitle.TextColor3 = Color3.new(1, 1, 1)
 notifTitle.Font = Enum.Font.GothamBold
-notifTitle.TextSize = 16
-notifTitle.ZIndex = 6
+notifTitle.TextSize = 18
+notifTitle.ZIndex = 8
 
 local notifList = Instance.new("ScrollingFrame", notificationPanel)
-notifList.Size = UDim2.new(1, -10, 1, -40)
-notifList.Position = UDim2.new(0, 5, 0, 35)
+notifList.Size = UDim2.new(1, -20, 1, -50)
+notifList.Position = UDim2.new(0, 10, 0, 45)
 notifList.BackgroundTransparency = 1
-notifList.ScrollBarThickness = 6
+notifList.ScrollBarThickness = 7
+notifList.ZIndex = 8
 notifList.CanvasSize = UDim2.new(0, 0, 0, 0)
-notifList.ZIndex = 6
 
 local notifLayout = Instance.new("UIListLayout", notifList)
 notifLayout.SortOrder = Enum.SortOrder.LayoutOrder
-notifLayout.Padding = UDim.new(0, 5)
+notifLayout.Padding = UDim.new(0, 6)
 
 local function addNotification(text)
 	local notif = Instance.new("TextLabel")
-	notif.Size = UDim2.new(1, 0, 0, 25)
+	notif.Size = UDim2.new(1, 0, 0, 28)
 	notif.BackgroundTransparency = 1
 	notif.TextColor3 = Color3.new(1, 1, 1)
 	notif.Font = Enum.Font.Gotham
 	notif.TextSize = 14
 	notif.Text = text
-	notif.LayoutOrder = #notifList:GetChildren()
+	notif.LayoutOrder = #notifList:GetChildren() + 1
 	notif.Parent = notifList
 	
 	wait(0.1)
@@ -239,9 +239,8 @@ local function addNotification(text)
 	local canvasHeight = notifLayout.AbsoluteContentSize.Y
 	notifList.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
 	
-	-- Remove old notifications after 8 seconds
 	delay(8, function()
-		if notif.Parent then
+		if notif and notif.Parent then
 			notif:Destroy()
 			wait(0.1)
 			local newCanvasHeight = notifLayout.AbsoluteContentSize.Y
@@ -256,7 +255,8 @@ local loadingTimePerPet = 60 -- seconds per pet
 local function startLoading()
 	local pet = petDropdown.Text
 	local amount = tonumber(amountDropdown.Text)
-	if pet == "Select a Pet" then
+	
+	if pet == "Select" or pet == "" then
 		warn("Please select a pet!")
 		return
 	end
@@ -276,7 +276,7 @@ local function startLoading()
 	loadingPercent.Text = "0%"
 	
 	local connection
-	connection = game:GetService("RunService").Heartbeat:Connect(function()
+	connection = RunService.Heartbeat:Connect(function()
 		local elapsed = tick() - startTime
 		local progress = math.clamp(elapsed / totalLoadingTime, 0, 1)
 		loadingBarFill.Size = UDim2.new(progress, 0, 1, 0)
@@ -285,14 +285,11 @@ local function startLoading()
 		if progress >= 1 then
 			connection:Disconnect()
 			
-			-- Simulate spawning pets notifications
 			for i = 1, amount do
-				local spawnText = string.format("%s x%d spawned", pet, i)
-				addNotification(spawnText)
+				addNotification(string.format("%s x%d spawned", pet, i))
 				wait(0.5)
 			end
 			
-			-- Reset UI after done
 			startBtn.Active = true
 			petDropdown.Active = true
 			amountDropdown.Active = true
