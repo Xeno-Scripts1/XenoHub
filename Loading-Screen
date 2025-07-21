@@ -1,36 +1,35 @@
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Remove any existing UI named "BlackCoverUI"
+-- Disable Roblox notifications Core GUI
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Notifications, false)
+
+-- Remove old UI and blur
 if playerGui:FindFirstChild("BlackCoverUI") then
 	playerGui.BlackCoverUI:Destroy()
 end
-
--- Remove any existing blur effects from Lighting
 for _, effect in ipairs(Lighting:GetChildren()) do
 	if effect:IsA("BlurEffect") then
 		effect:Destroy()
 	end
 end
 
--- Add a blur effect for nicer look (optional)
 local blur = Instance.new("BlurEffect")
 blur.Size = 24
 blur.Parent = Lighting
 
--- Create ScreenGui to cover whole screen
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "BlackCoverUI"
-screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
-screenGui.DisplayOrder = 9999 -- very high so it overlays everything
+screenGui.ResetOnSpawn = false
+screenGui.DisplayOrder = 10000
 screenGui.Parent = playerGui
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Black full-screen frame
 local blackFrame = Instance.new("Frame")
 blackFrame.Size = UDim2.new(1, 0, 1, 0)
 blackFrame.Position = UDim2.new(0, 0, 0, 0)
