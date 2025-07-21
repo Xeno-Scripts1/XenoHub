@@ -10,80 +10,71 @@ gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- Fullscreen Black Background
+-- ⬛ Black Gradient Background
 local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1, 0, 1, 0)
 bg.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 bg.BorderSizePixel = 0
 bg.Parent = gui
 
--- Gradient
 local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 10, 20)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 5))
-}
+gradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 15, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0)),
+})
 gradient.Rotation = 90
 gradient.Parent = bg
 
--- Loading Title
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 60)
-title.Position = UDim2.new(0, 0, 0.3, 0)
-title.Text = "🔁 Duplicating Pets..."
-title.TextColor3 = Color3.fromRGB(200, 255, 255)
-title.TextStrokeTransparency = 0.6
-title.Font = Enum.Font.FredokaOne
-title.TextScaled = true
-title.BackgroundTransparency = 1
-title.Parent = bg
+-- 🌟 Drop shadow effect
+local blur = Instance.new("BlurEffect")
+blur.Size = 25
+blur.Parent = game:GetService("Lighting")
 
--- Loading Bar Container
-local barFrame = Instance.new("Frame")
-barFrame.Size = UDim2.new(0.4, 0, 0.025, 0)
-barFrame.Position = UDim2.new(0.3, 0, 0.45, 0)
-barFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-barFrame.BorderSizePixel = 0
-barFrame.Parent = bg
+-- 🧪 Loading Container
+local loadBox = Instance.new("Frame")
+loadBox.Size = UDim2.new(0.4, 0, 0.05, 0)
+loadBox.Position = UDim2.new(0.3, 0, 0.45, 0)
+loadBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+loadBox.BorderSizePixel = 0
+loadBox.Parent = bg
 
-local barCorner = Instance.new("UICorner")
-barCorner.CornerRadius = UDim.new(0, 8)
-barCorner.Parent = barFrame
+local loadCorner = Instance.new("UICorner")
+loadCorner.CornerRadius = UDim.new(0, 10)
+loadCorner.Parent = loadBox
 
--- Fill Bar
+-- ✅ Loading Fill Bar
 local bar = Instance.new("Frame")
 bar.Size = UDim2.new(0, 0, 1, 0)
 bar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 bar.BorderSizePixel = 0
-bar.Parent = barFrame
+bar.Parent = loadBox
 
 local fillCorner = Instance.new("UICorner")
-fillCorner.CornerRadius = UDim.new(0, 8)
+fillCorner.CornerRadius = UDim.new(0, 10)
 fillCorner.Parent = bar
 
--- Percent Text
+-- % Text Inside Bar
 local percent = Instance.new("TextLabel")
-percent.Size = UDim2.new(1, 0, 0, 30)
-percent.Position = UDim2.new(0, 0, 0.48, 30)
+percent.Size = UDim2.new(1, 0, 1, 0)
+percent.BackgroundTransparency = 1
 percent.Text = "0%"
 percent.Font = Enum.Font.GothamBold
 percent.TextColor3 = Color3.fromRGB(255, 255, 255)
-percent.TextStrokeTransparency = 0.4
 percent.TextScaled = true
-percent.BackgroundTransparency = 1
-percent.Parent = bg
+percent.TextStrokeTransparency = 0.4
+percent.Parent = loadBox
 
--- Recent Duplications Panel
+-- 🔔 Recent Duplications Panel
 local notifBox = Instance.new("Frame")
-notifBox.Size = UDim2.new(0, 280, 0, 180)
-notifBox.Position = UDim2.new(1, -300, 1, -200)
+notifBox.Size = UDim2.new(0, 300, 0, 200)
+notifBox.Position = UDim2.new(1, -310, 1, -220)
 notifBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 notifBox.BackgroundTransparency = 0.1
 notifBox.BorderSizePixel = 0
 notifBox.Parent = bg
 
 local notifCorner = Instance.new("UICorner")
-notifCorner.CornerRadius = UDim.new(0, 6)
+notifCorner.CornerRadius = UDim.new(0, 8)
 notifCorner.Parent = notifBox
 
 local notifTitle = Instance.new("TextLabel")
@@ -101,17 +92,19 @@ local notifList = Instance.new("Frame")
 notifList.Size = UDim2.new(1, -20, 1, -35)
 notifList.Position = UDim2.new(0, 10, 0, 30)
 notifList.BackgroundTransparency = 1
+notifList.ClipsDescendants = true
 notifList.Parent = notifBox
 
-local listLayout = Instance.new("UIListLayout")
-listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-listLayout.Padding = UDim.new(0, 4)
-listLayout.Parent = notifList
+local layout = Instance.new("UIListLayout")
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Padding = UDim.new(0, 6)
+layout.Parent = notifList
 
--- Notification Generator
+-- 🧪 Notification Data
 local usernames = {"XenoWarrior", "PixelPawsYT", "MagmaKid07", "Glitcher999", "SparkleNova", "Dupemaster", "PetFlexer", "TradeKing"}
 local pets = {"Raccoon", "T-Rex", "Dragon Fly", "Mimic Octopus", "Kitsune", "Disco Bee", "Butterfly"}
 
+-- 🎬 Notification Function with Animation
 local function createNotif()
 	local name = usernames[math.random(#usernames)]
 	local pet = pets[math.random(#pets)]
@@ -119,37 +112,47 @@ local function createNotif()
 
 	local notif = Instance.new("TextLabel")
 	notif.Size = UDim2.new(1, 0, 0, 24)
+	notif.BackgroundTransparency = 0.15
 	notif.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	notif.BackgroundTransparency = 0.1
+	notif.Text = name .. " duplicated " .. amount .. "x " .. pet
 	notif.Font = Enum.Font.Gotham
 	notif.TextSize = 16
 	notif.TextXAlignment = Enum.TextXAlignment.Left
-	notif.TextColor3 = Color3.fromRGB(0, 255, 170)
-	notif.Text = name .. " duplicated " .. amount .. "x " .. pet
+	notif.TextColor3 = Color3.fromRGB(0, 255, 180)
+	notif.TextTransparency = 1
 	notif.Parent = notifList
 
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 4)
+	corner.CornerRadius = UDim.new(0, 6)
 	corner.Parent = notif
 
-	game.Debris:AddItem(notif, 10)
+	notif.Position = UDim2.new(0, 0, 0, 0)
+	TweenService:Create(notif, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+
+	task.delay(4.5, function()
+		TweenService:Create(notif, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+		task.wait(0.4)
+		notif:Destroy()
+	end)
 end
 
--- Progress Bar Logic (60 seconds)
+-- ⏳ 60-Second Loading Bar Animation
 task.spawn(function()
 	local totalTime = 60
-	for i = 0, 100 do
-		local percentValue = i / 100
-		bar:TweenSize(UDim2.new(percentValue, 0, 1, 0), "Out", "Quad", 0.15, true)
-		percent.Text = i .. "%"
-		wait(totalTime / 100)
+	local steps = 100
+	for i = 0, steps do
+		local percentValue = i / steps
+		bar:TweenSize(UDim2.new(percentValue, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+		percent.Text = math.floor(percentValue * 100) .. "%"
+		wait(totalTime / steps)
 	end
 
 	wait(1)
 	gui:Destroy()
+	blur:Destroy()
 end)
 
--- Notification Spawner
+-- 🔁 Notification Spawner
 task.spawn(function()
 	while gui and gui.Parent do
 		createNotif()
