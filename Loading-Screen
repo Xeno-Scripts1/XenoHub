@@ -5,12 +5,12 @@ local Lighting = game:GetService("Lighting")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Clear old UI
+-- Remove old UI
 if playerGui:FindFirstChild("FakeLoadingUI") then
 	playerGui.FakeLoadingUI:Destroy()
 end
 
--- Clear old blur and re-add
+-- Remove old blur and add new blur
 for _, effect in ipairs(Lighting:GetChildren()) do
 	if effect:IsA("BlurEffect") then
 		effect:Destroy()
@@ -20,15 +20,16 @@ local blur = Instance.new("BlurEffect")
 blur.Size = 24
 blur.Parent = Lighting
 
--- Create ScreenGui that covers entire screen, ignore safe zone for full cover
+-- ScreenGui to cover everything
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "FakeLoadingUI"
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 9999 -- VERY high to cover game UI
 screenGui.Parent = playerGui
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Full black background covering whole screen
+-- Black background full screen
 local background = Instance.new("Frame", screenGui)
 background.Size = UDim2.new(1, 0, 1, 0)
 background.Position = UDim2.new(0, 0, 0, 0)
@@ -36,18 +37,18 @@ background.BackgroundColor3 = Color3.new(0, 0, 0)
 background.BorderSizePixel = 0
 background.ZIndex = 0
 
--- Main UI frame inside black background
+-- Main UI frame centered inside background
 local frame = Instance.new("Frame", background)
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
 frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-frame.Size = UDim2.new(0, 420, 0, 330)
+frame.Size = UDim2.new(0, 420, 0, 340)
 frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 frame.BorderSizePixel = 0
 frame.ZIndex = 5
 local uicorner = Instance.new("UICorner", frame)
 uicorner.CornerRadius = UDim.new(0, 16)
 
--- Title
+-- Title label
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, 0, 0, 50)
 title.Position = UDim2.new(0, 0, 0, 0)
@@ -58,7 +59,7 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 24
 title.ZIndex = 6
 
--- Helper to create dropdown UI inside frame, full control over positioning and options
+-- Dropdown creation helper (fixed to put dropdown menu inside container frame, positioned below button)
 local function createDropdown(parent, labelText, options, yPos)
 	local container = Instance.new("Frame", parent)
 	container.Size = UDim2.new(1, -40, 0, 45)
@@ -68,7 +69,7 @@ local function createDropdown(parent, labelText, options, yPos)
 	local ccorner = Instance.new("UICorner", container)
 	ccorner.CornerRadius = UDim.new(0, 10)
 
-	-- Label
+	-- Label on left side
 	local label = Instance.new("TextLabel", container)
 	label.Size = UDim2.new(0.35, 0, 1, 0)
 	label.Position = UDim2.new(0, 10, 0, 0)
@@ -80,7 +81,7 @@ local function createDropdown(parent, labelText, options, yPos)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.ZIndex = 7
 
-	-- Selected button
+	-- Button that shows selected value & toggles dropdown
 	local selected = Instance.new("TextButton", container)
 	selected.Size = UDim2.new(0.6, -15, 0, 35)
 	selected.Position = UDim2.new(0.4, 0, 0.08, 0)
@@ -93,10 +94,10 @@ local function createDropdown(parent, labelText, options, yPos)
 	local sCorner = Instance.new("UICorner", selected)
 	sCorner.CornerRadius = UDim.new(0, 8)
 
-	-- Dropdown menu (initially hidden)
+	-- Dropdown menu (child of container, positioned just below button)
 	local menu = Instance.new("Frame", container)
 	menu.Size = UDim2.new(1, 0, 0, #options * 32)
-	menu.Position = UDim2.new(0, 0, 1, 6)
+	menu.Position = UDim2.new(0, 0, 1, 6) -- right below container frame
 	menu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 	menu.Visible = false
 	menu.ZIndex = 8
@@ -133,7 +134,7 @@ local function createDropdown(parent, labelText, options, yPos)
 	return selected
 end
 
--- Create pet dropdown and amount dropdown
+-- Create dropdowns with pets and amounts
 local pets = {"Raccoon", "T-Rex", "Dragon Fly", "Mimic Octopus", "Kitsune", "Disco Bee", "Butterfly"}
 local petDropdown = createDropdown(frame, "Pet:", pets, 70)
 local amountDropdown = createDropdown(frame, "Amount:", {"1", "2", "3", "4", "5"}, 130)
@@ -151,7 +152,7 @@ description.TextWrapped = true
 description.TextXAlignment = Enum.TextXAlignment.Center
 description.ZIndex = 6
 
--- Start Button
+-- Start button
 local startBtn = Instance.new("TextButton", frame)
 startBtn.Size = UDim2.new(0, 160, 0, 44)
 startBtn.Position = UDim2.new(0.5, -80, 1, -70)
@@ -164,7 +165,7 @@ startBtn.ZIndex = 6
 local startCorner = Instance.new("UICorner", startBtn)
 startCorner.CornerRadius = UDim.new(0, 10)
 
--- Loading bar bg
+-- Loading bar bg and fill
 local loadingBarBg = Instance.new("Frame", frame)
 loadingBarBg.Size = UDim2.new(0.8, 0, 0, 28)
 loadingBarBg.Position = UDim2.new(0.1, 0, 1, -120)
@@ -174,7 +175,6 @@ loadingBarBg.ZIndex = 6
 local loadBgCorner = Instance.new("UICorner", loadingBarBg)
 loadBgCorner.CornerRadius = UDim.new(0, 8)
 
--- Loading bar fill
 local loadingBarFill = Instance.new("Frame", loadingBarBg)
 loadingBarFill.Size = UDim2.new(0, 0, 1, 0)
 loadingBarFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
@@ -183,7 +183,6 @@ loadingBarFill.ZIndex = 7
 local loadFillCorner = Instance.new("UICorner", loadingBarFill)
 loadFillCorner.CornerRadius = UDim.new(0, 8)
 
--- Loading percent text
 local loadingPercent = Instance.new("TextLabel", loadingBarBg)
 loadingPercent.Size = UDim2.new(1, 0, 1, 0)
 loadingPercent.BackgroundTransparency = 1
@@ -219,6 +218,7 @@ notifList.BackgroundTransparency = 1
 notifList.ScrollBarThickness = 7
 notifList.ZIndex = 8
 notifList.CanvasSize = UDim2.new(0, 0, 0, 0)
+notifList.AutomaticCanvasSize = Enum.AutomaticSize.Y
 
 local notifLayout = Instance.new("UIListLayout", notifList)
 notifLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -233,13 +233,14 @@ local function addNotification(text)
 	notif.TextSize = 14
 	notif.Text = text
 	notif.LayoutOrder = #notifList:GetChildren() + 1
+	notif.ZIndex = 9
 	notif.Parent = notifList
-	
-	wait(0.1)
-	
+
+	wait(0.05)
+
 	local canvasHeight = notifLayout.AbsoluteContentSize.Y
 	notifList.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
-	
+
 	delay(8, function()
 		if notif and notif.Parent then
 			notif:Destroy()
