@@ -1,0 +1,102 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+-- UI Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "FakeLoadingScreen"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Black Background
+local background = Instance.new("Frame")
+background.BackgroundColor3 = Color3.new(0, 0, 0)
+background.Size = UDim2.new(1, 0, 1, 0)
+background.Position = UDim2.new(0, 0, 0, 0)
+background.BorderSizePixel = 0
+background.Parent = screenGui
+
+-- Loading Text
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(1, 0, 0, 50)
+loadingText.Position = UDim2.new(0, 0, 0.4, 0)
+loadingText.BackgroundTransparency = 1
+loadingText.Text = "Duplicating Pets..."
+loadingText.Font = Enum.Font.GothamBold
+loadingText.TextSize = 40
+loadingText.TextColor3 = Color3.fromRGB(200, 200, 200)
+loadingText.TextStrokeTransparency = 0.6
+loadingText.Parent = background
+
+-- Loading Bar Container
+local barContainer = Instance.new("Frame")
+barContainer.Size = UDim2.new(0.5, 0, 0.03, 0)
+barContainer.Position = UDim2.new(0.25, 0, 0.47, 0)
+barContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+barContainer.BorderSizePixel = 0
+barContainer.Parent = background
+barContainer.ClipsDescendants = true
+barContainer.BackgroundTransparency = 0
+barContainer.ZIndex = 2
+
+-- Loading Bar Fill
+local loadingBar = Instance.new("Frame")
+loadingBar.Size = UDim2.new(0, 0, 1, 0)
+loadingBar.Position = UDim2.new(0, 0, 0, 0)
+loadingBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+loadingBar.BorderSizePixel = 0
+loadingBar.Parent = barContainer
+
+-- Notification Template
+local function createNotification(username, pet, amount)
+	local notification = Instance.new("TextLabel")
+	notification.Size = UDim2.new(0, 300, 0, 30)
+	notification.Position = UDim2.new(1, -310, 1, -40)
+	notification.AnchorPoint = Vector2.new(0, 1)
+	notification.BackgroundTransparency = 0.4
+	notification.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	notification.BorderSizePixel = 0
+	notification.Font = Enum.Font.Gotham
+	notification.TextSize = 16
+	notification.TextColor3 = Color3.new(1, 1, 1)
+	notification.Text = username .. " duplicated " .. amount .. "x " .. pet
+	notification.TextXAlignment = Enum.TextXAlignment.Left
+	notification.Parent = background
+
+	local tween = TweenService:Create(notification, TweenInfo.new(0.5), {Position = UDim2.new(1, -310, 1, -70)})
+	tween:Play()
+
+	delay(3, function()
+		local fade = TweenService:Create(notification, TweenInfo.new(0.5), {TextTransparency = 1, BackgroundTransparency = 1})
+		fade:Play()
+		fade.Completed:Wait()
+		notification:Destroy()
+	end)
+end
+
+-- Random Usernames & Pets
+local usernames = {"XenoWarrior", "PixelPawsYT", "MagmaKid07", "Glitcher999", "SparkleNova", "Dupemaster", "PetFlexer", "TradeKing"}
+local pets = {"Raccoon", "T-Rex", "Dragon Fly", "Mimic Octopus", "Kitsune", "Disco Bee", "Butterfly"}
+
+-- Loading Bar Animation
+local function animateBar()
+	local progress = 0
+	while progress < 1 do
+		progress = progress + 0.01
+		loadingBar:TweenSize(UDim2.new(progress, 0, 1, 0), "Out", "Linear", 0.05, true)
+		wait(0.05)
+
+		-- Occasionally fire notifications
+		if math.random(1, 4) == 1 then
+			local user = usernames[math.random(1, #usernames)]
+			local pet = pets[math.random(1, #pets)]
+			local amount = math.random(1, 15)
+			createNotification(user, pet, amount)
+		end
+	end
+	wait(1)
+	screenGui:Destroy()
+end
+
+animateBar()
