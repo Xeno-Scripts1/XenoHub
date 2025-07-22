@@ -1,152 +1,145 @@
--- Xeno's Pet Spawner UI (Base UI Layout with Cleanup)
+-- Xeno's Pet Spawner UI (Updated with Fixes and Styling)
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Destroy old UI if it exists
+-- Clear previous UI
 if playerGui:FindFirstChild("XenosPetSpawnerUI") then
     playerGui:FindFirstChild("XenosPetSpawnerUI"):Destroy()
 end
 
--- Main UI ScreenGui
+-- ScreenGui setup
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "XenosPetSpawnerUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
--- Main Frame
+-- Main frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 400, 0, 300)
 mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainFrame.BackgroundTransparency = 0.2
 mainFrame.BorderSizePixel = 0
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Parent = screenGui
+mainFrame.ClipsDescendants = true
+mainFrame.Name = "MainFrame"
 
--- Rounded corners
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 16)
-corner.Parent = mainFrame
+-- UICorner for rounded edges
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 16)
+mainCorner.Parent = mainFrame
 
 -- Title Bar
 local titleBar = Instance.new("Frame")
 titleBar.Size = UDim2.new(1, 0, 0, 40)
-titleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+titleBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 titleBar.BorderSizePixel = 0
 titleBar.Parent = mainFrame
 
 local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 16)
+titleCorner.CornerRadius = UDim.new(0, 12)
 titleCorner.Parent = titleBar
 
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, 0, 1, 0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "✨ Xeno's Pet Spawner 🐾"
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.TextScaled = true
-titleLabel.Parent = titleBar
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 1, 0)
+title.BackgroundTransparency = 1
+title.Text = "🐾 Xeno's Pet Spawner 🐾"
+title.Font = Enum.Font.FredokaOne
+title.TextColor3 = Color3.fromRGB(0, 255, 150)
+title.TextScaled = true
+title.Parent = titleBar
 
 -- Pet Selector Title
-local selectorTitle = Instance.new("TextLabel")
-selectorTitle.Position = UDim2.new(0, 20, 0, 50)
-selectorTitle.Size = UDim2.new(0, 200, 0, 20)
-selectorTitle.BackgroundTransparency = 1
-selectorTitle.Text = "Pet Selector"
-selectorTitle.Font = Enum.Font.GothamBold
-selectorTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-selectorTitle.TextSize = 16
-selectorTitle.TextXAlignment = Enum.TextXAlignment.Left
-selectorTitle.Parent = mainFrame
+local petTitle = Instance.new("TextLabel")
+petTitle.Size = UDim2.new(1, -40, 0, 20)
+petTitle.Position = UDim2.new(0, 20, 0, 60)
+petTitle.BackgroundTransparency = 1
+petTitle.Text = "🦴 Pet Selector"
+petTitle.Font = Enum.Font.GothamBold
+petTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+petTitle.TextScaled = true
+petTitle.TextXAlignment = Enum.TextXAlignment.Left
+petTitle.Parent = mainFrame
 
--- Pet Dropdown
-local dropdown = Instance.new("TextButton")
-dropdown.Name = "PetDropdown"
-dropdown.Position = UDim2.new(0, 20, 0, 75)
-dropdown.Size = UDim2.new(0, 360, 0, 30)
-dropdown.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-dropdown.Text = "Select a Pet"
-dropdown.Font = Enum.Font.Gotham
-dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
-dropdown.TextSize = 14
-
-dropdown.AutoButtonColor = true
-dropdown.Parent = mainFrame
+-- Dropdown (placeholder)
+local petDropdown = Instance.new("TextButton")
+petDropdown.Size = UDim2.new(1, -40, 0, 30)
+petDropdown.Position = UDim2.new(0, 20, 0, 90)
+petDropdown.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+petDropdown.TextColor3 = Color3.fromRGB(200, 200, 200)
+petDropdown.Text = "Select a Pet"
+petDropdown.Font = Enum.Font.Gotham
+petDropdown.TextSize = 16
+petDropdown.Parent = mainFrame
 
 local dropdownCorner = Instance.new("UICorner")
 dropdownCorner.CornerRadius = UDim.new(0, 8)
-dropdownCorner.Parent = dropdown
+dropdownCorner.Parent = petDropdown
 
--- Weight Title
-local weightTitle = Instance.new("TextLabel")
-weightTitle.Position = UDim2.new(0, 20, 0, 120)
-weightTitle.Size = UDim2.new(0, 180, 0, 20)
-weightTitle.BackgroundTransparency = 1
-weightTitle.Text = "Weight"
-weightTitle.Font = Enum.Font.GothamBold
-weightTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-weightTitle.TextSize = 16
-weightTitle.TextXAlignment = Enum.TextXAlignment.Left
-weightTitle.Parent = mainFrame
+-- Age and Weight Labels
+local ageLabel = Instance.new("TextLabel")
+ageLabel.Size = UDim2.new(0.5, -25, 0, 20)
+ageLabel.Position = UDim2.new(0, 20, 0, 140)
+ageLabel.BackgroundTransparency = 1
+ageLabel.Text = "🎂 Age"
+ageLabel.Font = Enum.Font.GothamBold
+ageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ageLabel.TextSize = 14
+ageLabel.Parent = mainFrame
 
--- Age Title
-local ageTitle = Instance.new("TextLabel")
-ageTitle.Position = UDim2.new(0, 210, 0, 120)
-ageTitle.Size = UDim2.new(0, 180, 0, 20)
-ageTitle.BackgroundTransparency = 1
-ageTitle.Text = "Age"
-ageTitle.Font = Enum.Font.GothamBold
-ageTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-ageTitle.TextSize = 16
-ageTitle.TextXAlignment = Enum.TextXAlignment.Left
-ageTitle.Parent = mainFrame
+local weightLabel = Instance.new("TextLabel")
+weightLabel.Size = UDim2.new(0.5, -25, 0, 20)
+weightLabel.Position = UDim2.new(0.5, 5, 0, 140)
+weightLabel.BackgroundTransparency = 1
+weightLabel.Text = "⚖️ Weight"
+weightLabel.Font = Enum.Font.GothamBold
+weightLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+weightLabel.TextSize = 14
+weightLabel.Parent = mainFrame
 
--- Weight Input
-local weightBox = Instance.new("TextBox")
-weightBox.Position = UDim2.new(0, 20, 0, 145)
-weightBox.Size = UDim2.new(0, 170, 0, 30)
-weightBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-weightBox.PlaceholderText = "Enter weight"
-weightBox.Font = Enum.Font.Gotham
-weightBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-weightBox.TextSize = 14
-weightBox.Parent = mainFrame
-
-local weightCorner = Instance.new("UICorner")
-weightCorner.CornerRadius = UDim.new(0, 8)
-weightCorner.Parent = weightBox
-
--- Age Input
-local ageBox = Instance.new("TextBox")
-ageBox.Position = UDim2.new(0, 210, 0, 145)
-ageBox.Size = UDim2.new(0, 170, 0, 30)
-ageBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-ageBox.PlaceholderText = "Enter age"
-ageBox.Font = Enum.Font.Gotham
-ageBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-ageBox.TextSize = 14
-ageBox.Parent = mainFrame
+-- Age and Weight Inputs
+local ageInput = Instance.new("TextBox")
+ageInput.Size = UDim2.new(0.5, -25, 0, 30)
+ageInput.Position = UDim2.new(0, 20, 0, 165)
+ageInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+ageInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+ageInput.PlaceholderText = "Enter Age"
+ageInput.Font = Enum.Font.Gotham
+ageInput.TextSize = 16
+ageInput.Parent = mainFrame
 
 local ageCorner = Instance.new("UICorner")
 ageCorner.CornerRadius = UDim.new(0, 8)
-ageCorner.Parent = ageBox
+ageCorner.Parent = ageInput
+
+local weightInput = Instance.new("TextBox")
+weightInput.Size = UDim2.new(0.5, -25, 0, 30)
+weightInput.Position = UDim2.new(0.5, 5, 0, 165)
+weightInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+weightInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+weightInput.PlaceholderText = "Enter Weight"
+weightInput.Font = Enum.Font.Gotham
+weightInput.TextSize = 16
+weightInput.Parent = mainFrame
+
+local weightCorner = Instance.new("UICorner")
+weightCorner.CornerRadius = UDim.new(0, 8)
+weightCorner.Parent = weightInput
 
 -- Footer
 local footer = Instance.new("TextLabel")
-footer.Size = UDim2.new(1, 0, 0, 25)
-footer.Position = UDim2.new(0, 0, 1, -25)
-footer.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+footer.Size = UDim2.new(1, 0, 0, 20)
+footer.Position = UDim2.new(0, 0, 1, -20)
+footer.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 footer.Text = "Made by XenoScripts | Premium"
-footer.TextColor3 = Color3.fromRGB(160, 160, 160)
-footer.Font = Enum.Font.GothamSemibold
-footer.TextSize = 12
-footer.BorderSizePixel = 0
+footer.TextColor3 = Color3.fromRGB(0, 255, 150)
+footer.TextSize = 14
+footer.Font = Enum.Font.Gotham
 footer.Parent = mainFrame
 
 local footerCorner = Instance.new("UICorner")
-footerCorner.CornerRadius = UDim.new(0, 8)
+footerCorner.CornerRadius = UDim.new(0, 10)
 footerCorner.Parent = footer
