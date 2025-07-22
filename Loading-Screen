@@ -13,21 +13,14 @@ screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
 screenGui.Parent = playerGui
 
--- Semi-dark full screen background
-local bg = Instance.new("Frame")
-bg.Size = UDim2.new(1, 0, 1, 0)
-bg.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-bg.BackgroundTransparency = 0.25
-bg.Parent = screenGui
-
--- Main UI container
+-- Main UI container (centered)
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 500, 0, 350)
 main.Position = UDim2.new(0.5, -250, 0.5, -175)
 main.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 main.BorderSizePixel = 0
 main.AnchorPoint = Vector2.new(0.5, 0.5)
-main.Parent = bg
+main.Parent = screenGui
 main.ClipsDescendants = true
 main.ZIndex = 10
 main.BackgroundTransparency = 0
@@ -108,7 +101,7 @@ spawnBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 spawnBtn.Parent = main
 Instance.new("UICorner", spawnBtn).CornerRadius = UDim.new(0, 10)
 
--- Optional: Hover effect
+-- Hover effect
 local function addHover(button)
 	button.MouseEnter:Connect(function()
 		button.BackgroundColor3 = button.BackgroundColor3:lerp(Color3.fromRGB(100, 200, 100), 0.2)
@@ -118,4 +111,3 @@ local function addHover(button)
 	end)
 end
 addHover(spawnBtn)
-
