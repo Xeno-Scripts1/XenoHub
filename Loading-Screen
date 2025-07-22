@@ -1,309 +1,188 @@
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Clean old UI
-if PlayerGui:FindFirstChild("GrowAGardenDupeUI") then
-    PlayerGui.GrowAGardenDupeUI:Destroy()
+-- Clean old UI if exists
+if PlayerGui:FindFirstChild("PetSpawnerUI") then
+    PlayerGui.PetSpawnerUI:Destroy()
 end
-
--- Create ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "GrowAGardenDupeUI"
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.Parent = PlayerGui
 
 -- Pets list
 local pets = {
-    "Kitsune",
-    "Dragonfly",
-    "Disco bee",
-    "Mimic octopus",
-    "Butterfly",
-    "Raccoon",
-    "T-Rex",
-    "Fennec Fox",
-    "Spinosaurus",
-    "Chicken Zombie"
+    "Kitsune", "Dragonfly", "Disco bee", "Mimic octopus", 
+    "Butterfly", "Raccoon", "T-Rex", "Fennec Fox", "Spinosaurus", "Chicken Zombie"
 }
 
--- Pets folder in ReplicatedStorage (adjust path if needed)
-local PetsFolder = ReplicatedStorage:WaitForChild("Pets")
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PetSpawnerUI"
+screenGui.Parent = PlayerGui
 
--- UI starts visible and stays visible; no toggle hotkey
-screenGui.Enabled = true
-
--- Main Frame
+-- Main frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 450, 0, 370)
-mainFrame.Position = UDim2.new(0.5, -225, 0.5, -185)
-mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-mainFrame.BackgroundTransparency = 0.2
+mainFrame.Size = UDim2.new(0, 450, 0, 320)
+mainFrame.Position = UDim2.new(0.5, -225, 0.5, -160)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 mainFrame.BorderSizePixel = 0
-mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 12)
 corner.Parent = mainFrame
 
--- Draggable setup
-local dragging, dragInput, dragStart, startPos
-
-local function update(input)
-    local delta = input.Position - dragStart
-    mainFrame.Position = UDim2.new(
-        startPos.X.Scale,
-        startPos.X.Offset + delta.X,
-        startPos.Y.Scale,
-        startPos.Y.Offset + delta.Y
-    )
-end
-
-mainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = mainFrame.Position
-
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-mainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        update(input)
-    end
-end)
-
--- Title Bar
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 35)
-titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-titleBar.BackgroundTransparency = 0.3
-titleBar.BorderSizePixel = 0
-titleBar.Parent = mainFrame
-
-local titleBarCorner = Instance.new("UICorner")
-titleBarCorner.CornerRadius = UDim.new(0, 12)
-titleBarCorner.Parent = titleBar
-
+-- Title
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Text = "🐾  Xeno's Pet Spawner"
-titleLabel.Font = Enum.Font.SourceSansBold
-titleLabel.TextSize = 22
-titleLabel.TextColor3 = Color3.new(1, 1, 1)
+titleLabel.Size = UDim2.new(1, 0, 0, 35)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Size = UDim2.new(1, 0, 1, 0)
-titleLabel.TextXAlignment = Enum.TextXAlignment.Center
-titleLabel.Parent = titleBar
+titleLabel.Text = "🐾 Xeno's Pet Spawner"
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 24
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Parent = mainFrame
 
--- Close Button
-local closeButton = Instance.new("TextButton")
-closeButton.Text = "❌"
-closeButton.Font = Enum.Font.SourceSansBold
-closeButton.TextSize = 18
-closeButton.TextColor3 = Color3.new(1, 1, 1)
-closeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(1, -35, 0, 3)
-closeButton.Parent = titleBar
+-- Pet dropdown label
+local petLabel = Instance.new("TextLabel")
+petLabel.Text = "Select Pet:"
+petLabel.Font = Enum.Font.Gotham
+petLabel.TextSize = 18
+petLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+petLabel.BackgroundTransparency = 1
+petLabel.Position = UDim2.new(0, 20, 0, 60)
+petLabel.Size = UDim2.new(0, 120, 0, 30)
+petLabel.Parent = mainFrame
 
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(1, 0)
-closeCorner.Parent = closeButton
-
-closeButton.MouseEnter:Connect(function()
-    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-end)
-closeButton.MouseLeave:Connect(function()
-    closeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-end)
-
-closeButton.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
-end)
-
--- Warning Label
-local warningLabel = Instance.new("TextLabel")
-warningLabel.Text = "⚠️ WARNING: This is a visual pet spawner!"
-warningLabel.Font = Enum.Font.SourceSansBold
-warningLabel.TextSize = 16
-warningLabel.TextColor3 = Color3.new(1, 1, 0)
-warningLabel.BackgroundTransparency = 1
-warningLabel.Size = UDim2.new(1, -20, 0, 30)
-warningLabel.Position = UDim2.new(0, 10, 0, 50)
-warningLabel.TextWrapped = true
-warningLabel.TextXAlignment = Enum.TextXAlignment.Center
-warningLabel.Parent = mainFrame
-
--- Pet Dropdown Label
-local dropdownLabel = Instance.new("TextLabel")
-dropdownLabel.Text = "Select Pet:"
-dropdownLabel.Font = Enum.Font.SourceSans
-dropdownLabel.TextSize = 16
-dropdownLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-dropdownLabel.BackgroundTransparency = 1
-dropdownLabel.Position = UDim2.new(0, 30, 0, 90)
-dropdownLabel.Size = UDim2.new(0, 120, 0, 25)
-dropdownLabel.Parent = mainFrame
-
--- Pet Dropdown Button
+-- Pet dropdown button
 local petDropdown = Instance.new("TextButton")
 petDropdown.Text = "Choose a pet ▼"
-petDropdown.Font = Enum.Font.SourceSans
-petDropdown.TextSize = 16
-petDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
-petDropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-petDropdown.Size = UDim2.new(0, 180, 0, 30)
-petDropdown.Position = UDim2.new(0, 150, 0, 90)
+petDropdown.Font = Enum.Font.Gotham
+petDropdown.TextSize = 18
+petDropdown.TextColor3 = Color3.new(1,1,1)
+petDropdown.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+petDropdown.Position = UDim2.new(0, 150, 0, 60)
+petDropdown.Size = UDim2.new(0, 250, 0, 30)
 petDropdown.Parent = mainFrame
 
-local dropdownCorner = Instance.new("UICorner")
-dropdownCorner.CornerRadius = UDim.new(0, 6)
-dropdownCorner.Parent = petDropdown
+local petDropdownCorner = Instance.new("UICorner")
+petDropdownCorner.CornerRadius = UDim.new(0, 6)
+petDropdownCorner.Parent = petDropdown
 
--- Dropdown Frame (hidden by default)
-local dropdownFrame = Instance.new("Frame")
-dropdownFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-dropdownFrame.BorderSizePixel = 0
-dropdownFrame.Position = UDim2.new(0, 150, 0, 120)
-dropdownFrame.Size = UDim2.new(0, 180, 0, 0) -- Start collapsed
-dropdownFrame.ClipsDescendants = true
-dropdownFrame.Parent = mainFrame
+-- Dropdown list frame (hidden initially)
+local dropdownList = Instance.new("Frame")
+dropdownList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+dropdownList.Position = UDim2.new(0, 150, 0, 90)
+dropdownList.Size = UDim2.new(0, 250, 0, 0) -- height zero initially
+dropdownList.ClipsDescendants = true
+dropdownList.Parent = mainFrame
 
-local dropdownCorner2 = Instance.new("UICorner")
-dropdownCorner2.CornerRadius = UDim.new(0, 6)
-dropdownCorner2.Parent = dropdownFrame
+local dropdownListCorner = Instance.new("UICorner")
+dropdownListCorner.CornerRadius = UDim.new(0, 6)
+dropdownListCorner.Parent = dropdownList
 
--- ScrollFrame inside dropdown for pets list
-local petList = Instance.new("ScrollingFrame")
-petList.BackgroundTransparency = 1
-petList.BorderSizePixel = 0
-petList.Size = UDim2.new(1, 0, 1, 0)
-petList.CanvasSize = UDim2.new(0, 0, 0, 0)
-petList.ScrollBarThickness = 5
-petList.Parent = dropdownFrame
+-- Populate dropdown options
+local function createDropdownOption(petName, index)
+    local option = Instance.new("TextButton")
+    option.Text = petName
+    option.Font = Enum.Font.Gotham
+    option.TextSize = 16
+    option.TextColor3 = Color3.new(1, 1, 1)
+    option.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    option.Size = UDim2.new(1, 0, 0, 30)
+    option.Position = UDim2.new(0, 0, 0, (index-1)*30)
+    option.Parent = dropdownList
 
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Parent = petList
-
--- Populate dropdown list with pets
-for i, petName in ipairs(pets) do
-    local btn = Instance.new("TextButton")
-    btn.Text = petName
-    btn.Font = Enum.Font.SourceSans
-    btn.TextSize = 16
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    btn.Size = UDim2.new(1, 0, 0, 30)
-    btn.LayoutOrder = i
-    btn.Parent = petList
-
-    btn.MouseEnter:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    option.MouseEnter:Connect(function()
+        option.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
     end)
-    btn.MouseLeave:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    option.MouseLeave:Connect(function()
+        option.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     end)
 
-    btn.MouseButton1Click:Connect(function()
+    option.MouseButton1Click:Connect(function()
         petDropdown.Text = petName .. " ▼"
-        dropdownFrame:TweenSize(UDim2.new(0, 180, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+        -- close dropdown
+        dropdownList:TweenSize(UDim2.new(0, 250, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+        dropdownOpen = false
     end)
 end
 
--- Toggle dropdown open/close
 local dropdownOpen = false
 petDropdown.MouseButton1Click:Connect(function()
     if dropdownOpen then
-        dropdownFrame:TweenSize(UDim2.new(0, 180, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+        dropdownList:TweenSize(UDim2.new(0, 250, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
         dropdownOpen = false
     else
-        petList.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
-        dropdownFrame:TweenSize(UDim2.new(0, 180, 0, math.min(UIListLayout.AbsoluteContentSize.Y, 180)), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+        dropdownList:TweenSize(UDim2.new(0, 250, 0, #pets * 30), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
         dropdownOpen = true
     end
 end)
 
--- Age Label and Input
+for i, petName in ipairs(pets) do
+    createDropdownOption(petName, i)
+end
+
+-- Age label & box
 local ageLabel = Instance.new("TextLabel")
 ageLabel.Text = "Age:"
-ageLabel.Font = Enum.Font.SourceSans
-ageLabel.TextSize = 16
-ageLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+ageLabel.Font = Enum.Font.Gotham
+ageLabel.TextSize = 18
+ageLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 ageLabel.BackgroundTransparency = 1
-ageLabel.Position = UDim2.new(0, 30, 0, 230)
-ageLabel.Size = UDim2.new(0, 120, 0, 25)
+ageLabel.Position = UDim2.new(0, 20, 0, 150)
+ageLabel.Size = UDim2.new(0, 120, 0, 30)
 ageLabel.Parent = mainFrame
 
 local ageBox = Instance.new("TextBox")
-ageBox.PlaceholderText = "Enter age"
-ageBox.Font = Enum.Font.SourceSans
-ageBox.TextSize = 16
-ageBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-ageBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-ageBox.Size = UDim2.new(0, 180, 0, 30)
-ageBox.Position = UDim2.new(0, 150, 0, 230)
+ageBox.PlaceholderText = "Enter age (e.g., 1)"
+ageBox.Font = Enum.Font.Gotham
+ageBox.TextSize = 18
+ageBox.TextColor3 = Color3.new(1, 1, 1)
+ageBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+ageBox.Position = UDim2.new(0, 150, 0, 150)
+ageBox.Size = UDim2.new(0, 250, 0, 30)
 ageBox.ClearTextOnFocus = false
 ageBox.Parent = mainFrame
 
-local ageCorner = Instance.new("UICorner")
-ageCorner.CornerRadius = UDim.new(0, 6)
-ageCorner.Parent = ageBox
+local ageBoxCorner = Instance.new("UICorner")
+ageBoxCorner.CornerRadius = UDim.new(0, 6)
+ageBoxCorner.Parent = ageBox
 
--- Weight Label and Input
+-- Weight label & box
 local weightLabel = Instance.new("TextLabel")
 weightLabel.Text = "Weight:"
-weightLabel.Font = Enum.Font.SourceSans
-weightLabel.TextSize = 16
-weightLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+weightLabel.Font = Enum.Font.Gotham
+weightLabel.TextSize = 18
+weightLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 weightLabel.BackgroundTransparency = 1
-weightLabel.Position = UDim2.new(0, 30, 0, 280)
-weightLabel.Size = UDim2.new(0, 120, 0, 25)
+weightLabel.Position = UDim2.new(0, 20, 0, 200)
+weightLabel.Size = UDim2.new(0, 120, 0, 30)
 weightLabel.Parent = mainFrame
 
 local weightBox = Instance.new("TextBox")
-weightBox.PlaceholderText = "Enter weight (default 1)"
-weightBox.Font = Enum.Font.SourceSans
-weightBox.TextSize = 16
-weightBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-weightBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-weightBox.Size = UDim2.new(0, 180, 0, 30)
-weightBox.Position = UDim2.new(0, 150, 0, 280)
+weightBox.PlaceholderText = "Enter weight (e.g., 1)"
+weightBox.Font = Enum.Font.Gotham
+weightBox.TextSize = 18
+weightBox.TextColor3 = Color3.new(1, 1, 1)
+weightBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+weightBox.Position = UDim2.new(0, 150, 0, 200)
+weightBox.Size = UDim2.new(0, 250, 0, 30)
 weightBox.ClearTextOnFocus = false
 weightBox.Parent = mainFrame
 
-local weightCorner = Instance.new("UICorner")
-weightCorner.CornerRadius = UDim.new(0, 6)
-weightCorner.Parent = weightBox
+local weightBoxCorner = Instance.new("UICorner")
+weightBoxCorner.CornerRadius = UDim.new(0, 6)
+weightBoxCorner.Parent = weightBox
 
 -- Spawn Button
 local spawnButton = Instance.new("TextButton")
-spawnButton.Text = "Spawn Visual Pet"
-spawnButton.Font = Enum.Font.SourceSansBold
+spawnButton.Text = "Spawn Pet"
+spawnButton.Font = Enum.Font.GothamBold
 spawnButton.TextSize = 22
-spawnButton.TextColor3 = Color3.new(1, 1, 1)
+spawnButton.TextColor3 = Color3.new(1,1,1)
 spawnButton.BackgroundColor3 = Color3.fromRGB(140, 0, 255)
-spawnButton.Size = UDim2.new(0.8, 0, 0, 45)
-spawnButton.Position = UDim2.new(0.1, 0, 0, 320)
+spawnButton.Position = UDim2.new(0.5, -100, 0, 260)
+spawnButton.Size = UDim2.new(0, 200, 0, 40)
 spawnButton.Parent = mainFrame
 
 local spawnCorner = Instance.new("UICorner")
@@ -317,92 +196,68 @@ spawnButton.MouseLeave:Connect(function()
     spawnButton.BackgroundColor3 = Color3.fromRGB(140, 0, 255)
 end)
 
--- Function to spawn pet visually
+-- Spawn pet function
 local function spawnVisualPet(petName, age, weight)
-    local petModel = PetsFolder:FindFirstChild(petName)
+    local petsFolder = ReplicatedStorage:FindFirstChild("Pets")
+    if not petsFolder then
+        warn("Pets folder not found in ReplicatedStorage!")
+        return
+    end
+
+    local petModel = petsFolder:FindFirstChild(petName)
     if not petModel then
         warn("Pet model not found: "..petName)
         return
     end
 
-    -- Remove any existing spawned pet tools (optional, to avoid duplicates)
-    for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
-        if tool:IsA("Tool") and table.find(pets, tool.Name) then
-            tool:Destroy()
-        end
-    end
-    -- Also unequip pet currently held if it matches pet list
-    local char = LocalPlayer.Character
-    if char then
-        local humanoid = char:FindFirstChildOfClass("Humanoid")
-        if humanoid and humanoid:IsA("Humanoid") then
-            local equipped = humanoid:GetEquippedTool()
-            if equipped and table.find(pets, equipped.Name) then
-                humanoid:UnequipTools()
-            end
-        end
-    end
-
-    -- Clone pet model/tool
+    -- Clone the pet tool/model
     local petClone = petModel:Clone()
 
-    -- Parent to Backpack
-    petClone.Parent = LocalPlayer.Backpack
+    -- Set size scale based on weight and age (convert to numbers)
+    local scaleWeight = tonumber(weight) or 1
+    local scaleAge = tonumber(age) or 1
+    local finalScale = math.clamp(scaleWeight * scaleAge, 0.1, 10)
 
-    -- Set Age and Weight attributes (strings or numbers)
-    age = tonumber(age) or 0
-    weight = tonumber(weight) or 1
-
-    petClone:SetAttribute("Age", age)
-    petClone:SetAttribute("Weight", weight)
-
-    -- Adjust pet size based on weight (scale handle or model)
-    -- This depends on how your pet model is structured.
-    -- We'll try scaling the Handle part if it exists.
-
-    local function scaleModel(model, scaleFactor)
+    -- Scale the pet clone's primary parts (usually the Handle or root parts)
+    local function scaleModel(model, scale)
         for _, part in pairs(model:GetDescendants()) do
             if part:IsA("BasePart") then
-                part.Size = part.Size * scaleFactor
-                if part:IsA("MeshPart") and part.MeshId ~= "" then
-                    -- Scale the mesh offset too
-                    local scale = part:FindFirstChildOfClass("SpecialMesh")
-                    if scale then
-                        scale.Scale = scale.Scale * scaleFactor
-                    end
+                part.Size = part.Size * scale
+                part.CFrame = part.CFrame -- keep position same
+                -- Adjust massless property if needed
+                if part:IsA("MeshPart") then
+                    -- optional: scale mesh size if mesh size differs
+                    part.Mesh.Scale = part.Mesh.Scale * scale
                 end
+            elseif part:IsA("SpecialMesh") then
+                part.Scale = part.Scale * scale
             end
         end
     end
 
-    -- Apply scaling to petClone
-    if weight > 0 then
-        scaleModel(petClone, weight)
-    end
+    scaleModel(petClone, finalScale)
 
-    -- Equip after a small delay
+    -- Parent to backpack so it can be equipped
+    petClone.Parent = LocalPlayer.Backpack
+
+    -- Equip the pet tool after short delay
     task.delay(0.1, function()
-        local character = LocalPlayer.Character
-        if character and character:FindFirstChildOfClass("Humanoid") then
-            pcall(function()
-                character.Humanoid:EquipTool(petClone)
-            end)
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            LocalPlayer.Character.Humanoid:EquipTool(petClone)
         end
     end)
-
-    print(("Spawned visual pet: %s | Age: %s | Weight: %s"):format(petName, age, weight))
 end
 
--- Spawn Button click logic
+-- On Spawn button clicked
 spawnButton.MouseButton1Click:Connect(function()
     local selectedPet = petDropdown.Text:gsub(" ▼", "")
     if not table.find(pets, selectedPet) then
-        warn("Please select a valid pet from dropdown!")
+        warn("Please select a valid pet!")
         return
     end
 
-    local ageInput = ageBox.Text
-    local weightInput = weightBox.Text
+    local ageVal = ageBox.Text
+    local weightVal = weightBox.Text
 
-    spawnVisualPet(selectedPet, ageInput, weightInput)
+    spawnVisualPet(selectedPet, ageVal, weightVal)
 end)
