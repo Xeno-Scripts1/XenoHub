@@ -1,328 +1,199 @@
+-- Xeno's Pet Spawner (UI + Logic)
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local InsertService = game:GetService("InsertService")
-local UserInputService = game:GetService("UserInputService")
-
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- PET MODELS --
-local PetModels = {
-	["Kitsune"] = "rbxassetid://12345678",
-	["Dragonfly"] = "rbxassetid://12345679",
-	["Disco bee"] = "rbxassetid://12345680",
-	["Mimic octopus"] = "rbxassetid://12345681",
-	["Butterfly"] = "rbxassetid://12345682",
-	["Raccoon"] = "rbxassetid://12345683",
-	["T-Rex"] = "rbxassetid://12345684",
-	["Fennec Fox"] = "rbxassetid://12345685",
-	["Spinosaurus"] = "rbxassetid://12345686",
-	["Chicken Zombie"] = "rbxassetid://12345687"
-}
-
--- Clear old UI if any
+-- Cleanup old UI if exists
 if PlayerGui:FindFirstChild("PetSpawnerUI") then
 	PlayerGui.PetSpawnerUI:Destroy()
 end
 
--- UI SETUP --
-local screenGui = Instance.new("ScreenGui", PlayerGui)
+-- Dummy pet models in ReplicatedStorage
+local AvailablePets = {
+	"Butterfly", "Bunny", "Dragon", "Duck", "Penguin"
+}
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "PetSpawnerUI"
+screenGui.Parent = PlayerGui
 screenGui.ResetOnSpawn = false
 
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 450, 0, 360)
-mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-mainFrame.BorderSizePixel = 0
-mainFrame.ClipsDescendants = true
-mainFrame.Parent = screenGui
-mainFrame.Name = "MainFrame"
-mainFrame.Active = true
-mainFrame.Draggable = false
+-- Main Frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 420, 0, 300)
+frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
 
--- Round corners using UIStroke + UIAspectRatio or UIGradient + UICorner
-local uicorner = Instance.new("UICorner")
-uicorner.CornerRadius = UDim.new(0, 16)
-uicorner.Parent = mainFrame
+-- Rounded corners
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 16)
+corner.Parent = frame
 
--- Drop shadow effect
-local shadow = Instance.new("ImageLabel")
-shadow.Name = "Shadow"
-shadow.BackgroundTransparency = 1
-shadow.Image = "rbxassetid://1316045217" -- subtle shadow png
-shadow.ImageColor3 = Color3.new(0, 0, 0)
-shadow.ImageTransparency = 0.8
-shadow.Size = UDim2.new(1, 40, 1, 40)
-shadow.Position = UDim2.new(0, -20, 0, -20)
-shadow.ZIndex = 0
-shadow.Parent = mainFrame
-
--- DRAGGABLE TITLE BAR
-local dragging, dragInput, dragStart, startPos
-
-local function update(input)
-	local delta = input.Position - dragStart
-	mainFrame.Position = UDim2.new(
-		startPos.X.Scale, startPos.X.Offset + delta.X,
-		startPos.Y.Scale, startPos.Y.Offset + delta.Y
-	)
-end
-
-mainFrame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = input.Position
-		startPos = mainFrame.Position
-
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-
-mainFrame.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		dragInput = input
-	end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		update(input)
-	end
-end)
-
--- TITLE
+-- Title
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 45)
-title.Position = UDim2.new(0, 0, 0, 0)
-title.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
-title.Text = "✨ Xeno's Pet Spawner ✨"
-title.TextColor3 = Color3.fromRGB(240, 240, 255)
+title.Text = "🐾 Xeno's Pet Spawner 🐾"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 24
-title.Parent = mainFrame
-title.ZIndex = 2
-local titleCorner = Instance.new("UICorner", title)
-titleCorner.CornerRadius = UDim.new(0, 16)
+title.TextSize = 22
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.BackgroundTransparency = 1
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Position = UDim2.new(0, 0, 0, 8)
+title.Parent = frame
 
--- PET SELECTOR TITLE
-local selectorLabel = Instance.new("TextLabel")
-selectorLabel.Size = UDim2.new(1, -40, 0, 25)
-selectorLabel.Position = UDim2.new(0, 20, 0, 60)
-selectorLabel.Text = "Pet Selector"
-selectorLabel.BackgroundTransparency = 1
-selectorLabel.TextColor3 = Color3.fromRGB(220, 220, 255)
-selectorLabel.Font = Enum.Font.Gotham
-selectorLabel.TextSize = 18
-selectorLabel.TextXAlignment = Enum.TextXAlignment.Left
-selectorLabel.Parent = mainFrame
+-- Dropdown Title
+local dropdownLabel = Instance.new("TextLabel")
+dropdownLabel.Text = "Select a Pet"
+dropdownLabel.Font = Enum.Font.GothamSemibold
+dropdownLabel.TextSize = 16
+dropdownLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+dropdownLabel.BackgroundTransparency = 1
+dropdownLabel.Size = UDim2.new(0, 150, 0, 20)
+dropdownLabel.Position = UDim2.new(0, 20, 0, 50)
+dropdownLabel.Parent = frame
 
--- DROPDOWN
+-- Dropdown
 local dropdown = Instance.new("TextButton")
-dropdown.Size = UDim2.new(1, -40, 0, 34)
-dropdown.Position = UDim2.new(0, 20, 0, 90)
-dropdown.BackgroundColor3 = Color3.fromRGB(75, 75, 120)
+dropdown.Size = UDim2.new(0, 180, 0, 30)
+dropdown.Position = UDim2.new(0, 20, 0, 70)
+dropdown.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
 dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
 dropdown.Font = Enum.Font.Gotham
-dropdown.TextSize = 18
-dropdown.Text = "Select Pet"
-dropdown.Parent = mainFrame
-local dropdownCorner = Instance.new("UICorner", dropdown)
-dropdownCorner.CornerRadius = UDim.new(0, 10)
+dropdown.Text = "Choose Pet"
+dropdown.TextSize = 14
+dropdown.Parent = frame
+
+local dropdownCorner = Instance.new("UICorner")
+dropdownCorner.CornerRadius = UDim.new(0, 6)
+dropdownCorner.Parent = dropdown
 
 local dropdownList = Instance.new("Frame")
-dropdownList.Size = UDim2.new(1, -40, 0, 0)
-dropdownList.Position = UDim2.new(0, 20, 0, 124)
-dropdownList.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
-dropdownList.BorderSizePixel = 0
 dropdownList.Visible = false
+dropdownList.Position = UDim2.new(0, 0, 1, 0)
+dropdownList.Size = UDim2.new(1, 0, 0, #AvailablePets * 24)
+dropdownList.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+dropdownList.Parent = dropdown
 dropdownList.ClipsDescendants = true
-dropdownList.Parent = mainFrame
-local listCorner = Instance.new("UICorner", dropdownList)
-listCorner.CornerRadius = UDim.new(0, 12)
 
-local layout = Instance.new("UIListLayout", dropdownList)
-layout.Padding = UDim.new(0, 4)
+local listLayout = Instance.new("UIListLayout")
+listLayout.Parent = dropdownList
 
--- Populate pet options
-for petName, _ in pairs(PetModels) do
+for _, pet in ipairs(AvailablePets) do
 	local option = Instance.new("TextButton")
-	option.Size = UDim2.new(1, -10, 0, 30)
-	option.BackgroundColor3 = Color3.fromRGB(90, 90, 140)
-	option.TextColor3 = Color3.fromRGB(255, 255, 255)
+	option.Text = pet
 	option.Font = Enum.Font.Gotham
-	option.TextSize = 16
-	option.Text = petName
-	option.AutoButtonColor = true
+	option.TextSize = 14
+	option.TextColor3 = Color3.fromRGB(255, 255, 255)
+	option.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+	option.Size = UDim2.new(1, 0, 0, 24)
 	option.Parent = dropdownList
-	local optionCorner = Instance.new("UICorner", option)
-	optionCorner.CornerRadius = UDim.new(0, 8)
 
 	option.MouseButton1Click:Connect(function()
-		dropdown.Text = petName
+		dropdown.Text = pet
 		dropdownList.Visible = false
-		dropdownList.Size = UDim2.new(1, -40, 0, 0)
 	end)
 end
 
 dropdown.MouseButton1Click:Connect(function()
 	dropdownList.Visible = not dropdownList.Visible
-	dropdownList.Size = dropdownList.Visible and UDim2.new(1, -40, 0, 330) or UDim2.new(1, -40, 0, 0)
 end)
 
--- AGE & WEIGHT (closer to pet selector)
-local ageBox = Instance.new("TextBox")
-ageBox.PlaceholderText = "Age"
-ageBox.Size = UDim2.new(0.45, -10, 0, 36)
-ageBox.Position = UDim2.new(0.05, 20, 0, 134)
-ageBox.BackgroundColor3 = Color3.fromRGB(75, 75, 120)
-ageBox.TextColor3 = Color3.fromRGB(230, 230, 255)
-ageBox.Font = Enum.Font.Gotham
-ageBox.TextSize = 16
-ageBox.ClearTextOnFocus = false
-ageBox.Parent = mainFrame
-local ageCorner = Instance.new("UICorner", ageBox)
-ageCorner.CornerRadius = UDim.new(0, 8)
+-- Age + Weight Labels
+local ageLabel = Instance.new("TextLabel")
+ageLabel.Text = "Age"
+ageLabel.Font = Enum.Font.Gotham
+ageLabel.TextSize = 14
+ageLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+ageLabel.BackgroundTransparency = 1
+ageLabel.Size = UDim2.new(0, 100, 0, 20)
+ageLabel.Position = UDim2.new(0, 20, 0, 110)
+ageLabel.Parent = frame
 
-local weightBox = Instance.new("TextBox")
-weightBox.PlaceholderText = "Weight"
-weightBox.Size = UDim2.new(0.45, -10, 0, 36)
-weightBox.Position = UDim2.new(0.5, 10, 0, 134)
-weightBox.BackgroundColor3 = Color3.fromRGB(75, 75, 120)
-weightBox.TextColor3 = Color3.fromRGB(230, 230, 255)
-weightBox.Font = Enum.Font.Gotham
-weightBox.TextSize = 16
-weightBox.ClearTextOnFocus = false
-weightBox.Parent = mainFrame
-local weightCorner = Instance.new("UICorner", weightBox)
-weightCorner.CornerRadius = UDim.new(0, 8)
+local weightLabel = Instance.new("TextLabel")
+weightLabel.Text = "Weight"
+weightLabel.Font = Enum.Font.Gotham
+weightLabel.TextSize = 14
+weightLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+weightLabel.BackgroundTransparency = 1
+weightLabel.Size = UDim2.new(0, 100, 0, 20)
+weightLabel.Position = UDim2.new(0, 140, 0, 110)
+weightLabel.Parent = frame
 
--- LOADING BAR
-local loadingFrame = Instance.new("Frame")
-loadingFrame.Size = UDim2.new(1, -40, 0, 30)
-loadingFrame.Position = UDim2.new(0, 20, 0, 180)
-loadingFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-loadingFrame.BorderSizePixel = 0
-loadingFrame.Visible = false
-loadingFrame.Parent = mainFrame
-local loadingCorner = Instance.new("UICorner", loadingFrame)
-loadingCorner.CornerRadius = UDim.new(0, 8)
+-- Age Input
+local ageInput = Instance.new("TextBox")
+ageInput.Size = UDim2.new(0, 100, 0, 30)
+ageInput.Position = UDim2.new(0, 20, 0, 130)
+ageInput.PlaceholderText = "Enter Age"
+ageInput.Text = ""
+ageInput.Font = Enum.Font.Gotham
+ageInput.TextSize = 14
+ageInput.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+ageInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+ageInput.Parent = frame
 
-local loadingBar = Instance.new("Frame")
-loadingBar.BackgroundColor3 = Color3.fromRGB(140, 255, 160)
-loadingBar.Size = UDim2.new(0, 0, 1, 0)
-loadingBar.BorderSizePixel = 0
-loadingBar.Parent = loadingFrame
-loadingBar.ZIndex = 3
+local ageCorner = Instance.new("UICorner")
+ageCorner.CornerRadius = UDim.new(0, 6)
+ageCorner.Parent = ageInput
 
-local loadingLabel = Instance.new("TextLabel")
-loadingLabel.Size = UDim2.new(1, 0, 1, 0)
-loadingLabel.BackgroundTransparency = 1
-loadingLabel.TextColor3 = Color3.fromRGB(220, 255, 220)
-loadingLabel.Font = Enum.Font.GothamBold
-loadingLabel.TextSize = 16
-loadingLabel.Text = ""
-loadingLabel.Parent = loadingFrame
-loadingLabel.ZIndex = 4
+-- Weight Input
+local weightInput = Instance.new("TextBox")
+weightInput.Size = UDim2.new(0, 100, 0, 30)
+weightInput.Position = UDim2.new(0, 140, 0, 130)
+weightInput.PlaceholderText = "Enter Weight"
+weightInput.Text = ""
+weightInput.Font = Enum.Font.Gotham
+weightInput.TextSize = 14
+weightInput.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+weightInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+weightInput.Parent = frame
 
--- SPAWN BUTTON
-local spawnBtn = Instance.new("TextButton")
-spawnBtn.Size = UDim2.new(1, -40, 0, 44)
-spawnBtn.Position = UDim2.new(0, 20, 0, 225)
-spawnBtn.Text = "Spawn Pet"
-spawnBtn.BackgroundColor3 = Color3.fromRGB(115, 180, 255)
-spawnBtn.TextColor3 = Color3.fromRGB(20, 20, 40)
-spawnBtn.Font = Enum.Font.GothamBold
-spawnBtn.TextSize = 20
-spawnBtn.Parent = mainFrame
-local spawnCorner = Instance.new("UICorner", spawnBtn)
-spawnCorner.CornerRadius = UDim.new(0, 12)
+local weightCorner = Instance.new("UICorner")
+weightCorner.CornerRadius = UDim.new(0, 6)
+weightCorner.Parent = weightInput
 
-spawnBtn.AutoButtonColor = true
-spawnBtn.MouseEnter:Connect(function()
-	spawnBtn.BackgroundColor3 = Color3.fromRGB(180, 220, 255)
-end)
-spawnBtn.MouseLeave:Connect(function()
-	spawnBtn.BackgroundColor3 = Color3.fromRGB(115, 180, 255)
-end)
+-- Spawn Button
+local spawnButton = Instance.new("TextButton")
+spawnButton.Size = UDim2.new(0, 120, 0, 36)
+spawnButton.Position = UDim2.new(0, 20, 0, 180)
+spawnButton.Text = "Spawn Pet"
+spawnButton.Font = Enum.Font.GothamBold
+spawnButton.TextSize = 16
+spawnButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+spawnButton.BackgroundColor3 = Color3.fromRGB(0, 170, 127)
+spawnButton.Parent = frame
 
--- WELD FUNCTION (unchanged)
-local function weldToRightHand(character, petModel)
-	local rightHand = character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
-	if not rightHand then return end
+local spawnCorner = Instance.new("UICorner")
+spawnCorner.CornerRadius = UDim.new(0, 8)
+spawnCorner.Parent = spawnButton
 
-	for _, child in pairs(petModel:GetChildren()) do
-		if child:IsA("BasePart") then
-			local weld = Instance.new("WeldConstraint")
-			weld.Part0 = rightHand
-			weld.Part1 = child
-			weld.Parent = child
-		elseif child:IsA("Model") then
-			weldToRightHand(character, child)
-		end
-	end
-	petModel:SetPrimaryPartCFrame(rightHand.CFrame * CFrame.new(0, 0, -1))
-end
-
--- SPAWN BUTTON LOGIC (unchanged from before)
-spawnBtn.MouseButton1Click:Connect(function()
+-- Pet Spawn Logic
+spawnButton.MouseButton1Click:Connect(function()
 	local selectedPet = dropdown.Text
-	local age = tonumber(ageBox.Text) or 1
-	local weight = tonumber(weightBox.Text) or 1
-	if not PetModels[selectedPet] then return end
+	if not table.find(AvailablePets, selectedPet) then return end
 
-	loadingFrame.Visible = true
-	loadingLabel.Text = `Spawning {selectedPet} (Age: {age}, Weight: {weight})`
+	local age = tonumber(ageInput.Text) or 1
+	local weight = tonumber(weightInput.Text) or 1
 
-	local tween = TweenService:Create(loadingBar, TweenInfo.new(3), { Size = UDim2.new(1, 0, 1, 0) })
-	tween:Play()
-	tween.Completed:Wait()
-
-	loadingFrame.Visible = false
-	loadingBar.Size = UDim2.new(0, 0, 1, 0)
-
-	local success, petModel = pcall(function()
-		return InsertService:LoadAsset(tonumber(string.match(PetModels[selectedPet], "%d+")))
-	end)
-
-	if not success or not petModel then
-		warn("Failed to load pet model for "..selectedPet)
-		return
-	end
-
-	petModel = petModel:GetChildren()[1]
-	if not petModel or not petModel:IsA("Model") then
-		warn("Pet model is invalid for "..selectedPet)
-		return
-	end
-
-	local scaleFactor = math.clamp(age * weight * 0.2, 0.5, 5)
-	for _, part in ipairs(petModel:GetDescendants()) do
-		if part:IsA("BasePart") then
-			part.Size = part.Size * scaleFactor
-		elseif part:IsA("SpecialMesh") then
-			part.Scale = part.Scale * scaleFactor
-		end
-	end
+	local model = ReplicatedStorage:FindFirstChild(selectedPet):Clone()
+	if not model then return end
 
 	local tool = Instance.new("Tool")
-	tool.Name = selectedPet .. " (Age: "..age..", Weight: "..weight..")"
+	tool.Name = selectedPet
 	tool.RequiresHandle = false
-	tool.CanBeDropped = true
 
-	petModel.Parent = tool
-	petModel.Name = "PetModel"
-	tool.Parent = LocalPlayer.Backpack
+	model.Parent = tool
+	model:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -2))
 
-	if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-		LocalPlayer.Character.Humanoid:EquipTool(tool)
-
-		wait(0.1)
-		weldToRightHand(LocalPlayer.Character, petModel)
+	local scale = 1 + (age * 0.05) + (weight * 0.05)
+	for _, part in ipairs(model:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.Size *= scale
+		end
 	end
+
+	tool.Parent = LocalPlayer.Backpack
 end)
