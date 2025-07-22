@@ -1,70 +1,121 @@
 local Players = game:GetService("Players")
-local Lighting = game:GetService("Lighting")
-local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
-local CoreGui = game:GetService("CoreGui")
-local Workspace = game:GetService("Workspace")
-
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Disable Roblox Core Notifications GUI
-StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Notifications, false)
-
--- Remove old UI and blur
-if playerGui:FindFirstChild("BlackCoverUI") then
-	playerGui.BlackCoverUI:Destroy()
-end
-for _, effect in ipairs(Lighting:GetChildren()) do
-	if effect:IsA("BlurEffect") then
-		effect:Destroy()
-	end
+-- Clean up any old versions
+if playerGui:FindFirstChild("XenosPetSpawner") then
+	playerGui.XenosPetSpawner:Destroy()
 end
 
--- Add blur effect
-local blur = Instance.new("BlurEffect")
-blur.Size = 24
-blur.Parent = Lighting
-
--- Create ScreenGui with very high DisplayOrder
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "BlackCoverUI"
-screenGui.IgnoreGuiInset = true
+screenGui.Name = "XenosPetSpawner"
 screenGui.ResetOnSpawn = false
-screenGui.DisplayOrder = 100000 -- extremely high
+screenGui.IgnoreGuiInset = true
 screenGui.Parent = playerGui
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Full screen black frame
-local blackFrame = Instance.new("Frame")
-blackFrame.Size = UDim2.new(1, 0, 1, 0)
-blackFrame.Position = UDim2.new(0, 0, 0, 0)
-blackFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-blackFrame.BorderSizePixel = 0
-blackFrame.ZIndex = 100001 -- extremely high
-blackFrame.Parent = screenGui
+-- Semi-dark full screen background
+local bg = Instance.new("Frame")
+bg.Size = UDim2.new(1, 0, 1, 0)
+bg.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+bg.BackgroundTransparency = 0.25
+bg.Parent = screenGui
 
--- Function to hide other GUI elements except our black screen UI
-local function hideOtherGuis()
-	-- Hide other PlayerGui children except BlackCoverUI
-	for _, gui in pairs(playerGui:GetChildren()) do
-		if gui:IsA("ScreenGui") and gui.Name ~= "BlackCoverUI" then
-			gui.Enabled = false
-		end
-	end
-	-- Hide CoreGui ScreenGuis except if any you want to keep (here we hide all)
-	for _, gui in pairs(CoreGui:GetChildren()) do
-		if gui:IsA("ScreenGui") then
-			gui.Enabled = false
-		end
-	end
-	-- Hide any BillboardGuis in Workspace (often used for in-world messages)
-	for _, obj in pairs(Workspace:GetDescendants()) do
-		if obj:IsA("BillboardGui") then
-			obj.Enabled = false
-		end
-	end
+-- Main UI container
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 500, 0, 350)
+main.Position = UDim2.new(0.5, -250, 0.5, -175)
+main.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+main.BorderSizePixel = 0
+main.AnchorPoint = Vector2.new(0.5, 0.5)
+main.Parent = bg
+main.ClipsDescendants = true
+main.ZIndex = 10
+main.BackgroundTransparency = 0
+main.Name = "Main"
+
+-- Rounded corners
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 16)
+corner.Parent = main
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundTransparency = 1
+title.Text = "🧬 Xeno's Pet Spawner"
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.fromRGB(200, 255, 200)
+title.TextSize = 26
+title.Parent = main
+
+-- Exit button
+local exit = Instance.new("TextButton")
+exit.Size = UDim2.new(0, 30, 0, 30)
+exit.Position = UDim2.new(1, -40, 0, 10)
+exit.Text = "⨉"
+exit.Font = Enum.Font.Gotham
+exit.TextSize = 20
+exit.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+exit.TextColor3 = Color3.fromRGB(255, 255, 255)
+exit.Parent = main
+local exitCorner = Instance.new("UICorner", exit)
+exitCorner.CornerRadius = UDim.new(0, 6)
+exit.MouseButton1Click:Connect(function()
+	screenGui:Destroy()
+end)
+
+-- Pet Dropdown
+local petDropDown = Instance.new("TextButton")
+petDropDown.Size = UDim2.new(0.8, 0, 0, 40)
+petDropDown.Position = UDim2.new(0.1, 0, 0, 70)
+petDropDown.Text = "Select Pet Type ▼"
+petDropDown.Font = Enum.Font.Gotham
+petDropDown.TextSize = 20
+petDropDown.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+petDropDown.TextColor3 = Color3.fromRGB(220, 220, 220)
+petDropDown.Parent = main
+Instance.new("UICorner", petDropDown).CornerRadius = UDim.new(0, 8)
+
+-- Age Input
+local ageInput = Instance.new("TextBox")
+ageInput.Size = UDim2.new(0.37, 0, 0, 40)
+ageInput.Position = UDim2.new(0.1, 0, 0, 130)
+ageInput.PlaceholderText = "Enter Age"
+ageInput.Text = ""
+ageInput.Font = Enum.Font.Gotham
+ageInput.TextSize = 18
+ageInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+ageInput.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ageInput.ClearTextOnFocus = false
+ageInput.Parent = main
+Instance.new("UICorner", ageInput).CornerRadius = UDim.new(0, 8)
+
+-- Weight Input
+local weightInput = ageInput:Clone()
+weightInput.PlaceholderText = "Enter Weight"
+weightInput.Position = UDim2.new(0.53, 0, 0, 130)
+weightInput.Parent = main
+
+-- Spawn Button
+local spawnBtn = Instance.new("TextButton")
+spawnBtn.Size = UDim2.new(0.8, 0, 0, 45)
+spawnBtn.Position = UDim2.new(0.1, 0, 0, 200)
+spawnBtn.Text = "Spawn Pet"
+spawnBtn.Font = Enum.Font.GothamBold
+spawnBtn.TextSize = 22
+spawnBtn.BackgroundColor3 = Color3.fromRGB(80, 170, 80)
+spawnBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+spawnBtn.Parent = main
+Instance.new("UICorner", spawnBtn).CornerRadius = UDim.new(0, 10)
+
+-- Optional: Hover effect
+local function addHover(button)
+	button.MouseEnter:Connect(function()
+		button.BackgroundColor3 = button.BackgroundColor3:lerp(Color3.fromRGB(100, 200, 100), 0.2)
+	end)
+	button.MouseLeave:Connect(function()
+		button.BackgroundColor3 = Color3.fromRGB(80, 170, 80)
+	end)
 end
+addHover(spawnBtn)
 
--- Run every frame
-RunService.Heartbeat:Connect(hideOtherGuis)
