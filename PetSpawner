@@ -1,9 +1,10 @@
---// Xeno's Visual Pet Spawner (Black GUI with Popout Boxes)
+--// Xeno's Visual Pet Spawner (Fixed Spawn Button)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -29,7 +30,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Main Frame (keep original dark color)
+-- Main Frame
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0,450,0,320)
 mainFrame.Position = UDim2.new(0.5,-225,0.5,-160)
@@ -120,9 +121,9 @@ closeButton.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
--- Function to create TextBox with "popout" effect
+-- Function to create TextBox
 local function createBox(placeholderText, posX, posY, width)
-    local shadow = Instance.new("Frame") -- slight shadow effect
+    local shadow = Instance.new("Frame") -- slight shadow
     shadow.Size = UDim2.new(0,width,0,35)
     shadow.Position = UDim2.new(0,posX+2,0,posY+2)
     shadow.BackgroundColor3 = Color3.fromRGB(20,20,20)
@@ -149,7 +150,6 @@ local function createBox(placeholderText, posX, posY, width)
     return box
 end
 
--- Layout: Pet Name & Weight horizontal, Age below
 local petBox = createBox("Pet Name", 25, 70, 180)
 local weightBox = createBox("Weight", 245, 70, 180)
 local ageBox = createBox("Age", 25, 120, 400)
@@ -204,7 +204,7 @@ local spawnCorner = Instance.new("UICorner")
 spawnCorner.CornerRadius = UDim.new(0,8)
 spawnCorner.Parent = spawnButton
 
--- Warning label under button
+-- Warning
 local warningLabel = Instance.new("TextLabel")
 warningLabel.Text = "⚠️ Do NOT leave the game during spawning, you may get banned!"
 warningLabel.Font = Enum.Font.SourceSansBold
@@ -217,7 +217,7 @@ warningLabel.TextWrapped = true
 warningLabel.TextXAlignment = Enum.TextXAlignment.Center
 warningLabel.Parent = mainFrame
 
--- Visual Pet Spawn Function
+-- Fixed Visual Pet Spawn Function
 local function spawnVisualPet(petName, weight, age)
     local petsFolder = ReplicatedStorage:FindFirstChild("Pets")
     if not petsFolder then warn("No Pets folder in ReplicatedStorage") return end
@@ -225,51 +225,49 @@ local function spawnVisualPet(petName, weight, age)
     local petModel = petsFolder:FindFirstChild(petName)
     if not petModel then warn("Pet not found: "..petName) return end
 
+    -- Clone and parent to Workspace
     local clone = petModel:Clone()
     clone.Name = petName.." (Visual)"
     clone:SetAttribute("Weight", tonumber(weight) or 1)
     clone:SetAttribute("Age", tonumber(age) or 1)
+    clone.Parent = Workspace
+    if clone.PrimaryPart == nil then
+        clone.PrimaryPart = clone:FindFirstChildWhichIsA("BasePart")
+    end
+    clone:SetPrimaryPartCFrame(CFrame.new(LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(3,0,0)))
 
+    -- Make parts non-colliding
     for _, part in pairs(clone:GetDescendants()) do
-        if part:IsA("Attachment") and part.Parent and not part.Parent:IsA("BasePart") then
-            local handle = clone:FindFirstChild("Handle") or clone:FindFirstChildWhichIsA("BasePart")
-            if handle then
-                part.Parent = handle
-            else
-                part:Destroy()
-            end
-        end
         if part:IsA("BasePart") then
             part.CanCollide = false
             part.Anchored = false
         end
+        if part:IsA("Attachment") and part.Parent and not part.Parent:IsA("BasePart") then
+            part.Parent = clone.PrimaryPart
+        end
     end
 
-    local tool
-    if clone:IsA("Tool") then
-        tool = clone
-    else
-        tool = Instance.new("Tool")
-        tool.Name = clone.Name
-        tool.RequiresHandle = true
-        local handle = Instance.new("Part")
-        handle.Size = Vector3.new(2,2,2)
-        handle.Transparency = 1
-        handle.Name = "Handle"
-        handle.CanCollide = false
-        handle.Parent = tool
-        clone.Parent = tool
-    end
-
+    -- Create a Tool for Backpack
+    local tool = Instance.new("Tool")
+    tool.Name = clone.Name
+    tool.RequiresHandle = true
+    local handle = Instance.new("Part")
+    handle.Size = Vector3.new(2,2,2)
+    handle.Transparency = 1
+    handle.Name = "Handle"
+    handle.CanCollide = false
+    handle.Parent = tool
+    clone.Parent = tool
     tool.Parent = Backpack
 
+    -- Equip Tool
     task.defer(function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
             LocalPlayer.Character.Humanoid:EquipTool(tool)
         end
     end)
 
-    -- Animate loading bar
+    -- Loading bar animation
     loadingContainer.Visible = true
     loadingBar.Size = UDim2.new(0,0,1,0)
     loadingPercent.Text = "0%"
@@ -288,7 +286,7 @@ local function spawnVisualPet(petName, weight, age)
     end)
 end
 
--- Spawn Button Logic (FIXED)
+-- Fixed Spawn Button Logic
 spawnButton.MouseButton1Click:Connect(function()
     local petName = petBox.Text
     local weight = weightBox.Text
