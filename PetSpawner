@@ -1,4 +1,4 @@
---// Xeno's Visual Pet Spawner (Fixed Spawn Button)
+--// Xeno's Visual Pet Spawner (Backpack Pet Edition)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -75,16 +75,18 @@ UserInputService.InputChanged:Connect(function(input)
     if input == dragInput and dragging then update(input) end
 end)
 
--- Title Bar
+-- Vibrant Title Bar
 local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1,0,0,35)
-titleBar.BackgroundColor3 = Color3.fromRGB(30,30,30)
+titleBar.Size = UDim2.new(1,0,0,40)
+titleBar.BackgroundColor3 = Color3.fromRGB(255,85,255)
 titleBar.BorderSizePixel = 0
 titleBar.Parent = mainFrame
 
-local titleBarCorner = Instance.new("UICorner")
-titleBarCorner.CornerRadius = UDim.new(0,12)
-titleBarCorner.Parent = titleBar
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255,85,255)),
+                                   ColorSequenceKeypoint.new(1, Color3.fromRGB(85,170,255))}
+gradient.Rotation = 45
+gradient.Parent = titleBar
 
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Text = "🐾 Xeno's Pet Spawner"
@@ -104,7 +106,7 @@ closeButton.TextSize = 18
 closeButton.TextColor3 = Color3.new(1,1,1)
 closeButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
 closeButton.Size = UDim2.new(0,30,0,30)
-closeButton.Position = UDim2.new(1,-35,0,3)
+closeButton.Position = UDim2.new(1,-35,0,5)
 closeButton.Parent = titleBar
 
 local closeCorner = Instance.new("UICorner")
@@ -121,9 +123,9 @@ closeButton.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
--- Function to create TextBox
+-- TextBox creator with shadow effect
 local function createBox(placeholderText, posX, posY, width)
-    local shadow = Instance.new("Frame") -- slight shadow
+    local shadow = Instance.new("Frame")
     shadow.Size = UDim2.new(0,width,0,35)
     shadow.Position = UDim2.new(0,posX+2,0,posY+2)
     shadow.BackgroundColor3 = Color3.fromRGB(20,20,20)
@@ -136,7 +138,7 @@ local function createBox(placeholderText, posX, posY, width)
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(0,width,0,35)
     box.Position = UDim2.new(0,posX,0,posY)
-    box.BackgroundColor3 = Color3.fromRGB(100,50,200)
+    box.BackgroundColor3 = Color3.fromRGB(120,0,255)
     box.TextColor3 = Color3.fromRGB(255,255,255)
     box.Font = Enum.Font.SourceSansBold
     box.TextSize = 16
@@ -150,14 +152,14 @@ local function createBox(placeholderText, posX, posY, width)
     return box
 end
 
-local petBox = createBox("Pet Name", 25, 70, 180)
-local weightBox = createBox("Weight", 245, 70, 180)
-local ageBox = createBox("Age", 25, 120, 400)
+local petBox = createBox("Pet Name", 25, 60, 180)
+local weightBox = createBox("Weight", 245, 60, 180)
+local ageBox = createBox("Age", 25, 110, 400)
 
 -- Loading bar
 local loadingContainer = Instance.new("Frame")
 loadingContainer.Size = UDim2.new(0.9,0,0,25)
-loadingContainer.Position = UDim2.new(0.05,0,0,170)
+loadingContainer.Position = UDim2.new(0.05,0,0,160)
 loadingContainer.BackgroundColor3 = Color3.fromRGB(50,50,50)
 loadingContainer.BorderSizePixel = 0
 loadingContainer.Visible = false
@@ -170,7 +172,7 @@ loadingCorner.Parent = loadingContainer
 local loadingBar = Instance.new("Frame")
 loadingBar.Size = UDim2.new(0,0,1,0)
 loadingBar.Position = UDim2.new(0,0,0,0)
-loadingBar.BackgroundColor3 = Color3.fromRGB(140,0,255)
+loadingBar.BackgroundColor3 = Color3.fromRGB(255,0,255)
 loadingBar.BorderSizePixel = 0
 loadingBar.Parent = loadingContainer
 
@@ -195,9 +197,9 @@ spawnButton.Text = "SPAWN PET"
 spawnButton.Font = Enum.Font.SourceSansBold
 spawnButton.TextSize = 20
 spawnButton.TextColor3 = Color3.fromRGB(255,255,255)
-spawnButton.BackgroundColor3 = Color3.fromRGB(140,0,255)
+spawnButton.BackgroundColor3 = Color3.fromRGB(180,0,255)
 spawnButton.Size = UDim2.new(0.9,0,0,40)
-spawnButton.Position = UDim2.new(0.05,0,0,210)
+spawnButton.Position = UDim2.new(0.05,0,0,200)
 spawnButton.Parent = mainFrame
 
 local spawnCorner = Instance.new("UICorner")
@@ -212,62 +214,75 @@ warningLabel.TextSize = 14
 warningLabel.TextColor3 = Color3.fromRGB(255,255,0)
 warningLabel.BackgroundTransparency = 1
 warningLabel.Size = UDim2.new(0.9,0,0,30)
-warningLabel.Position = UDim2.new(0.05,0,0,260)
+warningLabel.Position = UDim2.new(0.05,0,0,250)
 warningLabel.TextWrapped = true
 warningLabel.TextXAlignment = Enum.TextXAlignment.Center
 warningLabel.Parent = mainFrame
 
--- Fixed Visual Pet Spawn Function
+-- Spawn function (Backpack Pet)
 local function spawnVisualPet(petName, weight, age)
     local petsFolder = ReplicatedStorage:FindFirstChild("Pets")
-    if not petsFolder then warn("No Pets folder in ReplicatedStorage") return end
+    if not petsFolder then
+        warn("No Pets folder in ReplicatedStorage")
+        return
+    end
 
     local petModel = petsFolder:FindFirstChild(petName)
-    if not petModel then warn("Pet not found: "..petName) return end
+    if not petModel then
+        warn("Pet not found: "..petName)
+        return
+    end
 
-    -- Clone and parent to Workspace
     local clone = petModel:Clone()
     clone.Name = petName.." (Visual)"
     clone:SetAttribute("Weight", tonumber(weight) or 1)
     clone:SetAttribute("Age", tonumber(age) or 1)
-    clone.Parent = Workspace
-    if clone.PrimaryPart == nil then
-        clone.PrimaryPart = clone:FindFirstChildWhichIsA("BasePart")
-    end
-    clone:SetPrimaryPartCFrame(CFrame.new(LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(3,0,0)))
 
-    -- Make parts non-colliding
-    for _, part in pairs(clone:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = false
-            part.Anchored = false
-        end
-        if part:IsA("Attachment") and part.Parent and not part.Parent:IsA("BasePart") then
-            part.Parent = clone.PrimaryPart
-        end
-    end
-
-    -- Create a Tool for Backpack
+    -- Create Tool
     local tool = Instance.new("Tool")
     tool.Name = clone.Name
     tool.RequiresHandle = true
+    tool.CanBeDropped = true
+
+    -- Create visible handle
     local handle = Instance.new("Part")
-    handle.Size = Vector3.new(2,2,2)
-    handle.Transparency = 1
     handle.Name = "Handle"
+    handle.Size = Vector3.new(2,2,2)
+    handle.Transparency = 0 -- visible
     handle.CanCollide = false
+    handle.Anchored = false
     handle.Parent = tool
+
+    -- Position pet model relative to handle
+    clone.PrimaryPart = clone:FindFirstChildWhichIsA("BasePart") or clone:FindFirstChild()
+    if clone.PrimaryPart then
+        clone:SetPrimaryPartCFrame(handle.CFrame)
+    end
     clone.Parent = tool
+
+    -- Weld all parts to handle
+    for _, part in pairs(clone:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.Anchored = false
+            part.CanCollide = false
+            local weld = Instance.new("WeldConstraint")
+            weld.Part0 = handle
+            weld.Part1 = part
+            weld.Parent = handle
+        end
+    end
+
+    -- Parent tool to Backpack
     tool.Parent = Backpack
 
-    -- Equip Tool
-    task.defer(function()
+    -- Equip immediately
+    task.delay(0.1, function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
             LocalPlayer.Character.Humanoid:EquipTool(tool)
         end
     end)
 
-    -- Loading bar animation
+    -- Animate loading bar
     loadingContainer.Visible = true
     loadingBar.Size = UDim2.new(0,0,1,0)
     loadingPercent.Text = "0%"
@@ -276,7 +291,7 @@ local function spawnVisualPet(petName, weight, age)
     local conn
     conn = RunService.Heartbeat:Connect(function()
         local elapsed = tick() - startTime
-        local pct = math.clamp(elapsed / duration,0,1)
+        local pct = math.clamp(elapsed/duration,0,1)
         loadingBar.Size = UDim2.new(pct,0,1,0)
         loadingPercent.Text = math.floor(pct*100).."%"
         if pct >= 1 then
@@ -286,7 +301,7 @@ local function spawnVisualPet(petName, weight, age)
     end)
 end
 
--- Fixed Spawn Button Logic
+-- Spawn Button Logic
 spawnButton.MouseButton1Click:Connect(function()
     local petName = petBox.Text
     local weight = weightBox.Text
