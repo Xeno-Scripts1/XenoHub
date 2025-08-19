@@ -1,8 +1,8 @@
---// Xeno's Visual Pet Spawner (Safe Edition)
+--// Xeno's Visual Pet Spawner (Full Safe Edition with TextBoxes)
+
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer
@@ -31,8 +31,8 @@ end)
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0,450,0,340)
-mainFrame.Position = UDim2.new(0.5,-225,0.5,-170)
+mainFrame.Size = UDim2.new(0,450,0,360)
+mainFrame.Position = UDim2.new(0.5,-225,0.5,-180)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
 mainFrame.BackgroundTransparency = 0.2
 mainFrame.BorderSizePixel = 0
@@ -125,7 +125,7 @@ end)
 local warningLabel = Instance.new("TextLabel")
 warningLabel.Text = "⚠️ WARNING: Do NOT leave the game during spawning, or you may get banned!"
 warningLabel.Font = Enum.Font.SourceSansBold
-warningLabel.TextSize = 18
+warningLabel.TextSize = 16
 warningLabel.TextColor3 = Color3.fromRGB(255,255,0)
 warningLabel.BackgroundTransparency = 1
 warningLabel.Size = UDim2.new(1,-20,0,40)
@@ -134,7 +134,7 @@ warningLabel.TextWrapped = true
 warningLabel.TextXAlignment = Enum.TextXAlignment.Center
 warningLabel.Parent = mainFrame
 
--- TextBoxes
+-- TextBoxes with labels
 local function createLabeledBox(labelText, posY)
     local label = Instance.new("TextLabel")
     label.Text = labelText
@@ -163,25 +163,10 @@ local petBox = createLabeledBox("Pet Name", 100)
 local weightBox = createLabeledBox("Weight", 160)
 local ageBox = createLabeledBox("Age", 220)
 
--- Spawn Button
-local spawnButton = Instance.new("TextButton")
-spawnButton.Text = "SPAWN PET"
-spawnButton.Font = Enum.Font.SourceSansBold
-spawnButton.TextSize = 22
-spawnButton.TextColor3 = Color3.new(1,1,1)
-spawnButton.BackgroundColor3 = Color3.fromRGB(140,0,255)
-spawnButton.Size = UDim2.new(0.8,0,0,45)
-spawnButton.Position = UDim2.new(0.1,0,0,280)
-spawnButton.Parent = mainFrame
-
-local spawnCorner = Instance.new("UICorner")
-spawnCorner.CornerRadius = UDim.new(0,8)
-spawnCorner.Parent = spawnButton
-
 -- Loading bar
 local loadingBarContainer = Instance.new("Frame")
-loadingBarContainer.Size = UDim2.new(0.8,0,0,30)
-loadingBarContainer.Position = UDim2.new(0.1,0,0,240)
+loadingBarContainer.Size = UDim2.new(0.8,0,0,25)
+loadingBarContainer.Position = UDim2.new(0.1,0,0,270)
 loadingBarContainer.BackgroundColor3 = Color3.fromRGB(50,50,50)
 loadingBarContainer.BackgroundTransparency = 0.4
 loadingBarContainer.BorderSizePixel = 0
@@ -215,7 +200,22 @@ loadingPercentInside.TextXAlignment = Enum.TextXAlignment.Center
 loadingPercentInside.TextYAlignment = Enum.TextYAlignment.Center
 loadingPercentInside.Parent = loadingBar
 
--- Visual spawn logic
+-- Spawn Button
+local spawnButton = Instance.new("TextButton")
+spawnButton.Text = "SPAWN PET"
+spawnButton.Font = Enum.Font.SourceSansBold
+spawnButton.TextSize = 22
+spawnButton.TextColor3 = Color3.new(1,1,1)
+spawnButton.BackgroundColor3 = Color3.fromRGB(140,0,255)
+spawnButton.Size = UDim2.new(0.8,0,0,45)
+spawnButton.Position = UDim2.new(0.1,0,0,305)
+spawnButton.Parent = mainFrame
+
+local spawnCorner = Instance.new("UICorner")
+spawnCorner.CornerRadius = UDim.new(0,8)
+spawnCorner.Parent = spawnButton
+
+-- Visual spawn function
 local function spawnVisualPet(petName, weight, age)
     local petsFolder = ReplicatedStorage:FindFirstChild("Pets")
     if not petsFolder then warn("No Pets folder in ReplicatedStorage") return end
@@ -228,16 +228,14 @@ local function spawnVisualPet(petName, weight, age)
     clone:SetAttribute("Weight", tonumber(weight) or 1)
     clone:SetAttribute("Age", tonumber(age) or 1)
 
-    -- Ensure attachments are parented correctly
+    -- Fix attachments
     for _, part in pairs(clone:GetDescendants()) do
-        if part:IsA("Attachment") then
-            if part.Parent and not part.Parent:IsA("BasePart") then
-                local handle = clone:FindFirstChild("Handle") or clone:FindFirstChildWhichIsA("BasePart")
-                if handle then
-                    part.Parent = handle
-                else
-                    part:Destroy() -- if no basepart, remove attachment
-                end
+        if part:IsA("Attachment") and part.Parent and not part.Parent:IsA("BasePart") then
+            local handle = clone:FindFirstChild("Handle") or clone:FindFirstChildWhichIsA("BasePart")
+            if handle then
+                part.Parent = handle
+            else
+                part:Destroy()
             end
         end
         if part:IsA("BasePart") then
@@ -246,7 +244,6 @@ local function spawnVisualPet(petName, weight, age)
         end
     end
 
-    -- Wrap in tool for backpack
     local tool
     if clone:IsA("Tool") then
         tool = clone
@@ -265,7 +262,6 @@ local function spawnVisualPet(petName, weight, age)
 
     tool.Parent = Backpack
 
-    -- Equip tool in-hand
     task.defer(function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
             LocalPlayer.Character.Humanoid:EquipTool(tool)
