@@ -1,4 +1,4 @@
---// Xeno's Visual Pet Spawner (Fixed TextBoxes Edition)
+--// Xeno's Visual Pet Spawner (Horizontal Boxes Edition)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -31,10 +31,9 @@ end)
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0,450,0,420)
-mainFrame.Position = UDim2.new(0.5,-225,0.5,-210)
-mainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-mainFrame.BackgroundTransparency = 0.2
+mainFrame.Size = UDim2.new(0,450,0,320)
+mainFrame.Position = UDim2.new(0.5,-225,0.5,-160)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15,15,15)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
@@ -77,8 +76,7 @@ end)
 -- Title Bar
 local titleBar = Instance.new("Frame")
 titleBar.Size = UDim2.new(1,0,0,35)
-titleBar.BackgroundColor3 = Color3.fromRGB(30,30,30)
-titleBar.BackgroundTransparency = 0.3
+titleBar.BackgroundColor3 = Color3.fromRGB(35,35,35)
 titleBar.BorderSizePixel = 0
 titleBar.Parent = mainFrame
 
@@ -87,10 +85,10 @@ titleBarCorner.CornerRadius = UDim.new(0,12)
 titleBarCorner.Parent = titleBar
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Text = "🐾  Xeno's Pet Spawner  ⚠️"
+titleLabel.Text = "🐾 Xeno's Pet Spawner"
 titleLabel.Font = Enum.Font.SourceSansBold
 titleLabel.TextSize = 20
-titleLabel.TextColor3 = Color3.new(1,1,1)
+titleLabel.TextColor3 = Color3.fromRGB(255,255,255)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Size = UDim2.new(1,0,1,0)
 titleLabel.TextXAlignment = Enum.TextXAlignment.Center
@@ -121,101 +119,94 @@ closeButton.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
--- Warning Label
-local warningLabel = Instance.new("TextLabel")
-warningLabel.Text = "⚠️ WARNING: Do NOT leave the game during spawning, or you may get banned!"
-warningLabel.Font = Enum.Font.SourceSansBold
-warningLabel.TextSize = 16
-warningLabel.TextColor3 = Color3.fromRGB(255,255,0)
-warningLabel.BackgroundTransparency = 1
-warningLabel.Size = UDim2.new(1,-20,0,40)
-warningLabel.Position = UDim2.new(0,10,0,50)
-warningLabel.TextWrapped = true
-warningLabel.TextXAlignment = Enum.TextXAlignment.Center
-warningLabel.Parent = mainFrame
-
--- TextBoxes with Labels
-local function createTextBox(labelText, yPos)
-    local label = Instance.new("TextLabel")
-    label.Text = labelText
-    label.Font = Enum.Font.SourceSansBold
-    label.TextSize = 16
-    label.TextColor3 = Color3.fromRGB(255,255,255)
-    label.BackgroundTransparency = 1
-    label.Position = UDim2.new(0,25,0,yPos)
-    label.Size = UDim2.new(0,150,0,20)
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = mainFrame
-
+-- Function to create TextBox with placeholder inside
+local function createBox(placeholderText, posX, posY, width)
     local box = Instance.new("TextBox")
-    box.Size = UDim2.new(0,200,0,30)
-    box.Position = UDim2.new(0,25,0,yPos+25)
-    box.BackgroundColor3 = Color3.fromRGB(100,100,100)
+    box.Size = UDim2.new(0,width,0,35)
+    box.Position = UDim2.new(0,posX,0,posY)
+    box.BackgroundColor3 = Color3.fromRGB(70,70,70)
     box.TextColor3 = Color3.fromRGB(255,255,255)
     box.Font = Enum.Font.SourceSans
     box.TextSize = 16
-    box.PlaceholderText = "Enter "..labelText
+    box.PlaceholderText = placeholderText
+    box.ClearTextOnFocus = false
+    box.Text = ""
     box.Parent = mainFrame
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0,6)
+    corner.Parent = box
     return box
 end
 
-local petBox = createTextBox("Pet Name", 100)
-local weightBox = createTextBox("Weight", 160)
-local ageBox = createTextBox("Age", 220)
+-- Horizontal layout for Pet Name & Weight, Age underneath
+local petBox = createBox("Pet Name", 25, 70, 180)
+local weightBox = createBox("Weight", 245, 70, 180)
+local ageBox = createBox("Age", 25, 120, 400)
 
--- Loading Bar
-local loadingBarContainer = Instance.new("Frame")
-loadingBarContainer.Size = UDim2.new(0.8,0,0,25)
-loadingBarContainer.Position = UDim2.new(0.1,0,0,270)
-loadingBarContainer.BackgroundColor3 = Color3.fromRGB(50,50,50)
-loadingBarContainer.BackgroundTransparency = 0.4
-loadingBarContainer.BorderSizePixel = 0
-loadingBarContainer.Visible = false
-loadingBarContainer.Parent = mainFrame
+-- Loading bar
+local loadingContainer = Instance.new("Frame")
+loadingContainer.Size = UDim2.new(0.9,0,0,25)
+loadingContainer.Position = UDim2.new(0.05,0,0,170)
+loadingContainer.BackgroundColor3 = Color3.fromRGB(50,50,50)
+loadingContainer.BorderSizePixel = 0
+loadingContainer.Visible = false
+loadingContainer.Parent = mainFrame
 
 local loadingCorner = Instance.new("UICorner")
-loadingCorner.CornerRadius = UDim.new(0,8)
-loadingCorner.Parent = loadingBarContainer
+loadingCorner.CornerRadius = UDim.new(0,6)
+loadingCorner.Parent = loadingContainer
 
 local loadingBar = Instance.new("Frame")
 loadingBar.Size = UDim2.new(0,0,1,0)
 loadingBar.Position = UDim2.new(0,0,0,0)
 loadingBar.BackgroundColor3 = Color3.fromRGB(140,0,255)
 loadingBar.BorderSizePixel = 0
-loadingBar.Parent = loadingBarContainer
+loadingBar.Parent = loadingContainer
 
-local loadingBarCorner = Instance.new("UICorner")
-loadingBarCorner.CornerRadius = UDim.new(0,8)
-loadingBarCorner.Parent = loadingBar
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(0,6)
+barCorner.Parent = loadingBar
 
-local loadingPercentInside = Instance.new("TextLabel")
-loadingPercentInside.Text = "0%"
-loadingPercentInside.Font = Enum.Font.SourceSansBold
-loadingPercentInside.TextSize = 16
-loadingPercentInside.TextColor3 = Color3.new(1,1,1)
-loadingPercentInside.BackgroundTransparency = 1
-loadingPercentInside.Size = UDim2.new(1,0,1,0)
-loadingPercentInside.Position = UDim2.new(0,0,0,0)
-loadingPercentInside.TextXAlignment = Enum.TextXAlignment.Center
-loadingPercentInside.TextYAlignment = Enum.TextYAlignment.Center
-loadingPercentInside.Parent = loadingBar
+local loadingPercent = Instance.new("TextLabel")
+loadingPercent.Text = "0%"
+loadingPercent.Font = Enum.Font.SourceSansBold
+loadingPercent.TextSize = 16
+loadingPercent.TextColor3 = Color3.fromRGB(255,255,255)
+loadingPercent.BackgroundTransparency = 1
+loadingPercent.Size = UDim2.new(1,0,1,0)
+loadingPercent.Parent = loadingBar
+loadingPercent.TextXAlignment = Enum.TextXAlignment.Center
+loadingPercent.TextYAlignment = Enum.TextYAlignment.Center
 
 -- Spawn Button
 local spawnButton = Instance.new("TextButton")
 spawnButton.Text = "SPAWN PET"
 spawnButton.Font = Enum.Font.SourceSansBold
-spawnButton.TextSize = 22
-spawnButton.TextColor3 = Color3.new(1,1,1)
+spawnButton.TextSize = 20
+spawnButton.TextColor3 = Color3.fromRGB(255,255,255)
 spawnButton.BackgroundColor3 = Color3.fromRGB(140,0,255)
-spawnButton.Size = UDim2.new(0.8,0,0,45)
-spawnButton.Position = UDim2.new(0.1,0,0,305)
+spawnButton.Size = UDim2.new(0.9,0,0,40)
+spawnButton.Position = UDim2.new(0.05,0,0,210)
 spawnButton.Parent = mainFrame
 
 local spawnCorner = Instance.new("UICorner")
 spawnCorner.CornerRadius = UDim.new(0,8)
 spawnCorner.Parent = spawnButton
 
--- Visual Spawn Function
+-- Warning label under button
+local warningLabel = Instance.new("TextLabel")
+warningLabel.Text = "⚠️ Do NOT leave the game during spawning, you may get banned!"
+warningLabel.Font = Enum.Font.SourceSansBold
+warningLabel.TextSize = 14
+warningLabel.TextColor3 = Color3.fromRGB(255,255,0)
+warningLabel.BackgroundTransparency = 1
+warningLabel.Size = UDim2.new(0.9,0,0,30)
+warningLabel.Position = UDim2.new(0.05,0,0,260)
+warningLabel.TextWrapped = true
+warningLabel.TextXAlignment = Enum.TextXAlignment.Center
+warningLabel.Parent = mainFrame
+
+-- Visual Pet Spawn Function
 local function spawnVisualPet(petName, weight, age)
     local petsFolder = ReplicatedStorage:FindFirstChild("Pets")
     if not petsFolder then warn("No Pets folder in ReplicatedStorage") return end
@@ -228,7 +219,6 @@ local function spawnVisualPet(petName, weight, age)
     clone:SetAttribute("Weight", tonumber(weight) or 1)
     clone:SetAttribute("Age", tonumber(age) or 1)
 
-    -- Fix attachments
     for _, part in pairs(clone:GetDescendants()) do
         if part:IsA("Attachment") and part.Parent and not part.Parent:IsA("BasePart") then
             local handle = clone:FindFirstChild("Handle") or clone:FindFirstChildWhichIsA("BasePart")
@@ -269,21 +259,20 @@ local function spawnVisualPet(petName, weight, age)
     end)
 
     -- Animate loading bar
-    loadingBarContainer.Visible = true
+    loadingContainer.Visible = true
     loadingBar.Size = UDim2.new(0,0,1,0)
-    loadingPercentInside.Text = "0%"
-
+    loadingPercent.Text = "0%"
     local duration = 2
     local startTime = tick()
-    local connection
-    connection = RunService.Heartbeat:Connect(function()
+    local conn
+    conn = RunService.Heartbeat:Connect(function()
         local elapsed = tick() - startTime
-        local percent = math.clamp(elapsed / duration, 0, 1)
-        loadingBar.Size = UDim2.new(percent,0,1,0)
-        loadingPercentInside.Text = math.floor(percent*100).."%"
-        if percent >= 1 then
-            loadingBarContainer.Visible = false
-            connection:Disconnect()
+        local pct = math.clamp(elapsed / duration,0,1)
+        loadingBar.Size = UDim2.new(pct,0,1,0)
+        loadingPercent.Text = math.floor(pct*100).."%"
+        if pct >= 1 then
+            loadingContainer.Visible = false
+            conn:Disconnect()
         end
     end)
 end
