@@ -1,4 +1,4 @@
---// Xeno's Visual Pet Spawner (Typed Input Edition)
+--// Xeno's Visual Pet Spawner (Safe Edition)
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -7,10 +7,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Backpack = LocalPlayer:WaitForChild("Backpack")
 
 -- Clean old UI
 if PlayerGui:FindFirstChild("XenoPetSpawnerUI") then
-    PlayerGui:FindFirstChild("XenoPetSpawnerUI"):Destroy()
+    PlayerGui.XenoPetSpawnerUI:Destroy()
 end
 
 -- ScreenGui
@@ -227,6 +228,25 @@ local function spawnVisualPet(petName, weight, age)
     clone:SetAttribute("Weight", tonumber(weight) or 1)
     clone:SetAttribute("Age", tonumber(age) or 1)
 
+    -- Ensure attachments are parented correctly
+    for _, part in pairs(clone:GetDescendants()) do
+        if part:IsA("Attachment") then
+            if part.Parent and not part.Parent:IsA("BasePart") then
+                local handle = clone:FindFirstChild("Handle") or clone:FindFirstChildWhichIsA("BasePart")
+                if handle then
+                    part.Parent = handle
+                else
+                    part:Destroy() -- if no basepart, remove attachment
+                end
+            end
+        end
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+            part.Anchored = false
+        end
+    end
+
+    -- Wrap in tool for backpack
     local tool
     if clone:IsA("Tool") then
         tool = clone
@@ -243,15 +263,45 @@ local function spawnVisualPet(petName, weight, age)
         clone.Parent = tool
     end
 
-    tool.Parent = LocalPlayer.Backpack
+    tool.Parent = Backpack
 
-    task.delay(0.1,function()
+    -- Equip tool in-hand
+    task.defer(function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
             LocalPlayer.Character.Humanoid:EquipTool(tool)
         end
     end)
 
-    for _, part in pairs(clone:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = false
-            part.Anchored = false
+    -- Animate loading bar
+    loadingBarContainer.Visible = true
+    loadingBar.Size = UDim2.new(0,0,1,0)
+    loadingPercentInside.Text = "0%"
+
+    local duration = 2
+    local startTime = tick()
+    local connection
+    connection = RunService.Heartbeat:Connect(function()
+        local elapsed = tick() - startTime
+        local percent = math.clamp(elapsed / duration, 0, 1)
+        loadingBar.Size = UDim2.new(percent,0,1,0)
+        loadingPercentInside.Text = math.floor(percent*100).."%"
+        if percent >= 1 then
+            loadingBarContainer.Visible = false
+            connection:Disconnect()
+        end
+    end)
+end
+
+-- Spawn Button Logic
+spawnButton.MouseButton1Click:Connect(function()
+    local petName = petBox.Text
+    local weight = weightBox.Text
+    local age = ageBox.Text
+
+    if petName == "" then
+        warn("Please enter a pet name")
+        return
+    end
+
+    spawnVisualPet(petName, weight, age)
+end)
