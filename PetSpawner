@@ -1,129 +1,298 @@
---// Xeno's Pet Spawner (Self-Contained Edition)
-
+--// Xeno's Pet Spawner (Visual Edition)
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Player = Players.LocalPlayer
 
--- UI Setup (same as your original)
-local ScreenGui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
-local Frame = Instance.new("Frame")
-local UICorner = Instance.new("UICorner")
-local Title = Instance.new("TextLabel")
-local PetBox = Instance.new("TextBox")
-local WeightBox = Instance.new("TextBox")
-local AgeBox = Instance.new("TextBox")
-local SpawnBtn = Instance.new("TextButton")
-local LoadingFrame = Instance.new("Frame")
-local LoadingBar = Instance.new("Frame")
-local LoadingText = Instance.new("TextLabel")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Frame
-Frame.Size = UDim2.new(0, 350, 0, 260)
-Frame.Position = UDim2.new(0.5, -175, 0.5, -130)
-Frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
-Frame.Parent = ScreenGui
-UICorner.CornerRadius = UDim.new(0,12)
-UICorner.Parent = Frame
+-- Clean old UI
+if PlayerGui:FindFirstChild("XenoPetSpawnerUI") then
+    PlayerGui:FindFirstChild("XenoPetSpawnerUI"):Destroy()
+end
 
--- Title
-Title.Text = "🐾 Xeno's Pet Spawner"
-Title.Size = UDim2.new(1,0,0,40)
-Title.BackgroundTransparency = 1
-Title.TextColor3 = Color3.fromRGB(255,255,255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 20
-Title.Parent = Frame
+-- ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "XenoPetSpawnerUI"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = PlayerGui
 
--- Pet input
-PetBox.PlaceholderText = "Type Pet Name (e.g. Raccoon)"
-PetBox.Size = UDim2.new(0,300,0,30)
-PetBox.Position = UDim2.new(0,25,0,55)
-PetBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-PetBox.TextColor3 = Color3.fromRGB(255,255,255)
-PetBox.Parent = Frame
+-- Toggle hotkey (X)
+screenGui.Enabled = true
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.X then
+        screenGui.Enabled = not screenGui.Enabled
+    end
+end)
 
--- Weight input
-WeightBox.PlaceholderText = "Weight (e.g. 1)"
-WeightBox.Size = UDim2.new(0,140,0,30)
-WeightBox.Position = UDim2.new(0,25,0,95)
-WeightBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-WeightBox.TextColor3 = Color3.fromRGB(255,255,255)
-WeightBox.Parent = Frame
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 450, 0, 340)
+mainFrame.Position = UDim2.new(0.5, -225, 0.5, -170)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+mainFrame.BackgroundTransparency = 0.2
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = screenGui
 
--- Age input
-AgeBox.PlaceholderText = "Age (e.g. 2)"
-AgeBox.Size = UDim2.new(0,140,0,30)
-AgeBox.Position = UDim2.new(0,185,0,95)
-AgeBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-AgeBox.TextColor3 = Color3.fromRGB(255,255,255)
-AgeBox.Parent = Frame
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0,12)
+corner.Parent = mainFrame
 
--- Spawn button
-SpawnBtn.Text = "Spawn Pet"
-SpawnBtn.Size = UDim2.new(0,300,0,35)
-SpawnBtn.Position = UDim2.new(0,25,0,140)
-SpawnBtn.BackgroundColor3 = Color3.fromRGB(80,150,80)
-SpawnBtn.TextColor3 = Color3.fromRGB(255,255,255)
-SpawnBtn.Font = Enum.Font.GothamBold
-SpawnBtn.TextSize = 16
-SpawnBtn.Parent = Frame
+-- Draggable
+local dragging, dragInput, dragStart, startPos
+local function update(input)
+    local delta = input.Position - dragStart
+    mainFrame.Position = UDim2.new(
+        startPos.X.Scale, startPos.X.Offset + delta.X,
+        startPos.Y.Scale, startPos.Y.Offset + delta.Y
+    )
+end
+
+mainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+mainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then update(input) end
+end)
+
+-- Title Bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1,0,0,35)
+titleBar.BackgroundColor3 = Color3.fromRGB(30,30,30)
+titleBar.BackgroundTransparency = 0.3
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+
+local titleBarCorner = Instance.new("UICorner")
+titleBarCorner.CornerRadius = UDim.new(0,12)
+titleBarCorner.Parent = titleBar
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Text = "🐾  Xeno's Pet Spawner  ⚠️"
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.TextSize = 20
+titleLabel.TextColor3 = Color3.new(1,1,1)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Size = UDim2.new(1,0,1,0)
+titleLabel.TextXAlignment = Enum.TextXAlignment.Center
+titleLabel.Parent = titleBar
+
+-- Close button
+local closeButton = Instance.new("TextButton")
+closeButton.Text = "❌"
+closeButton.Font = Enum.Font.SourceSansBold
+closeButton.TextSize = 18
+closeButton.TextColor3 = Color3.new(1,1,1)
+closeButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
+closeButton.Size = UDim2.new(0,30,0,30)
+closeButton.Position = UDim2.new(1,-35,0,3)
+closeButton.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(1,0)
+closeCorner.Parent = closeButton
+
+closeButton.MouseEnter:Connect(function()
+    closeButton.BackgroundColor3 = Color3.fromRGB(200,50,50)
+end)
+closeButton.MouseLeave:Connect(function()
+    closeButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
+end)
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Warning
+local warningLabel = Instance.new("TextLabel")
+warningLabel.Text = "⚠️ WARNING: Visual spawn only!"
+warningLabel.Font = Enum.Font.SourceSansBold
+warningLabel.TextSize = 18
+warningLabel.TextColor3 = Color3.fromRGB(255,255,0)
+warningLabel.BackgroundTransparency = 1
+warningLabel.Size = UDim2.new(1,-20,0,40)
+warningLabel.Position = UDim2.new(0,10,0,50)
+warningLabel.TextWrapped = true
+warningLabel.TextXAlignment = Enum.TextXAlignment.Center
+warningLabel.Parent = mainFrame
+
+-- Labeled TextBoxes
+local function createLabeledBox(labelText, posY)
+    local label = Instance.new("TextLabel")
+    label.Text = labelText
+    label.Font = Enum.Font.SourceSansBold
+    label.TextSize = 16
+    label.TextColor3 = Color3.fromRGB(255,255,255)
+    label.BackgroundTransparency = 1
+    label.Position = UDim2.new(0,25,posY,0)
+    label.Size = UDim2.new(0,150,0,20)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = mainFrame
+
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(0,200,0,30)
+    box.Position = UDim2.new(0,25,posY+25,0)
+    box.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    box.TextColor3 = Color3.fromRGB(255,255,255)
+    box.Font = Enum.Font.SourceSans
+    box.TextSize = 16
+    box.PlaceholderText = "Enter "..labelText
+    box.Parent = mainFrame
+    return box
+end
+
+local petBox = createLabeledBox("Pet Name", 100)
+local weightBox = createLabeledBox("Weight", 160)
+local ageBox = createLabeledBox("Age", 220)
+
+-- Spawn Button
+local spawnButton = Instance.new("TextButton")
+spawnButton.Text = "SPAWN PET"
+spawnButton.Font = Enum.Font.SourceSansBold
+spawnButton.TextSize = 22
+spawnButton.TextColor3 = Color3.new(1,1,1)
+spawnButton.BackgroundColor3 = Color3.fromRGB(140,0,255)
+spawnButton.Size = UDim2.new(0.8,0,0,45)
+spawnButton.Position = UDim2.new(0.1,0,0,280)
+spawnButton.Parent = mainFrame
+
+local spawnCorner = Instance.new("UICorner")
+spawnCorner.CornerRadius = UDim.new(0,8)
+spawnCorner.Parent = spawnButton
 
 -- Loading bar
-LoadingFrame.Size = UDim2.new(0,300,0,30)
-LoadingFrame.Position = UDim2.new(0,25,0,185)
-LoadingFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
-LoadingFrame.Visible = false
-LoadingFrame.Parent = Frame
+local loadingBarContainer = Instance.new("Frame")
+loadingBarContainer.Size = UDim2.new(0.8,0,0,30)
+loadingBarContainer.Position = UDim2.new(0.1,0,0,240)
+loadingBarContainer.BackgroundColor3 = Color3.fromRGB(50,50,50)
+loadingBarContainer.BackgroundTransparency = 0.4
+loadingBarContainer.BorderSizePixel = 0
+loadingBarContainer.Visible = false
+loadingBarContainer.Parent = mainFrame
 
-LoadingBar.Size = UDim2.new(0,0,1,0)
-LoadingBar.BackgroundColor3 = Color3.fromRGB(100,200,100)
-LoadingBar.Parent = LoadingFrame
+local loadingCorner = Instance.new("UICorner")
+loadingCorner.CornerRadius = UDim.new(0,8)
+loadingCorner.Parent = loadingBarContainer
 
-LoadingText.Size = UDim2.new(1,0,1,0)
-LoadingText.BackgroundTransparency = 1
-LoadingText.TextColor3 = Color3.fromRGB(255,255,255)
-LoadingText.Font = Enum.Font.GothamBold
-LoadingText.TextSize = 14
-LoadingText.Text = "0%"
-LoadingText.Parent = LoadingFrame
+local loadingBar = Instance.new("Frame")
+loadingBar.Size = UDim2.new(0,0,1,0)
+loadingBar.Position = UDim2.new(0,0,0,0)
+loadingBar.BackgroundColor3 = Color3.fromRGB(140,0,255)
+loadingBar.BorderSizePixel = 0
+loadingBar.Parent = loadingBarContainer
 
--- Function to spawn a pet
-local function SpawnPet(petName, weight, age)
-    -- Example logic: assumes you have pet models in ReplicatedStorage under "Pets"
-    local petModel = ReplicatedStorage:FindFirstChild("Pets") and ReplicatedStorage.Pets:FindFirstChild(petName)
-    if petModel then
-        local petClone = petModel:Clone()
-        petClone.Parent = workspace
-        petClone:SetPrimaryPartCFrame(Player.Character.PrimaryPart.CFrame * CFrame.new(0,3,0))
-        -- Store weight and age as attributes
-        petClone:SetAttribute("Weight", weight)
-        petClone:SetAttribute("Age", age)
-        return true
+local loadingBarCorner = Instance.new("UICorner")
+loadingBarCorner.CornerRadius = UDim.new(0,8)
+loadingBarCorner.Parent = loadingBar
+
+local loadingPercentInside = Instance.new("TextLabel")
+loadingPercentInside.Text = "0%"
+loadingPercentInside.Font = Enum.Font.SourceSansBold
+loadingPercentInside.TextSize = 16
+loadingPercentInside.TextColor3 = Color3.new(1,1,1)
+loadingPercentInside.BackgroundTransparency = 1
+loadingPercentInside.Size = UDim2.new(1,0,1,0)
+loadingPercentInside.Position = UDim2.new(0,0,0,0)
+loadingPercentInside.TextXAlignment = Enum.TextXAlignment.Center
+loadingPercentInside.TextYAlignment = Enum.TextYAlignment.Center
+loadingPercentInside.Parent = loadingBar
+
+-- Visual Spawn Logic
+local function spawnVisualPet(petName, weight, age)
+    local petsFolder = ReplicatedStorage:FindFirstChild("Pets")
+    if not petsFolder then warn("No Pets folder in ReplicatedStorage") return end
+
+    local petModel = petsFolder:FindFirstChild(petName)
+    if not petModel then warn("Pet not found: "..petName) return end
+
+    local clone = petModel:Clone()
+    clone.Name = petName.." (Visual)"
+    clone:SetAttribute("Weight", tonumber(weight) or 1)
+    clone:SetAttribute("Age", tonumber(age) or 1)
+
+    -- Create Tool if it's not already a Tool
+    local tool
+    if clone:IsA("Tool") then
+        tool = clone
     else
-        warn("Pet not found: "..petName)
-        return false
+        tool = Instance.new("Tool")
+        tool.Name = clone.Name
+        tool.RequiresHandle = true
+        local handle = Instance.new("Part")
+        handle.Size = Vector3.new(2,2,2)
+        handle.Transparency = 1
+        handle.Name = "Handle"
+        handle.CanCollide = false
+        handle.Parent = tool
+        clone.Parent = tool
+        if clone.PrimaryPart then
+            tool.Handle.CFrame = clone.PrimaryPart.CFrame
+        end
+    end
+
+    tool.Parent = LocalPlayer.Backpack
+
+    -- Equip in hand
+    task.delay(0.1,function()
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            LocalPlayer.Character.Humanoid:EquipTool(tool)
+        end
+    end)
+
+    -- Optional: make all parts non-colliding
+    for _, part in pairs(clone:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+            part.Anchored = false
+        end
     end
 end
 
 -- Loading animation
 local function playLoading(petName, weight, age)
-    LoadingFrame.Visible = true
-    LoadingBar.Size = UDim2.new(0,0,1,0)
-    for i = 1,100 do
-        LoadingBar.Size = UDim2.new(i/100,0,1,0)
-        LoadingText.Text = i.."%"
-        task.wait(0.02)
-    end
-    LoadingFrame.Visible = false
-    SpawnPet(petName, tonumber(weight) or 1, tonumber(age) or 1)
+    loadingBarContainer.Visible = true
+    loadingBar.Size = UDim2.new(0,0,1,0)
+    local startTime = tick()
+    local duration = 3
+    local conn
+    conn = RunService.Heartbeat:Connect(function()
+        local elapsed = tick()-startTime
+        local progress = math.clamp(elapsed/duration,0,1)
+        loadingBar.Size = UDim2.new(progress,0,1,0)
+        loadingPercentInside.Text = math.floor(progress*100).."%"
+        local pulse = 0.5+0.5*math.sin(elapsed*8)
+        loadingBar.BackgroundColor3 = Color3.fromHSV(0.75,1,pulse*0.8+0.2)
+        if progress>=1 then
+            conn:Disconnect()
+            loadingBarContainer.Visible = false
+            spawnVisualPet(petName, weight, age)
+        end
+    end)
 end
 
 -- Button click
-SpawnBtn.MouseButton1Click:Connect(function()
-    local pet = PetBox.Text
-    local weight = WeightBox.Text
-    local age = AgeBox.Text
-    if pet ~= "" then
+spawnButton.MouseButton1Click:Connect(function()
+    local pet = petBox.Text
+    local weight = weightBox.Text
+    local age = ageBox.Text
+    if pet~="" then
         playLoading(pet, weight, age)
     end
 end)
