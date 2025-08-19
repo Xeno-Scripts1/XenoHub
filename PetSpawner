@@ -1,4 +1,4 @@
---// Xeno's Pet Spawner (Visual Edition)
+--// Xeno's Visual Pet Spawner (Typed Input Edition)
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -30,8 +30,8 @@ end)
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 450, 0, 340)
-mainFrame.Position = UDim2.new(0.5, -225, 0.5, -170)
+mainFrame.Size = UDim2.new(0,450,0,340)
+mainFrame.Position = UDim2.new(0.5,-225,0.5,-170)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
 mainFrame.BackgroundTransparency = 0.2
 mainFrame.BorderSizePixel = 0
@@ -120,9 +120,9 @@ closeButton.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
--- Warning
+-- Warning Label
 local warningLabel = Instance.new("TextLabel")
-warningLabel.Text = "⚠️ WARNING: Visual spawn only!"
+warningLabel.Text = "⚠️ WARNING: Do NOT leave the game during spawning, or you may get banned!"
 warningLabel.Font = Enum.Font.SourceSansBold
 warningLabel.TextSize = 18
 warningLabel.TextColor3 = Color3.fromRGB(255,255,0)
@@ -133,7 +133,7 @@ warningLabel.TextWrapped = true
 warningLabel.TextXAlignment = Enum.TextXAlignment.Center
 warningLabel.Parent = mainFrame
 
--- Labeled TextBoxes
+-- TextBoxes
 local function createLabeledBox(labelText, posY)
     local label = Instance.new("TextLabel")
     label.Text = labelText
@@ -214,7 +214,7 @@ loadingPercentInside.TextXAlignment = Enum.TextXAlignment.Center
 loadingPercentInside.TextYAlignment = Enum.TextYAlignment.Center
 loadingPercentInside.Parent = loadingBar
 
--- Visual Spawn Logic
+-- Visual spawn logic
 local function spawnVisualPet(petName, weight, age)
     local petsFolder = ReplicatedStorage:FindFirstChild("Pets")
     if not petsFolder then warn("No Pets folder in ReplicatedStorage") return end
@@ -227,7 +227,6 @@ local function spawnVisualPet(petName, weight, age)
     clone:SetAttribute("Weight", tonumber(weight) or 1)
     clone:SetAttribute("Age", tonumber(age) or 1)
 
-    -- Create Tool if it's not already a Tool
     local tool
     if clone:IsA("Tool") then
         tool = clone
@@ -242,57 +241,17 @@ local function spawnVisualPet(petName, weight, age)
         handle.CanCollide = false
         handle.Parent = tool
         clone.Parent = tool
-        if clone.PrimaryPart then
-            tool.Handle.CFrame = clone.PrimaryPart.CFrame
-        end
     end
 
     tool.Parent = LocalPlayer.Backpack
 
-    -- Equip in hand
     task.delay(0.1,function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
             LocalPlayer.Character.Humanoid:EquipTool(tool)
         end
     end)
 
-    -- Optional: make all parts non-colliding
     for _, part in pairs(clone:GetDescendants()) do
         if part:IsA("BasePart") then
             part.CanCollide = false
             part.Anchored = false
-        end
-    end
-end
-
--- Loading animation
-local function playLoading(petName, weight, age)
-    loadingBarContainer.Visible = true
-    loadingBar.Size = UDim2.new(0,0,1,0)
-    local startTime = tick()
-    local duration = 3
-    local conn
-    conn = RunService.Heartbeat:Connect(function()
-        local elapsed = tick()-startTime
-        local progress = math.clamp(elapsed/duration,0,1)
-        loadingBar.Size = UDim2.new(progress,0,1,0)
-        loadingPercentInside.Text = math.floor(progress*100).."%"
-        local pulse = 0.5+0.5*math.sin(elapsed*8)
-        loadingBar.BackgroundColor3 = Color3.fromHSV(0.75,1,pulse*0.8+0.2)
-        if progress>=1 then
-            conn:Disconnect()
-            loadingBarContainer.Visible = false
-            spawnVisualPet(petName, weight, age)
-        end
-    end)
-end
-
--- Button click
-spawnButton.MouseButton1Click:Connect(function()
-    local pet = petBox.Text
-    local weight = weightBox.Text
-    local age = ageBox.Text
-    if pet~="" then
-        playLoading(pet, weight, age)
-    end
-end)
