@@ -1,4 +1,4 @@
---// Xeno's Visual Pet Spawner (Horizontal Boxes Edition)
+--// Xeno's Visual Pet Spawner (Black GUI with Popout Boxes)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -29,11 +29,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Main Frame
+-- Main Frame (keep original dark color)
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0,450,0,320)
 mainFrame.Position = UDim2.new(0.5,-225,0.5,-160)
-mainFrame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+mainFrame.BackgroundTransparency = 0.2
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
@@ -76,7 +77,7 @@ end)
 -- Title Bar
 local titleBar = Instance.new("Frame")
 titleBar.Size = UDim2.new(1,0,0,35)
-titleBar.BackgroundColor3 = Color3.fromRGB(35,35,35)
+titleBar.BackgroundColor3 = Color3.fromRGB(30,30,30)
 titleBar.BorderSizePixel = 0
 titleBar.Parent = mainFrame
 
@@ -119,14 +120,24 @@ closeButton.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
--- Function to create TextBox with placeholder inside
+-- Function to create TextBox with "popout" effect
 local function createBox(placeholderText, posX, posY, width)
+    local shadow = Instance.new("Frame") -- slight shadow effect
+    shadow.Size = UDim2.new(0,width,0,35)
+    shadow.Position = UDim2.new(0,posX+2,0,posY+2)
+    shadow.BackgroundColor3 = Color3.fromRGB(20,20,20)
+    shadow.BorderSizePixel = 0
+    shadow.Parent = mainFrame
+    local shadowCorner = Instance.new("UICorner")
+    shadowCorner.CornerRadius = UDim.new(0,6)
+    shadowCorner.Parent = shadow
+
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(0,width,0,35)
     box.Position = UDim2.new(0,posX,0,posY)
-    box.BackgroundColor3 = Color3.fromRGB(70,70,70)
+    box.BackgroundColor3 = Color3.fromRGB(100,50,200)
     box.TextColor3 = Color3.fromRGB(255,255,255)
-    box.Font = Enum.Font.SourceSans
+    box.Font = Enum.Font.SourceSansBold
     box.TextSize = 16
     box.PlaceholderText = placeholderText
     box.ClearTextOnFocus = false
@@ -138,7 +149,7 @@ local function createBox(placeholderText, posX, posY, width)
     return box
 end
 
--- Horizontal layout for Pet Name & Weight, Age underneath
+-- Layout: Pet Name & Weight horizontal, Age below
 local petBox = createBox("Pet Name", 25, 70, 180)
 local weightBox = createBox("Weight", 245, 70, 180)
 local ageBox = createBox("Age", 25, 120, 400)
@@ -277,7 +288,7 @@ local function spawnVisualPet(petName, weight, age)
     end)
 end
 
--- Spawn Button Logic
+-- Spawn Button Logic (FIXED)
 spawnButton.MouseButton1Click:Connect(function()
     local petName = petBox.Text
     local weight = weightBox.Text
