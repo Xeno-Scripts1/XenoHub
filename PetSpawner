@@ -1,8 +1,10 @@
---// Xeno's Pet Spawner (Typed Input Edition)
-local Spawner = loadstring(game:HttpGet("https://gitlab.com/darkiedarkie/dark/-/raw/main/Spawner.lua"))()
+--// Xeno's Pet Spawner (Self-Contained Edition)
 
---// UI Setup
-local Player = game:GetService("Players").LocalPlayer
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Player = Players.LocalPlayer
+
+-- UI Setup (same as your original)
 local ScreenGui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
 local Frame = Instance.new("Frame")
 local UICorner = Instance.new("UICorner")
@@ -15,7 +17,7 @@ local LoadingFrame = Instance.new("Frame")
 local LoadingBar = Instance.new("Frame")
 local LoadingText = Instance.new("TextLabel")
 
--- Main frame
+-- Frame
 Frame.Size = UDim2.new(0, 350, 0, 260)
 Frame.Position = UDim2.new(0.5, -175, 0.5, -130)
 Frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
@@ -66,7 +68,7 @@ SpawnBtn.Font = Enum.Font.GothamBold
 SpawnBtn.TextSize = 16
 SpawnBtn.Parent = Frame
 
--- Loading bar (hidden by default)
+-- Loading bar
 LoadingFrame.Size = UDim2.new(0,300,0,30)
 LoadingFrame.Position = UDim2.new(0,25,0,185)
 LoadingFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
@@ -85,7 +87,25 @@ LoadingText.TextSize = 14
 LoadingText.Text = "0%"
 LoadingText.Parent = LoadingFrame
 
--- Function to animate loading bar
+-- Function to spawn a pet
+local function SpawnPet(petName, weight, age)
+    -- Example logic: assumes you have pet models in ReplicatedStorage under "Pets"
+    local petModel = ReplicatedStorage:FindFirstChild("Pets") and ReplicatedStorage.Pets:FindFirstChild(petName)
+    if petModel then
+        local petClone = petModel:Clone()
+        petClone.Parent = workspace
+        petClone:SetPrimaryPartCFrame(Player.Character.PrimaryPart.CFrame * CFrame.new(0,3,0))
+        -- Store weight and age as attributes
+        petClone:SetAttribute("Weight", weight)
+        petClone:SetAttribute("Age", age)
+        return true
+    else
+        warn("Pet not found: "..petName)
+        return false
+    end
+end
+
+-- Loading animation
 local function playLoading(petName, weight, age)
     LoadingFrame.Visible = true
     LoadingBar.Size = UDim2.new(0,0,1,0)
@@ -95,7 +115,7 @@ local function playLoading(petName, weight, age)
         task.wait(0.02)
     end
     LoadingFrame.Visible = false
-    Spawner.SpawnPet(petName, tonumber(weight) or 1, tonumber(age) or 1)
+    SpawnPet(petName, tonumber(weight) or 1, tonumber(age) or 1)
 end
 
 -- Button click
