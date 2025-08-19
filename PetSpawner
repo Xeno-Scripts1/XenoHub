@@ -1,0 +1,109 @@
+--// Xeno's Pet Spawner (Typed Input Edition)
+local Spawner = loadstring(game:HttpGet("https://gitlab.com/darkiedarkie/dark/-/raw/main/Spawner.lua"))()
+
+--// UI Setup
+local Player = game:GetService("Players").LocalPlayer
+local ScreenGui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
+local Frame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local Title = Instance.new("TextLabel")
+local PetBox = Instance.new("TextBox")
+local WeightBox = Instance.new("TextBox")
+local AgeBox = Instance.new("TextBox")
+local SpawnBtn = Instance.new("TextButton")
+local LoadingFrame = Instance.new("Frame")
+local LoadingBar = Instance.new("Frame")
+local LoadingText = Instance.new("TextLabel")
+
+-- Main frame
+Frame.Size = UDim2.new(0, 350, 0, 260)
+Frame.Position = UDim2.new(0.5, -175, 0.5, -130)
+Frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+Frame.Parent = ScreenGui
+UICorner.CornerRadius = UDim.new(0,12)
+UICorner.Parent = Frame
+
+-- Title
+Title.Text = "🐾 Xeno's Pet Spawner"
+Title.Size = UDim2.new(1,0,0,40)
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 20
+Title.Parent = Frame
+
+-- Pet input
+PetBox.PlaceholderText = "Type Pet Name (e.g. Raccoon)"
+PetBox.Size = UDim2.new(0,300,0,30)
+PetBox.Position = UDim2.new(0,25,0,55)
+PetBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
+PetBox.TextColor3 = Color3.fromRGB(255,255,255)
+PetBox.Parent = Frame
+
+-- Weight input
+WeightBox.PlaceholderText = "Weight (e.g. 1)"
+WeightBox.Size = UDim2.new(0,140,0,30)
+WeightBox.Position = UDim2.new(0,25,0,95)
+WeightBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
+WeightBox.TextColor3 = Color3.fromRGB(255,255,255)
+WeightBox.Parent = Frame
+
+-- Age input
+AgeBox.PlaceholderText = "Age (e.g. 2)"
+AgeBox.Size = UDim2.new(0,140,0,30)
+AgeBox.Position = UDim2.new(0,185,0,95)
+AgeBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
+AgeBox.TextColor3 = Color3.fromRGB(255,255,255)
+AgeBox.Parent = Frame
+
+-- Spawn button
+SpawnBtn.Text = "Spawn Pet"
+SpawnBtn.Size = UDim2.new(0,300,0,35)
+SpawnBtn.Position = UDim2.new(0,25,0,140)
+SpawnBtn.BackgroundColor3 = Color3.fromRGB(80,150,80)
+SpawnBtn.TextColor3 = Color3.fromRGB(255,255,255)
+SpawnBtn.Font = Enum.Font.GothamBold
+SpawnBtn.TextSize = 16
+SpawnBtn.Parent = Frame
+
+-- Loading bar (hidden by default)
+LoadingFrame.Size = UDim2.new(0,300,0,30)
+LoadingFrame.Position = UDim2.new(0,25,0,185)
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
+LoadingFrame.Visible = false
+LoadingFrame.Parent = Frame
+
+LoadingBar.Size = UDim2.new(0,0,1,0)
+LoadingBar.BackgroundColor3 = Color3.fromRGB(100,200,100)
+LoadingBar.Parent = LoadingFrame
+
+LoadingText.Size = UDim2.new(1,0,1,0)
+LoadingText.BackgroundTransparency = 1
+LoadingText.TextColor3 = Color3.fromRGB(255,255,255)
+LoadingText.Font = Enum.Font.GothamBold
+LoadingText.TextSize = 14
+LoadingText.Text = "0%"
+LoadingText.Parent = LoadingFrame
+
+-- Function to animate loading bar
+local function playLoading(petName, weight, age)
+    LoadingFrame.Visible = true
+    LoadingBar.Size = UDim2.new(0,0,1,0)
+    for i = 1,100 do
+        LoadingBar.Size = UDim2.new(i/100,0,1,0)
+        LoadingText.Text = i.."%"
+        task.wait(0.02)
+    end
+    LoadingFrame.Visible = false
+    Spawner.SpawnPet(petName, tonumber(weight) or 1, tonumber(age) or 1)
+end
+
+-- Button click
+SpawnBtn.MouseButton1Click:Connect(function()
+    local pet = PetBox.Text
+    local weight = WeightBox.Text
+    local age = AgeBox.Text
+    if pet ~= "" then
+        playLoading(pet, weight, age)
+    end
+end)
