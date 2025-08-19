@@ -1,4 +1,4 @@
---// Xeno's Visual Pet Spawner (Full Safe Edition with TextBoxes)
+--// Xeno's Visual Pet Spawner (Fixed TextBoxes Edition)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -31,8 +31,8 @@ end)
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0,450,0,360)
-mainFrame.Position = UDim2.new(0.5,-225,0.5,-180)
+mainFrame.Size = UDim2.new(0,450,0,420)
+mainFrame.Position = UDim2.new(0.5,-225,0.5,-210)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
 mainFrame.BackgroundTransparency = 0.2
 mainFrame.BorderSizePixel = 0
@@ -134,23 +134,23 @@ warningLabel.TextWrapped = true
 warningLabel.TextXAlignment = Enum.TextXAlignment.Center
 warningLabel.Parent = mainFrame
 
--- TextBoxes with labels
-local function createLabeledBox(labelText, posY)
+-- TextBoxes with Labels
+local function createTextBox(labelText, yPos)
     local label = Instance.new("TextLabel")
     label.Text = labelText
     label.Font = Enum.Font.SourceSansBold
     label.TextSize = 16
     label.TextColor3 = Color3.fromRGB(255,255,255)
     label.BackgroundTransparency = 1
-    label.Position = UDim2.new(0,25,posY,0)
+    label.Position = UDim2.new(0,25,0,yPos)
     label.Size = UDim2.new(0,150,0,20)
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = mainFrame
 
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(0,200,0,30)
-    box.Position = UDim2.new(0,25,posY+25,0)
-    box.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    box.Position = UDim2.new(0,25,0,yPos+25)
+    box.BackgroundColor3 = Color3.fromRGB(100,100,100)
     box.TextColor3 = Color3.fromRGB(255,255,255)
     box.Font = Enum.Font.SourceSans
     box.TextSize = 16
@@ -159,11 +159,11 @@ local function createLabeledBox(labelText, posY)
     return box
 end
 
-local petBox = createLabeledBox("Pet Name", 100)
-local weightBox = createLabeledBox("Weight", 160)
-local ageBox = createLabeledBox("Age", 220)
+local petBox = createTextBox("Pet Name", 100)
+local weightBox = createTextBox("Weight", 160)
+local ageBox = createTextBox("Age", 220)
 
--- Loading bar
+-- Loading Bar
 local loadingBarContainer = Instance.new("Frame")
 loadingBarContainer.Size = UDim2.new(0.8,0,0,25)
 loadingBarContainer.Position = UDim2.new(0.1,0,0,270)
@@ -215,7 +215,7 @@ local spawnCorner = Instance.new("UICorner")
 spawnCorner.CornerRadius = UDim.new(0,8)
 spawnCorner.Parent = spawnButton
 
--- Visual spawn function
+-- Visual Spawn Function
 local function spawnVisualPet(petName, weight, age)
     local petsFolder = ReplicatedStorage:FindFirstChild("Pets")
     if not petsFolder then warn("No Pets folder in ReplicatedStorage") return end
